@@ -1,7 +1,7 @@
 #!/usr/local/bin/ruby
 
 class Member
-	NUMBER_OF_QUEENS=16
+	NUMBER_OF_QUEENS=8
 	DX = [-1, 1, -1, 1]
 	DY = [-1, 1, 1, -1]
 	attr_accessor :energy, :solution
@@ -32,9 +32,6 @@ class Member
 
 	def emit_solution
 		board = create_new_board
-		0.upto(NUMBER_OF_QUEENS-1) {|x| 
-			board[x][@solution[x]] = 'Q' 
-		}
 		0.upto(NUMBER_OF_QUEENS-1) {|x|
 			0.upto(NUMBER_OF_QUEENS-1) {|y|
 				putc board[x][y]
@@ -46,9 +43,6 @@ class Member
 	end
 	def compute_energy
 		board = create_new_board
-		0.upto(NUMBER_OF_QUEENS-1) {|x|
-			board[x][@solution[x]] = 'Q';
-		}
 		conflicts = 0
 		0.upto(NUMBER_OF_QUEENS-1) {|i|
 			x = i
@@ -59,12 +53,8 @@ class Member
 				while true	
 					tempx += DX[j]
 					tempy += DY[j]
-					if tempx<0 || tempx >= NUMBER_OF_QUEENS || tempy<0 || tempy>=NUMBER_OF_QUEENS 
-						break
-					end
-					if board[tempx][tempy] == 'Q'
-						conflicts += 1
-					end
+					break if tempx<0 || tempx >= NUMBER_OF_QUEENS || tempy<0 || tempy>=NUMBER_OF_QUEENS 
+					conflicts +=1 if board[tempx][tempy] == 'Q'
 				end
 			}
 		}
@@ -74,6 +64,8 @@ class Member
 	def create_new_board
 		board = Array.new(NUMBER_OF_QUEENS, '.')
 		board.each_index {|x| board[x] = Array.new(NUMBER_OF_QUEENS, '.') }
+		0.upto(NUMBER_OF_QUEENS-1) {|x| board[x][@solution[x]] = 'Q'; }
+		board
 	end
 
 end
