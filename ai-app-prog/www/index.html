@@ -9,7 +9,7 @@
 <ul>
 <li>Simulated Annealing
 <li>Adaptive Resonance Theory
-<li>Ant Algorithms
+<li><a href="#ant">Ant Algorithms</a>
 <li>Neural Networks and the Backpropagation Algorithm
 <li>Genetic Algorithms
 <li>Artificial Life
@@ -27,17 +27,6 @@
 <h3>General musings</h3>
 <ul>
 <li>The code in this book doesn't use setjmp() or doubly-indirect pointers or other hairy C stuff - it's mostly just loops and functions.  This makes porting it a lot easier.
-<li>Watch for C code like this:
-<pre>
-if (foo) {
-}
-</pre>
-It needs to be translated to
-<pre>
-if (foo != 0) {
-}
-</pre>
-in Ruby.  In other words. "non zero" in C needs to be translated to "not nil and not zero" in Ruby.
 <li>I'm porting in several steps:
 <ol>
 <li>Do an initial "raw" port by just translating C to Ruby
@@ -47,21 +36,46 @@ in Ruby.  In other words. "non zero" in C needs to be translated to "not nil and
 <li>Ruby is _so_ much less wordy than C - not having to type all the parentheses and semicolons and such is really nice.
 <li>If someone wanted to do this and preserve speed, it'd probably be best to just write Ruby extensions that wrap the AI stuff (thx to Rich Kilmer for this comment)
 <li>Writing more tests will alleviate some problems I'm having - i.e., forgetting the "@" on a instance variable.  It's kind of an odd situation, though... I don't really understand how some of the algorithms work, so writing tests for them is hard since I have to step thru the entire function with sample values.  I feel like the tests I'm writing are too high-level or something.
+<li>Watch for C code like this:
+<pre>
+if (foo) {
+	/* do something */
+}
+</pre>
+It needs to be translated to
+<pre>
+if foo != 0 
+	# do something
+end
+</pre>
+in Ruby.  In other words. "non zero" in C needs to be translated to "not nil and not zero" in Ruby.
+<li>A <code>do..while</code> forever loop in C can be done like this in Ruby:
+<pre>
+begin
+	# do stuff
+end until !true
+</pre>
 </ul>
 
 <hr>
+<a name="ant"></a>
+<h3>Chapter 4 - Ant Algorithms</h3>
+<p>Updated 10/17/03: Just started on this one; about half done translating the code.  Using Range objects a lot; very nice.
+
+<hr>
+
 <a name="fuzzy"></a>
 <h3>Chapter 9 - Fuzzy Logic</h3>
 <p>Updated 10/16/03: Battery charger and predator prey examples complete, code is <a href="http://rubyforge.org/cgi-bin/viewcvs/cgi/viewcvs.cgi/ai-app-prog/src/ch9/?cvsroot=ai-app-prog">here</a>.  
 <ul>
 <li>The predator/prey example was fun because I had to relearn some trigonometry.  Also, I had to tweak the membership functions a bit - the first time through I made the center spike profile too wide and so the predator kept waiting too long to turn towards the prey.
-<li>To run the programs and generate the graphs, move to the <code>src/ch9</code> directory and do a <code>./fuzzy.rb > predator_data.txt && ./predator_gnuplot</code> to regenerate the predator graph, or a <code>./fuzzy.rb -battery > battery_data.txt && ./battery_gnuplot</code> to regenerate the battery graph.
+<li>To regenerate the predator graph: <p><code>./fuzzy.rb > predator_data.txt && ./predator_gnuplot</code>
+<li>To regenerate the battery graph: <p><code>./fuzzy.rb -battery > battery_data.txt && ./battery_gnuplot</code>
 </ul>
 <p>Battery charger example: below is a graph (thanks gnuplot!) showing the relationships between the battery's voltage and temperature - you can see when the fast charger kicks in and when it falls back to trickle charge mode. 
 <p><img src="ch9/battery.png"/>
 <p>Predator/prey example: below is an image of the predator seeing the prey and turning towards it.
 <p><img src="ch9/predator.png"/>
-
 </body>
 </html>
 
