@@ -122,7 +122,7 @@ class Agents
 		@agents << agent
 	end
 	def type_getting_low(a)	
-		@agents.collect {|x| x.type == a.type ? x : nil }.compact.size < ArtificialLife:MAX_AGENTS/4
+		@agents.collect {|x| x.type == a.type ? x : nil }.compact.size < ArtificialLife::MAX_AGENTS/4
 	end
 	def carnivores
 		@agents.collect{|a| (a.carnivore) ? a : nil}.compact
@@ -246,7 +246,8 @@ class ArtificialLife
 		@best_agent = []
 		@agents = Agents.new	
 		@agent_deaths = [0,0]
-`
+		@plants = Plants.new
+
 		puts "Creating plants" unless !@verbose
 		0.upto(MAX_PLANTS-1) {|x|
 			while true
