@@ -111,6 +111,15 @@ class StackMachine
 	end
 end
 
+class Generation
+	attr_reader :id
+	@@classid = 0 
+	def initialize
+		@id = @@classid
+		@@classid += 1
+	end
+end
+
 class Genetic
 	MAX_PROGRAM=6
 	MAX_GENERATIONS=1000
@@ -126,24 +135,23 @@ class Genetic
 		@populations = []
 	end
 	def run
-		generation = 0
+		g = Generation.new
 		init_population
 		perform_fitness_check
 
-		while generation < MAX_GENERATIONS
+		while g.id < MAX_GENERATIONS
 			@current_crossovers = @current_mutations = 0
 			perform_selection
 			@current_population = @current_population == 0 ? 1 : 0
 			perform_fitness_check
-			generation += 1
-			puts "Generation " + (generation-1).to_s
+			puts "Generation #{g.id}"
 			printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
 			printf("\tAverage fitness = %f\n", @average_fitness)
 			printf("\tMinimum fitness = %f\n", @min_fitness)
 			printf("\tCrossovers = %d\n", @current_crossovers)
 			printf("\tMutation = %d\n", @current_mutations)
 			printf("\tPercentage = %f\n", @average_fitness.to_f/@max_fitness.to_f)
-			if generation > (MAX_GENERATIONS * 0.25) && (@average_fitness / @max_fitness) > 0.98
+			if g.id > (MAX_GENERATIONS * 0.25) && (@average_fitness / @max_fitness) > 0.98
 				puts "Converged"
 				break
 			end
@@ -151,8 +159,9 @@ class Genetic
 				puts "Found solution"
 				break
 			end
+			g = Generation.new
 		end
-		puts "Generation " + (generation-1).to_s
+		puts "Generation #{g.id}"
 		printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
 		printf("\tAverage fitness = %f\n", @average_fitness)
 		printf("\tMinimum fitness = %f\n", @min_fitness)
