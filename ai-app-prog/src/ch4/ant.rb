@@ -97,17 +97,14 @@ class Ants
 		begin
 			p=0.0
 			city += 1
-			if city > Simulation::MAX_CITIES-1
-				city = 0
-			end
-			if @ants[ant].tabu[city] == 0
-				p = ant_product(@ants[ant].current_city, city, pheromone, distance)/denom
+			if @ants[ant].tabu[city % Simulation::MAX_CITIES] == 0
+				p = ant_product(@ants[ant].current_city, city % Simulation::MAX_CITIES, pheromone, distance)/denom
 				if rand() < p
 					break
 				end
 			end
 		end until !true
-		return city
+		return city % Simulation::MAX_CITIES
 	end
 	def ant_product(x,y, pheromone, distance)
 		(pheromone[x][y]**Simulation::ALPHA) * ((1.0/distance[x][y])**Simulation::BETA)
