@@ -19,6 +19,7 @@ class Bigram
 		@word_vector << "<END>"
 
 		@bigram_array = Array.new(MAX_WORDS)
+		@bigram_array.each {|slot| slot = Array.new(MAX_WORDS)}
 		@word = Array.new(MAX_WORD_LEN+1)
 		index = 0
 		first = false
@@ -67,10 +68,17 @@ class Bigram
 			@word_vector << word
 		end
 		if order == FIRST_WORD
-			@bigram_array
-		elsif
+			@bigram_array[START_SYMBOL][@word_vector.index(word)] += 1
+			@sum_vector[START_SYMBOL] += 1
+		elsif order == LAST_WORD
+			@bigram_array[END_SYMBOL][@word_vector.index(word)] += 1
+			@bigram_array[@word_vector.index(word)][END_SYMBOL] += 1
+			@sum_vector[END_SYMBOL] += 1
 		else
+			@bigram_array[@@last_index][@word_vector.index(word)] += 1
+			@sum_vector[@@last_index] += 1
 		end
+		@@last_index = @word_vector.index(word)
 	end
 end
 
