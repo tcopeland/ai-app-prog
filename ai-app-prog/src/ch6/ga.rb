@@ -3,9 +3,12 @@
 class Population
 	attr_accessor :fitness, :prog_size, :program
 	def initialize
-		@fitness = 0.0
+		reset_fitness
 		@prog_size = Genetic::MAX_PROGRAM-1
 		@program = []
+	end
+	def reset_fitness
+		@fitness = 0.0
 	end
 end
 
@@ -22,13 +25,23 @@ end
 class Genetic
 	MAX_PROGRAM=6
 	MAX_CHROMS=3000
-	MAX_INSTRUCTIONS=6
+	COUNT=10
 	def initialize
 		@current_population=0
 		@populations = []
 	end
 	def run
 		init_population
+		file = File.open("stats.txt", "w")
+		perform_fitness_check(file)
+
+		file.close
+	end
+	def perform_fitness_check(file)
+		(MAX_CHROMS-1).times {|chrom|
+			@populations[@current_population][chrom].reset_fitness
+			
+		}
 	end
 	def init_population	
 		(MAX_CHROMS-1).times {|x| init_member(x) }
