@@ -21,7 +21,7 @@ class Adaptive
 	MAX_CUSTOMERS = 10
 	TOTAL_PROTOTYPE_VECTORS = 5
 	BETA = 1.0
-	VIGILANCE = 0.0
+	VIGILANCE = 0.9
 
 	def initialize
 		@prototype_vector	= Array.new(TOTAL_PROTOTYPE_VECTORS, 0)
@@ -46,8 +46,7 @@ class Adaptive
 			0.upto(MAX_CUSTOMERS-1) {|index|
 				0.upto(TOTAL_PROTOTYPE_VECTORS-1) {|pvec|	
 					if !@members[pvec].nil?
-						vector_bitwise_and(and_result, DATABASE[index], @prototype_vector[pvec])
-						mag_pe = vector_magnitude(and_result)
+						mag_pe = vector_magnitude(vector_bitwise_and(DATABASE[index], @prototype_vector[pvec]))
 						mag_p = vector_magnitude(@prototype_vector[pvec])
 						mag_e = vector_magnitude(DATABASE[index])
 						result = mag_pe.to_f / (BETA + mag_p)
@@ -149,7 +148,7 @@ class Adaptive
 				end
 			}
 			puts "For customer #{customer}"
-			if best > 0
+			if best >= 0
 				puts "The best recommendation is #{best} (#{ITEM_NAMES[best]})"
 				puts "Owned by #{@sum_vector[@membership[customer]][best]} out of #{@members[@membership[customer]]} members of this cluster"
 			else
@@ -167,14 +166,18 @@ class Adaptive
 		v.each {|x| res += x }
 		res
 	end
-	def vector_bitwise_and(res, v, w)
-		0.upto(ITEM_NAMES.size-1) {|i| res[i] = (v[i]==1 && w[i]==1) ? 1 : 0 }
+	def vector_bitwise_and(v, w)
+		res = Array.new(v.size, 0)
+		0.upto(ITEM_NAMES.size-1) {|i| 
+			res[i] = (v[i]==1 && w[i]==1) ? 1 : 0 
+		}
+		res
 	end
 end
 
 if __FILE__ == $0
 	a = Adaptive.new	
 	a.perform_art1
-	a.display_customer_database
+	#a.display_customer_database
 	a.make_recommendations
 end
