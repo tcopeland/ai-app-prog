@@ -302,9 +302,7 @@ class Predator < MovingObject
 	end
 	def move
 		super
-		tmpx = @prey.pos.x - @pos.x
-		tmpy = @prey.pos.y - @pos.y
-		desired_heading = Math.atan2(tmpx, tmpy)/(Math::PI/180)
+		desired_heading = Math.atan2(@prey.pos.x - @pos.x, @prey.pos.y - @pos.y)/(Math::PI/180)
 		if desired_heading < 0
 			desired_heading = 360 - ((360-desired_heading)%360)
 		end
