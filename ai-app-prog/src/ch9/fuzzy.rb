@@ -10,7 +10,9 @@ class Simulation
 		result = Math.sin(t/100.0)
 		return result < 0.0 ? 0.0:result 
 	end
-	def simulate
+	def simulate	
+
+	end
 end
 
 class Battery
