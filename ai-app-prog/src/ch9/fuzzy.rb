@@ -25,13 +25,33 @@ class Timer
 	end
 end
 
+class Voltage
+	attr_accessor :volts
+	def initialize(start)
+		@volts = start
+	end
+	def add(amount)
+		@volts += amount	
+	end
+	def subtract(amount)
+		@volts -= amount	
+	end
+	def center
+		if @volts < 0.0
+			@volts = 0.0
+		elsif @volts > 35.0
+			@volts = 35.0
+		end
+	end
+end
+
 class Simulation
 	attr_accessor :temperature, :voltage
 	LOAD = [0.02, 0.04, 0.06, 0.08, 0.1]
 
 	def initialize(battery)
 		@battery = battery
-		@voltage = 20.0
+		@voltage = Voltage.new(20.0)
 		@temperature = 12.0
 		@current_load = LOAD[0]
 		@t=0.0
@@ -42,25 +62,17 @@ class Simulation
 		return result < 0.0 ? 0.0 : result
 	end
 
-	def center_voltage
-		if @voltage < 0.0
-			@voltage = 0.0
-		elsif @voltage > 35.0
-			@voltage = 35.0
-		end
-	end
-	
 	def simulate(timer)	
 		if rand < 0.02
 			@current_load = rand(LOAD.size)
 		end
-		@voltage -= LOAD[@current_load]
-		@voltage += (charge * Math.sqrt(timer.elapsed))/@battery.mode.load
-		center_voltage
+		@voltage.subtract LOAD[@current_load]
+		@voltage.add (charge * Math.sqrt(timer.elapsed))/@battery.mode.load
+		@voltage.center
 		if @battery.mode.kind_of? FastCharge
-			if @voltage > 25
+			if @voltage.volts > 25
 				@temperature += (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/25.0)) * 10.0
-			elsif @voltage > 15
+			elsif @voltage.volts > 15
 				@temperature += (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/20.0)) * 10.0
 			else	
 				@temperature += (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/15.0)) * 10.0
@@ -161,36 +173,36 @@ class BatteryMembership
 		low_plateau = 5.0
 		high_plateau = 5.0
 		high = 10.0
-		if voltage < low
+		if voltage.volts < low
 			return 1.0
 		end
-		if voltage > high 
+		if voltage.volts > high 
 			return 0.0
 		end
-		return @profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
+		return @profiles.plateau_profile(voltage.volts, low, low_plateau, high_plateau, high)
 	end
 	def voltage_medium(voltage)
 		low = 5.0
 		low_plateau = 10.0
 		high_plateau = 20.0	
 		high = 25.0
-		if voltage < low or voltage > high
+		if voltage.volts  < low or voltage.volts  > high
 			return 0.0
 		end
-		return @profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
+		return @profiles.plateau_profile(voltage.volts, low, low_plateau, high_plateau, high)
 	end
 	def voltage_high(voltage)
 		low = 25.0
 		low_plateau = 30.0
 		high_plateau = 30.0
 		high = 30.0
-		if voltage < low
+		if voltage.volts < low
 			return 0.0
 		end
-		if voltage > high 
+		if voltage.volts > high 
 			return 1.0
 		end
-		return @profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
+		return @profiles.plateau_profile(voltage.volts, low, low_plateau, high_plateau, high)
 	end
 end
 
@@ -227,15 +239,15 @@ class MembershipProfiles
 		low = 0
 		upslope = (1.0/(low_plateau - low))
 		downslope = (1.0/(high - high_plateau))
-		if value < low
+		if value< low
 			return 0.0
-		elsif value > high
+		elsif value> high
 			return 0.0
 		elsif value>= low_plateau and value<=high_plateau
 			return 1.0
-		elsif value < low_plateau 
+		elsif value< low_plateau 
 			return (value-low) * upslope
-		elseif value > hi_plateau
+		elseif value> hi_plateau
 			return (high-value)*downslope
 		end
 		return 0.0
@@ -263,7 +275,7 @@ if __FILE__ == $0
 		b.charge_control(s, t)
 		t.bump
 		if count % 25 == 0
-			puts "#{count},#{s.voltage},#{s.temperature}"
+			puts "#{count},#{s.voltage.volts},#{s.temperature}"
 		end
 	}	
 end
