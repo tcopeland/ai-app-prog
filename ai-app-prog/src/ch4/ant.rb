@@ -90,14 +90,14 @@ class Ants
 		denom = 0.0
 		@ants.each_index {|x|
 			if ant.tabu[x] == 0
-				denom += ant_product(ant.current_city, x, pheromone, distance)
+				denom += ant_product(ant, x, pheromone, distance)
 			end
 		}
 		city=0
 		begin
 			p=0.0
 			if ant.tabu[city % Simulation::MAX_CITIES] == 0
-				p = ant_product(ant.current_city, city % Simulation::MAX_CITIES, pheromone, distance)/denom
+				p = ant_product(ant, city % Simulation::MAX_CITIES, pheromone, distance)/denom
 				if rand() < p
 					break
 				end
@@ -106,8 +106,8 @@ class Ants
 		end until !true
 		return city % Simulation::MAX_CITIES
 	end
-	def ant_product(x,y, pheromone, distance)
-		(pheromone[x][y]**Simulation::ALPHA) * ((1.0/distance[x][y])**Simulation::BETA)
+	def ant_product(ant,y, pheromone, distance)
+		(pheromone[ant.current_city][y]**Simulation::ALPHA) * ((1.0/distance[ant.current_city][y])**Simulation::BETA)
 	end
 	def get(index)
 		@ants[index]
