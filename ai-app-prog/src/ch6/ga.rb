@@ -66,15 +66,13 @@ class Genetic
 			perform_selection
 			@current_population = @current_population == 0 ? 1 : 0
 			generation += 1
-			if generation % 100 == 0 
-				puts "Generation " + (generation-1).to_s
-				printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
-				printf("\tAverage fitness = %f\n", @avg_fitness)
-				printf("\tMinimum fitness = %f\n", @min_fitness)
-				printf("\tCrossovers = %d\n", @current_crossovers)
-				printf("\tMutation = %d\n", @current_mutations)
-				printf("\tpercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
-			end
+			puts "Generation " + (generation-1).to_s
+			printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
+			printf("\tAverage fitness = %f\n", @avg_fitness)
+			printf("\tMinimum fitness = %f\n", @min_fitness)
+			printf("\tCrossovers = %d\n", @current_crossovers)
+			printf("\tMutation = %d\n", @current_mutations)
+			printf("\tpercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
 			if generation > (MAX_GENERATIONS * 0.25) && (@avg_fitness / @max_fitness) > 0.98
 				puts "Converged"
 				break
@@ -106,11 +104,7 @@ class Genetic
 	end
 	def perform_selection
 		0.step(MAX_CHROMS-1, 2) {|chrom|
-			par1 = select_parent
-			par2 = select_parent
-			child1 = chrom
-			child2 = chrom+1
-			perform_reproduction(par1, par2, child1, child2)
+			perform_reproduction(select_parent, select_parent, chrom, chrom+1)
 		}
 	end
 	def perform_reproduction(para, parb, childa, childb)
@@ -151,8 +145,8 @@ class Genetic
 		loop do
 			ret_fitness = @populations[@current_population][@@class_chrom].fitness.to_f / @max_fitness.to_f
 			@@class_chrom = 0 if @@class_chrom == MAX_CHROMS - 1
-			puts "ret_fitness = #{ret_fitness}, @populations[@current_population][@@class_chrom].fitness = #{@populations[@current_population][@@class_chrom].fitness}, @min_fitness = #{@min_fitness}"
-
+			
+			#puts "ret_fitness = #{ret_fitness}, @populations[@current_population][@@class_chrom].fitness = #{@populations[@current_population][@@class_chrom].fitness}, @min_fitness = #{@min_fitness}"
 			# OVER AND OVER AND OVER
 			# ret_fitness = 0.0, @populations[@current_population][@@class_chrom].fitness = 0.0, @min_fitness = 0.0
 			# OVER AND OVER AND OVER
