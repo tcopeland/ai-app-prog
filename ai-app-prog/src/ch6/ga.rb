@@ -151,6 +151,12 @@ class Genetic
 		loop do
 			ret_fitness = @populations[@current_population][@@class_chrom].fitness.to_f / @max_fitness.to_f
 			@@class_chrom = 0 if @@class_chrom == MAX_CHROMS - 1
+			puts "ret_fitness = #{ret_fitness}, @populations[@current_population][@@class_chrom].fitness = #{@populations[@current_population][@@class_chrom].fitness}, @min_fitness = #{@min_fitness}"
+
+			# OVER AND OVER AND OVER
+			# ret_fitness = 0.0, @populations[@current_population][@@class_chrom].fitness = 0.0, @min_fitness = 0.0
+			# OVER AND OVER AND OVER
+
 			if @populations[@current_population][@@class_chrom].fitness > @min_fitness && rand < ret_fitness
 				ret = @@class_chrom
 				@@class_chrom += 1
