@@ -17,6 +17,27 @@ class TimerTest < Test::Unit::TestCase
 	end
 end
 
+class VoltageTest < Test::Unit::TestCase
+	def test_simple
+		v = Voltage.new(5)
+		assert(v.volts == 5, "Constructor didn't set values")
+		v.add 3
+		assert(v.volts == 8, "Voltage.add busted")
+		v.subtract 4
+		assert(v.volts == 4, "Voltage.subtract busted")
+	end
+	def test_center_high
+		v = Voltage.new(36)
+		v.center
+		assert(v.volts == 35.0, "Voltage.center didn't reign in high value")
+	end
+	def test_center_low
+		v = Voltage.new(-2.0)
+		v.center
+		assert(v.volts == 0.0, "Voltage.center didn't reign in low value")
+	end
+end
+
 class BatteryMembershipTest < Test::Unit::TestCase
 	def test_low
 		b = BatteryMembership.new	
