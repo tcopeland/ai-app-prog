@@ -33,9 +33,46 @@ class Instructions
 	STACK_DEPTH = 25
 end
 
+class Stack
+	def initialize
+		@s = []
+	end
+	def assert_elements(x)
+		@s.size < x
+	end
+	def assert_not_full
+		!@s.size == Instructions::STACK_DEPTH
+	end
+	def size
+		@s.size
+	end
+	def first
+		@s.first
+	end
+	def push(x)
+		@s << x
+	end
+	def pop
+		tmp = @s.last
+		@s = @s[0,@s.size-1]
+		return tmp
+	end
+	def peek
+		@s.last
+	end
+	def swap
+		a = peek
+		@s[@s.size-1] = @s[@s.size-2]
+		@s[@s.size-2] = a
+	end
+	def over
+		push(@s[@s.size-2])
+	end
+end
+
 class Genetic
 	MAX_PROGRAM=6
-	MAX_GENERATIONS=100
+	MAX_GENERATIONS=10
 	MAX_CHROMS=3000
 	MUTATION_PROB = 0.02
 	CROSSOVER_PROB = 0.8
@@ -194,51 +231,32 @@ class Genetic
 		@@weird_x_value += 1
 	end
 	def interpret_stm(pop, args)
-		@stack = []
-		(args.size-1).downto(0) {|x| spush(args[x])	}
+		@stack = Stack.new
+		(args.size-1).downto(0) {|x| @stack.push(args[x])	}
 		0.upto(pop.prog_size - 1) {|x|
 			case pop.program[x]
 				when Instructions::DUP
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_elements(1)
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_not_full
-					spush(speek)
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_elements(1)
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_not_full
+					@stack.push(@stack.peek)
 				when Instructions::SWAP
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_elements(2)
-					a = @stack.last
-					@stack[@stack.size-1] = @stack[@stack.size-2]
-					@stack[@stack.size-2] = a
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_elements(2)
+					@stack.swap
 				when Instructions::MUL
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_elements(2)
-					a = spop
-					b = spop
-					spush(a * b)
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_elements(2)
+					a = @stack.pop
+					b = @stack.pop
+					@stack.push(a * b)
 				when Instructions::ADD
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_elements(2)
-					a = spop
-					b = spop
-					spush(a + b)
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_elements(2)
+					a = @stack.pop
+					b = @stack.pop
+					@stack.push(a + b)
 				when Instructions::OVER
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_elements(2)
-					spush(@stack[@stack.size-2])
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_elements(2)
+					@stack.over
 			end
 		}
-	end
-	def assert_stack_elements(x)
-		@stack.size < x
-	end
-	def assert_stack_not_full
-		!@stack.size == Instructions::STACK_DEPTH
-	end
-	def spop	
-		x = speek
-		@stack.delete_at(@stack.size - 1)
-		return x
-	end
-	def spush(x)
-		@stack << x	
-	end
-	def speek
-		@stack.last
 	end
 	def init_population	
 		MAX_CHROMS.times {|x| 
