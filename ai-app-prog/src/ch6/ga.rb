@@ -47,7 +47,7 @@ class Genetic
 		generation = 0
 		init_population
 		file = File.open("stats.txt", "w")
-		perform_fitness_check(file)a
+		perform_fitness_check(file)
 		while generation < MAX_GENERATIONS
 			@current_crossovers = @current_mutations = 0
 			perform_selection
@@ -108,6 +108,7 @@ class Genetic
 					chrom += 1
 					ret_fitness = @populations[@current_population][chrom].fitness
 					break
+				end
 			end
 			chrom += 1
 		end
@@ -201,7 +202,6 @@ class Genetic
 			@populations[@current_population][index].program[x] = rand(Instructions::MAX_INSTRUCTIONS)
 		}
 	end
-	
 end
 
 if __FILE__ == $0
