@@ -84,23 +84,16 @@ class Battery
 	def charge_control(simulation)
 		@count += 1
 		if (@count % 10) == 0
-			#puts "ENTER"
 			if normalize(@bm.voltage_high(simulation.voltage)) >0
 				@mode = TRICKLE_CHARGE
 				simulation.reset_timer
-				#puts "FIRST"
 			elsif normalize(@tm.temp_hot(simulation.temperature)) > 0
 				@mode = TRICKLE_CHARGE
 				simulation.reset_timer
-				#puts "SECOND"
 			elsif normalize(@ops.and(@ops.not(@bm.voltage_high(simulation.voltage)), @ops.not(@tm.temp_hot(simulation.temperature)))) > 0
 				@mode = FAST_CHARGE
 				simulation.reset_timer
-				#puts "THIRD"
 			end
-
-			#puts "volt = " + @bm.voltage_high(simulation.voltage).to_s
-			#puts "temp = " + @tm.temp_hot(simulation.temperature).to_s
 		end
 	end
 	def normalize(input)
@@ -259,6 +252,6 @@ if __FILE__ == $0
 		s.simulate
 		b.charge_control(s)
 		s.bump_timer
-		puts "#{count}: V=#{s.voltage} T=#{s.temperature} Mode=#{b.mode == 0 ? 'Trickle' : 'Fast' }"
+		puts "#{count},#{s.voltage},#{s.temperature}"
 	}	
 end
