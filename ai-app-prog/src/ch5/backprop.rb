@@ -15,6 +15,7 @@ class BackProp
 	MAX_SAMPLES = 18
 	LEARN_RATE = 0.2
 	MAX_ITERATIONS = 10000
+	STRINGS = ["Attack", "Run", "Wander", "Hide"]
 	def initialize
 		@wih = []
 		@who = []
@@ -96,8 +97,10 @@ class BackProp
 			@target[3] = @samples[i].output_neurons[3]
 		
 			feed_forward
-			if action(actual) != actual(target) 
-				
+			if action(@actual) != action(@target) 
+				printf(file, "%2.1g:%2.1g:%2.1g:%2.1g %s (%s)\n", @inputs[0], @inputs[1], @inputs[2], @inputs[3], STRINGS[action(@actual)], STRINGS[action(@target)])
+			else
+				sum += 1
 			end	
 		}
 		file.close			
@@ -105,7 +108,7 @@ class BackProp
 	def action(vector)
 		selection = 0
 		max=vector[0]
-		1.upto(OUTPUT_NEURONS-1).times {|index|
+		1.upto(OUTPUT_NEURONS-1) {|index|
 			if vector[index] > max
 				max = vector[index]
 				selection = index
