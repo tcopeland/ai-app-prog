@@ -128,19 +128,14 @@ class Simulation
 		@best_so_far = nil
 	
 		(0..MAX_CITIES-1).each {|x|
-			@distance[x] = []
-			@pheromone[x] = []
-			(0..MAX_CITIES-1).each {|y|
-				@distance[x][y] = 0.0
-				@pheromone[x][y] = INIT_PHEROMONE	
-			}
+			@distance[x] = Array.new(MAX_CITIES, 0.0)
+			@pheromone[x] = Array.new(MAX_CITIES, INIT_PHEROMONE)
 		}
 
 		(0..MAX_CITIES-1).each {|x|
 			(0..MAX_CITIES-1).each {|y|
 				if x != y and @distance[x][y] == 0.0	
-					@distance[x][y] = @cities.dist(x,y)
-					@distance[y][x] = @distance[x][y]
+					@distance[x][y] = @distance[y][x] = @cities.dist(x,y)
 				end
 			}
 		}
