@@ -66,6 +66,41 @@ class Stack
 	end
 end
 
+class StackMachine
+	attr_reader :stack
+	def initialize(pop,args)
+		@pop = pop
+		@stack = Stack.new
+		(args.size-1).downto(0) {|x| @stack.push(args[x])	}
+	end
+	def solve
+		0.upto(pop.prog_size - 1) {|x|
+			case pop.program[x]
+				when Instructions::DUP
+					@stack.assert_elements(1)
+					@stack.assert_not_full
+					@stack.push(@stack.peek)
+				when Instructions::SWAP
+					@stack.assert_elements(2)
+					@stack.swap
+				when Instructions::MUL
+					@stack.assert_elements(2)
+					a = @stack.pop
+					b = @stack.pop
+					@stack.push(a * b)
+				when Instructions::ADD
+					@stack.assert_elements(2)
+					a = @stack.pop
+					b = @stack.pop
+					@stack.push(a + b)
+				when Instructions::OVER
+					@stack.assert_elements(2)
+					@stack.over
+			end
+		}
+	end
+end
+
 class Genetic
 	MAX_PROGRAM=6
 	MAX_GENERATIONS=10
@@ -79,7 +114,6 @@ class Genetic
 		@current_crossovers=0
 		@current_mutations=0
 		@populations = []
-		@stack = [] 
 		@@weird_x_value = 0
 		@@class_chrom = 0
 	end
@@ -185,7 +219,6 @@ class Genetic
 				if @populations[@current_population][@@class_chrom].fitness >= @min_fitness && rand < 0.5
 					ret = @@class_chrom
 					@@class_chrom += 1
-					ret_fitness = @populations[@current_population][@@class_chrom].fitness
 					raise "STOP"	
 				end
 				@@class_chrom += 1	
@@ -205,13 +238,14 @@ class Genetic
 				args = [rand(32), rand(32), rand(32)]
 				answer = args[0]**3 + args[1]**2 + args[2]
 				begin 
-					interpret_stm(@populations[@current_population][chrom], args)
+					stm = StackMachine.new(@populations[@current_population][chrom], args)
+					stm.solve
 					# no stack crashes, so some points
 					@populations[@current_population][chrom].fitness += Instructions::TIER1
 					# only one answer, more points
-					@populations[@current_population][chrom].fitness += Instructions::TIER2 if @stack.size == 1
+					@populations[@current_population][chrom].fitness += Instructions::TIER2 if stm.stack.size == 1
 					# w00t!
-					@populations[@current_population][chrom].fitness += Instructions::TIER3 if @stack.first == answer
+					@populations[@current_population][chrom].fitness += Instructions::TIER3 if stm.stack.first == answer
 				rescue Exception => x
 					# no points if there was an error
 				end
@@ -226,34 +260,6 @@ class Genetic
 		@avg_fitness = @total_fitness.to_f / MAX_CHROMS.to_f
 		printf("%d %6.4f %6.4f %6.4f\n", @@weird_x_value, @min_fitness, @avg_fitness, @max_fitness)
 		@@weird_x_value += 1
-	end
-	def interpret_stm(pop, args)
-		@stack = Stack.new
-		(args.size-1).downto(0) {|x| @stack.push(args[x])	}
-		0.upto(pop.prog_size - 1) {|x|
-			case pop.program[x]
-				when Instructions::DUP
-					@stack.assert_elements(1)
-					@stack.assert_not_full
-					@stack.push(@stack.peek)
-				when Instructions::SWAP
-					@stack.assert_elements(2)
-					@stack.swap
-				when Instructions::MUL
-					@stack.assert_elements(2)
-					a = @stack.pop
-					b = @stack.pop
-					@stack.push(a * b)
-				when Instructions::ADD
-					@stack.assert_elements(2)
-					a = @stack.pop
-					b = @stack.pop
-					@stack.push(a + b)
-				when Instructions::OVER
-					@stack.assert_elements(2)
-					@stack.over
-			end
-		}
 	end
 	def init_population	
 		MAX_CHROMS.times {|x| 
