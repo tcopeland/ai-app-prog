@@ -8,6 +8,9 @@ class Vector
       @a = Array.new(size_or_array,0)
     end
   end
+	def size
+		@a.size
+	end
   def value(x)
     @a[x]
   end
@@ -40,16 +43,16 @@ end
 
 class Adaptive
 	DATABASE = [
-        [ 0,   0,   0,   0,   0,   1,   0,   0,   1,   0,   0],
-        [ 0,   1,   0,   0,   0,   0,   0,   1,   0,   0,   1],
-        [ 0,   0,   0,   1,   0,   0,   1,   0,   0,   1,   0],
-        [ 0,   0,   0,   0,   1,   0,   0,   1,   0,   0,   1],
-        [ 1,   0,   0,   1,   0,   0,   0,   0,   0,   1,   0],
-        [ 0,   0,   0,   0,   1,   0,   0,   0,   0,   0,   1],
-        [ 1,   0,   0,   1,   0,   0,   0,   0,   0,   0,   0],
-        [ 0,   0,   1,   0,   0,   0,   0,   0,   1,   0,   0],
-        [ 0,   0,   0,   0,   1,   0,   0,   1,   0,   0,   0],
-        [ 0,   0,   1,   0,   0,   1,   0,   0,   1,   0,   0]	
+        Vector.new([ 0,   0,   0,   0,   0,   1,   0,   0,   1,   0,   0]),
+        Vector.new([ 0,   1,   0,   0,   0,   0,   0,   1,   0,   0,   1]),
+        Vector.new([ 0,   0,   0,   1,   0,   0,   1,   0,   0,   1,   0]),
+        Vector.new([ 0,   0,   0,   0,   1,   0,   0,   1,   0,   0,   1]),
+        Vector.new([ 1,   0,   0,   1,   0,   0,   0,   0,   0,   1,   0]),
+        Vector.new([ 0,   0,   0,   0,   1,   0,   0,   0,   0,   0,   1]),
+        Vector.new([ 1,   0,   0,   1,   0,   0,   0,   0,   0,   0,   0]),
+        Vector.new([ 0,   0,   1,   0,   0,   0,   0,   0,   1,   0,   0]),
+        Vector.new([ 0,   0,   0,   0,   1,   0,   0,   1,   0,   0,   0]),
+        Vector.new([ 0,   0,   1,   0,   0,   1,   0,   0,   1,   0,   0])	
 	]
 	ITEM_NAMES = [
     "Hammer", "Paper", "Snickers", "Screwdriver",
@@ -123,7 +126,7 @@ class Adaptive
 			end
 		}
 		@num_prototype_vectors += 1
-		0.upto(ITEM_NAMES.size-1) {|i| @prototype_vector[cluster][i] = example[i] }	
+		0.upto(ITEM_NAMES.size-1) {|i| @prototype_vector[cluster][i] = example.value(i) }	
 		@members[cluster] = 1
 		cluster
 	end
@@ -138,14 +141,14 @@ class Adaptive
 			if @membership[customer] == cluster
 				if first
 					0.upto(ITEM_NAMES.size-1) {|item|
-						@prototype_vector[cluster][item] = DATABASE[customer][item]
-						@sum_vector[cluster][item] = DATABASE[customer][item]
+						@prototype_vector[cluster][item] = DATABASE[customer].value(item)
+						@sum_vector[cluster][item] = DATABASE[customer].value(item)
 					}
 					first = false
 				else
 					0.upto(ITEM_NAMES.size-1) {|item|
-						@prototype_vector[cluster][item] = (@prototype_vector[cluster][item] == 1 && DATABASE[customer][item] == 1) ? 1 : 0
-						@sum_vector[cluster][item] += DATABASE[customer][item]
+						@prototype_vector[cluster][item] = (@prototype_vector[cluster][item] == 1 && DATABASE[customer].set?(item)) ? 1 : 0
+						@sum_vector[cluster][item] += DATABASE[customer].value(item)
 					}
 				end
 			end
@@ -162,7 +165,7 @@ class Adaptive
 				if @membership[customer] == cluster
 					puts "Customer #{customer}"
 					0.upto(ITEM_NAMES.size-1) {|item|
-						printf("%1d ", DATABASE[customer][item])
+						printf("%1d ", DATABASE[customer].value(item))
 					}
 					puts " : #{@membership[customer]} :"
 				end
@@ -174,7 +177,7 @@ class Adaptive
 			best = -1
 			val = 0
 			0.upto(ITEM_NAMES.size-1) {|item|
-				if DATABASE[customer][item] == 0 && @sum_vector[@membership[customer]][item] > val
+				if !DATABASE[customer].set?(item) && @sum_vector[@membership[customer]][item] > val
 					best = item
 					val = @sum_vector[@membership[customer]][item]
 				end
@@ -188,18 +191,21 @@ class Adaptive
 			end
 			printf("Already owns: ")
 			0.upto(ITEM_NAMES.size-1) {|item|
-				printf("%s ", ITEM_NAMES[item]) if DATABASE[customer][item] == 1
+				printf("%s ", ITEM_NAMES[item]) if DATABASE[customer].set?(item)
 			}
 			puts "\n"
 		}
 	end
 	def vector_magnitude(v)
+		if v.kind_of?(Vector)
+			return v.magnitude
+		end
 		v.collect{|a| a > 0 ? 1 : nil}.compact.size
 	end
 	def vector_bitwise_and(v, w)
 		res = Array.new(v.size, 0)
 		0.upto(ITEM_NAMES.size-1) {|i| 
-			res[i] = (v[i]==1 && w[i]==1) ? 1 : 0 
+			res[i] = (v.set?(i) && w[i]==1) ? 1 : 0 
 		}
 		res
 	end
