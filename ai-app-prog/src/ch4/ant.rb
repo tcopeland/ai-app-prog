@@ -60,7 +60,7 @@ class Ants
 	def restart(best_so_far)
     city_index = 0
 		@ants.each_index {|x| 
-			if @ants[x].tour_length < best_so_far.tour_length
+			if  best_so_far == nil or @ants[x].tour_length < best_so_far.tour_length
 				best_so_far = @ants[x]
 			end
       @ants[x] = Ant.new(city_index % (Simulation::MAX_CITIES-1))
@@ -129,8 +129,7 @@ class Simulation
 	
 		@distance = []
 		@pheromone = []
-		@best_so_far = Ant.new(0)
-		@best_so_far.tour_length = 500000
+		@best_so_far = nil
 	
 		(0..MAX_CITIES-1).each {|x|
 			@distance[x] = []
