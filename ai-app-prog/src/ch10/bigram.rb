@@ -8,6 +8,7 @@ class Bigram
 	LAST_WORD=2
 	START_SYMBOL="<START>"
 	END_SYMBOL="<END>"
+	WHITESPACE = ['\n','\r',' ']
 	
 	def initialize(debug)
 		@debug = debug
@@ -32,7 +33,7 @@ class Bigram
 
 	def next_word(word)
 		nextwordindex = @word_vector.index(word) + 1
-		lim = rand(@occurrences[word] + 1)
+		lim = rand(@occurrences[word] + 1)	
 		sum = 0
 		while nextwordindex != @word_vector.index(word)
 			nextwordindex = nextwordindex % @word_vector.size
@@ -45,17 +46,15 @@ class Bigram
 		return @word_vector[nextwordindex]
 	end
 
-	def parse_corpus(filename)
+	def parse_corpus(stream)
 		word = ""
 		first = false
-		file = File.open(filename, "r")
-		file.each_byte {|byte|
-			if file.eof
+		stream.each_byte {|byte|
+			if stream.eof
 				if word.size > 0
 					load_word(word, LAST_WORD)
-					word = ""
 				end
-			elsif byte == 10 or byte == 13 or byte.chr == ' '
+			elsif WHITESPACE.include?(byte.chr)
 				if !word.empty?
 					if first
 						first = false
@@ -111,6 +110,6 @@ if __FILE__ == $0
 		exit
 	end
 	b = Bigram.new(ARGV.include?("-v"))
-	b.parse_corpus(ARGV[ARGV.index("-f")+1])
+	File.open(ARGV[ARGV.index("-f")+1], "r") {|f| b.parse_corpus(f)}
 	5.times { puts b.build_sentence}
 end
