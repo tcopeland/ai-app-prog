@@ -14,12 +14,8 @@ class Ant
 		@current_city = city
 		@next_city = -1
 		@path_index = 1
-		@tabu = []
-		@path = []	
-		(0..Simulation::MAX_CITIES-1).each {|x|
-			@tabu[x] = 0
-			@path[x] = -1
-		}
+		@tabu = Array.new(Simulation::MAX_CITIES, 0)
+		@path = Array.new(Simulation::MAX_CITIES, -1)	
 		@path[0] = @current_city
 		@tour_length = 0.0
 		@tabu[@current_city] = 1
