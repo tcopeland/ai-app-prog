@@ -17,7 +17,8 @@ end
 
 class Agent
 	attr_accessor :type, :energy, :parent, :age, :generation, :location, :direction, :inputs, :weight_oi, :biaso, :actions
-	def initialize 
+	def initialize(type)
+		@type = type
 		@inputs = Array.new(ArtificialLife::MAX_INPUTS)
 		@weight_oi = Array.new(ArtificialLife::MAX_INPUTS * ArtificialLife::MAX_OUTPUTS)
 		@biaso = Array.new(ArtificialLife::MAX_INPUTS)
@@ -34,6 +35,7 @@ class OffsetPair
 end
 
 class ArtificialLife
+	TYPE_HERBIVORE=0
 	TYPE_CARNIVORE=1
 	TYPE_DEAD=-1
 	HERB_FRONT=0
@@ -108,10 +110,7 @@ class ArtificialLife
 		if @emit_runtime_trend
 			@rfp = File.open(RUNTIME, "w")
 		end
-		init()
-	end
 
-	def init
 		puts "Creating landscape" unless !@verbose
 		@landscape = Array.new(3)
 		@landscape.each_index {|x| 
@@ -122,6 +121,8 @@ class ArtificialLife
 		}
 		@best_agent = []
 		@plants = []	
+		@agents = []	
+		
 		puts "Creating plants" unless !@verbose
 		0.upto(MAX_PLANTS-1) {|x|
 			while true
@@ -134,6 +135,19 @@ class ArtificialLife
 				end
 			end
 		}
+
+		puts "Creating agents" unless !@verbose
+		if !@seed_population
+			0.upto(MAX_AGENTS-1) {|x|
+				if x < (MAX_AGENTS/2)
+					@agents << Agent.new(TYPE_HERBIVORE)
+				else
+					@agents << Agent.new(TYPE_CARNIVORE)
+				end
+			}
+		else
+		end
+		
 	end
 
 	def getWeight
