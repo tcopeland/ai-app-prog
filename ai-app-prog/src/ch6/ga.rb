@@ -218,6 +218,7 @@ class Genetic
 				if @populations[@current_population][@@class_chrom].fitness >= @min_fitness && rand < 0.5
 					ret = @@class_chrom
 					@@class_chrom += 1
+					# TODO retFitness bug ?
 					raise "STOP"	
 				end
 				@@class_chrom += 1	
