@@ -79,29 +79,19 @@ class Tokenizer
 end
 
 class RulesetParser
-	def initialize
-		@waiting_for_initial_delim = true
-	end
-	def handle(ctx, tok)
-		if @waiting_for_initial_delim
-			if tok.delim?
-				@waiting_for_initial_delim = false
-				return
-			end
-			raise "Expected initial delimiter!"
+	def handle(ctx, toks)
+		# bail out now if no rules
+		return if !toks[ctx.ptr]delim?
+
+		ctx.ptr += 2 # skip delim and defrule
+		ctx.rules << Rule.new(toks[ctx.ptr].to_s)
+	
+		while toks[ctx.ptr].open?
+			ctx.push(RuleParser.new)
+			ctx.pop
 		end
-		if tok.defrule?
-			@waiting_for_name = true
-		elsif tok.delim?
-			if tok.open?
-				ctx.push(RuleParser.new)
-			else
-				ctx.pop
-			end
-		else
-			ctx.rules << Rule.new(tok.txt)
-			@waiting_for_name = false
-		end
+		
+		ctx.pop	
 	end
 end
 
@@ -112,8 +102,9 @@ class FactParser
 end	
 
 class Ctx
-	attr_reader :rules
+	attr_reader :rules, :ptr
 	def initialize
+		@ptr = 0
 		@rules = []
 		@parser_stack = [RulesetParser.new]
 	end
@@ -131,10 +122,9 @@ end
 class Parser
 	attr_reader :rules
 	def initialize(input)
+		toks = Tokenizer.new.tokenize(input.kind_of?(File) ? File.read(input) : input)
 		ctx = Context.new
-		Tokenizer.new.tokenize(input.kind_of?(File) ? File.read(input) : input).each {|t|
-			ctx.peek.handle(ctx, t)	
-		}
+		ctx.peek.handle(ctx, toks)	
 	end
 end
 
