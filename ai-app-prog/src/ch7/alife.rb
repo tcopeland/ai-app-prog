@@ -12,6 +12,9 @@ class Plant
 	def initialize(loc)
 		@location = loc
 	end
+	def move_to(loc)
+		@location = loc
+	end
 end
 
 class Agent
@@ -83,14 +86,18 @@ class Agent
 		end
 		@age += 1 unless @energy <=0 
 	end
-	def die
+	def die	
+		move_out	
+		@type = ArtificialLife::TYPE_DEAD
 	end
 	def turn(winner)
-		
+		# TODO	
 	end
 	def move
+		# TODO	
 	end
 	def eat
+		# TODO	
 	end
 	def herbivore
 		@type == TYPE_HERBIVORE
@@ -100,6 +107,9 @@ class Agent
 	end
 	def dead	
 		@age<=0
+	end
+	def move_out
+		@location = Location.new(-1,-1)
 	end
 end
 
@@ -111,11 +121,34 @@ class Agents
 	def add(agent)
 		@agents << agent
 	end
+	def type_getting_low(a)	
+		@agents.collect {|x| x.type == a.type ? x : nil }.compact.size < ArtificialLife:MAX_AGENTS/4
+	end
 	def carnivores
 		@agents.collect{|a| (a.carnivore) ? a : nil}.compact
 	end
 	def herbivores
 		@agents.collect{|a| (a.herbivore) ? a : nil}.compact
+	end
+	def empty
+		@agents.empty?
+	end
+end
+
+class Plants
+	def initialize	
+		@plants = []
+	end	
+	def add(p)
+		@plants << p
+	end
+	def find_first_negative
+		@plants.each {|p|
+			if p.location.x == -1
+				return p
+			end
+		}	
+		return nil
 	end
 end
 
@@ -134,6 +167,12 @@ class Landscape
 	end
 	def bump(plane,x,y)
 		@landscape[plane][x][y] += 1
+	end
+	def subtract(agent)	
+		@landscape[agent.type, agent.location.x, agent.location.y] -= 1
+	end
+	def empty(type, agent)
+		@landscape[type, agent.location.x, agent.location.y] == 0
 	end
 end
 
@@ -205,16 +244,16 @@ class ArtificialLife
 		puts "Creating landscape" unless !@verbose
 		@landscape = Landscape.new(MAX_GRID)
 		@best_agent = []
-		@plants = []	
-		@agents = []	
-		
+		@agents = Agents.new	
+		@agent_deaths = [0,0]
+`
 		puts "Creating plants" unless !@verbose
 		0.upto(MAX_PLANTS-1) {|x|
 			while true
 				x = rand(MAX_GRID)	
 				y = rand(MAX_GRID)
 				if @landscape.empty_at(PLANT_PLANE, y, x)
-					@plants << Plant.new(Location.new(x,y))
+					@plants.add Plant.new(Location.new(x,y))
 					@landscape.bump(PLANT_PLANE, y, x)
 					break
 				end
@@ -256,7 +295,7 @@ class ArtificialLife
 					emit_trend_to_file
 				end
 			else
-				if @agents.empty? 
+				if @agents.empty 
 					break
 				end
 			end
@@ -272,25 +311,41 @@ class ArtificialLife
 		end
 	end
 	
-	def emit_trend_to_file
-		# TODO
-	end
-
-	def emit_agents_to_file
-		# TODO
-	end
-
 	def simulate
 		@agents.herbivores {|agent|
 			agent.simulate
 			if agent.dead
-				# TODO kill agent
+				@agent_deaths[agent.type] += 1
+				@landscape.subtract(agent)
+				if @carnivore_to_plant and agent.carnivore
+					if @landscape.empty(PLANT_PLANE, agent)
+						p = @plants.find_first_negative	
+						if p == nil
+							p.move_to(agent.location)
+							@landscape.bump(PLANT_PLANE, p.location)
+						end
+						agent.move_out
+					end
+				end
+			end
+			if @agents.type_getting_low(agent) and @seed_population
+				agent.init
+			else
+				agent.die
 			end
 		}
 	end
 
 	def getWeight
      rand(9)-1
+	end
+	
+	def emit_trend_to_file
+		# TODO
+	end
+
+	def emit_agents_to_file
+		# TODO
 	end
 
 	def usage
