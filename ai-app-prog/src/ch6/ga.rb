@@ -137,8 +137,9 @@ class Genetic
 		ret = -1
 		ret_fitness = 0.0
 		loop do
-			ret_fitness = @populations[@current_population][@@class_chrom].fitness / @max_fitness
+			ret_fitness = @populations[@current_population][@@class_chrom].fitness.to_f / @max_fitness.to_f
 			@@class_chrom = 0 if @@class_chrom == MAX_CHROMS - 1
+			puts "checking fitness = #{@populations[@current_population][@@class_chrom].fitness}, @min_fitness = #{@min_fitness}, ret_fitness = #{ret_fitness}"
 			if @populations[@current_population][@@class_chrom].fitness > @min_fitness and rand < ret_fitness
 				ret = @@class_chrom
 				@@class_chrom += 1
@@ -150,9 +151,9 @@ class Genetic
 		return ret	
 	end
 	def perform_fitness_check
-		@max_fitness = 0
-		@min_fitness = 1000
-		@total_fitness = 0
+		@max_fitness = 0.0
+		@min_fitness = 1000.0
+		@total_fitness = 0.0
 		MAX_CHROMS.times {|chrom|
 			puts "chrom = " + chrom.to_s if chrom % 100 == 0
 			@populations[@current_population][chrom].reset_fitness
