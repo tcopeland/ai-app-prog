@@ -20,12 +20,16 @@ class Instructions
 	OVER=0x04
 	NOP=0x05
 	MAX_INSTRUCTIONS=NOP+1
+	NONE=0
+	COUNT=10
+	TIER1=1
+	TIER2=(TIER1+1)*COUNT
+	TIER3=(TIER1+TIER2+2)*COUNT
 end
 
 class Genetic
 	MAX_PROGRAM=6
 	MAX_CHROMS=3000
-	COUNT=10
 	def initialize
 		@current_population=0
 		@populations = []
@@ -41,11 +45,11 @@ class Genetic
 		args = []
 		(MAX_CHROMS-1).times {|chrom|
 			@populations[@current_population][chrom].reset_fitness
-			(COUNT-1).times {|i|	
-				# TODO - is this what's intended?
-				args[0] = ((rand*10).to_i & 0x1f) + 1
-				args[1] = ((rand*10).to_i & 0x1f) + 1
-				args[2] = ((rand*10).to_i & 0x1f) + 1
+			(Instructions::COUNT-1).times {|i|	
+				args[0], args[1], args[2] = rand(32), rand(32), rand(32)
+				answer = args[0]**3 + args[1]**2 + args[2]
+				result = interpret_stm(@populations[@current_population][chrom].program, @populations[@current_population][chrom].prog_size, args, 3)
+				@populations[@current_population][chrom].fitness += Instructions::TIER1 if result == Instructions::NONE
 			}	
 		}
 	end
