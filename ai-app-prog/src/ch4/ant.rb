@@ -26,6 +26,31 @@ class Ant
 	end
 end
 
+class Cities
+	def initialize
+		@cities = []
+	end
+	def add_new
+			@cities << City.new(rand(Simulation::MAX_DISTANCE), rand(Simulation::MAX_DISTANCE))
+	end
+	def dist_x(x, y)
+		(@cities[x].x - @cities[y].x).abs
+	end
+	def dist_y(x, y)
+		(@cities[x].y - @cities[y].y).abs
+	end
+	def write(filename)
+		File.open(filename, "w") {|f|
+			@cities.each {|city|
+				f.write "#{city.x} #{city.y}\n"
+			}
+		}
+	end
+	def get(index)
+		return @cities[index]
+	end
+end
+
 class Simulation
 	MAX_CITIES = 15
 	MAX_DISTANCE = 100
@@ -40,7 +65,7 @@ class Simulation
 	INIT_PHEROMONE = 1.0 / MAX_CITIES
 
 	def initialize
-		@cities = []
+		@cities = Cities.new
 		@ants = []
 		@distance = []
 		@pheromone = []
@@ -48,7 +73,7 @@ class Simulation
 		@best.tour_length = 500000
 	
 		(0..(MAX_CITIES-1)).each {|x|
-			@cities[x] = City.new(rand(MAX_DISTANCE), rand(MAX_DISTANCE))
+			@cities.add_new
 			@distance[x] = []
 			@pheromone[x] = []
 			(0..(MAX_CITIES-1)).each {|y|
@@ -60,9 +85,7 @@ class Simulation
 		(0..(MAX_CITIES-1)).each {|x|
 			(0..(MAX_CITIES-1)).each {|y|
 				if x != y and @distance[x][y] == 0.0	
-					xd = (@cities[x].x - @cities[y].x).abs
-					yd = (@cities[x].y - @cities[y].y).abs
-					@distance[x][y] = Math.sqrt(xd**2 + yd**2)
+					@distance[x][y] = Math.sqrt((@cities.dist_x(x,y))**2 + (@cities.dist_y(x,y))**2)
 					@distance[y][x] = @distance[x][y]
 				end
 			}
@@ -173,16 +196,12 @@ class Simulation
 	end
 
 	def emit_data_file(ant)
-		File.open("cities.txt", "w") {|f|
-			@cities.each {|city|
-				f.write "#{city.x} #{city.y}\n"
-			}
-		}
+		@cities.write("cities.txt")
 		File.open("solution.txt", "w") {|f|
 			(0..(MAX_CITIES-1)).each {|x|
-				f.write "#{@cities[ant.path[x]].x} #{@cities[ant.path[x]].y}\n"
+				f.write "#{@cities.get(ant.path[x]).x} #{@cities.get(ant.path[x]).y}\n"
 			}
-			f.write "#{@cities[ant.path[0]].x} #{@cities[ant.path[0]].y}\n"
+			f.write "#{@cities.get(ant.path[0]).x} #{@cities.get(ant.path[0]).y}\n"
 		}
 	end
 	
