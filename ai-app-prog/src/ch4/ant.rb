@@ -29,8 +29,9 @@ end
 class Cities
 	def initialize
 		@cities = []
+		(1..Simulation::MAX_CITIES).each { @cities.add_new }
 	end
-	def add_new
+	def private : add_new
 			@cities << City.new(rand(Simulation::MAX_DISTANCE), rand(Simulation::MAX_DISTANCE))
 	end
 	def dist_x(x, y)
