@@ -12,7 +12,7 @@ class Simulation
 		@temperature = 12.0
 		@timer = 0.0
 		@load = [0.02, 0.04, 0.06, 0.08, 0.1]
-		@current_load = 0.0
+		@current_load = 0.02
 		@t=0.0
 	end
 
@@ -26,7 +26,7 @@ class Simulation
 
 	def charge
 		result = Math.sin(@t/100.0)
-		return result < 0.0 ? 0.0:result
+		return result < 0.0 ? 0.0 : result
 	end
 
 	def center_voltage
@@ -42,16 +42,16 @@ class Simulation
 			@current_load = rand(@load.size)
 		end
 		@voltage -= @load[@current_load]
-		if @battery.get_mode == FAST_CHARGE	
+		if @battery.mode == FAST_CHARGE	
 			@voltage += charge * Math.sqrt(@timer)
 		else
 			@voltage += (charge * Math.sqrt(@timer))/10.0
 		end
 		center_voltage
-		if @battery.get_mode == FAST_CHARGE
+		if @battery.mode == FAST_CHARGE
 			if @voltage > 25
 				@temperature += (@load[@current_load] * (Math.sqrt(@timer)/25.0)) * 10.0
-			elsif voltage > 15
+			elsif @voltage > 15
 				@temperature += (@load[@current_load] * (Math.sqrt(@timer)/20.0)) * 10.0
 			else	
 				@temperature += (@load[@current_load] * (Math.sqrt(@timer)/15.0)) * 10.0
@@ -73,37 +73,45 @@ class Simulation
 end
 
 class Battery
-	@mode = TRICKLE_CHARGE
+	attr_accessor :mode
 	def initialize
+		@mode = TRICKLE_CHARGE
 		@count = 0
+		@tm = TemperatureMembership.new
+		@bm = BatteryMembership.new
+		@ops = FuzzyOperations.new
 	end
 	def charge_control(simulation)
-		tm = TemperatureMembership.new
-		bm = BatteryMembership.new
-		ops = FuzzyOperations.new
 		@count += 1
 		if (@count % 10) == 0
-			if normalize(bm.voltage_high(simulation.voltage))
+			#puts "ENTER"
+			if normalize(@bm.voltage_high(simulation.voltage)) >0
 				@mode = TRICKLE_CHARGE
 				simulation.reset_timer
-			elsif normalize(tm.temp_hot(simulation.temperature))
+				#puts "FIRST"
+			elsif normalize(@tm.temp_hot(simulation.temperature)) > 0
 				@mode = TRICKLE_CHARGE
 				simulation.reset_timer
-			elsif normalize(ops.and(ops.not(bm.voltage_high(simulation.voltage), ops.not(tm.temp_hot(simulation.temperature)))))
+				#puts "SECOND"
+			elsif normalize(@ops.and(@ops.not(@bm.voltage_high(simulation.voltage)), @ops.not(@tm.temp_hot(simulation.temperature)))) > 0
 				@mode = FAST_CHARGE
 				simulation.reset_timer
+				#puts "THIRD"
 			end
+
+			#puts "volt = " + @bm.voltage_high(simulation.voltage).to_s
+			#puts "temp = " + @tm.temp_hot(simulation.temperature).to_s
 		end
 	end
-	def get_mode	
-		return @mode
-	end
 	def normalize(input)
-		return input >= 0.5 ? 1 : 0
+		input >= 0.5 ? 1 : 0
 	end
 end
 
-class TemperatureMembership
+class TemperatureMembership	
+	def initialize
+		@profiles = MembershipProfiles.new
+	end
 	def temp_cold(temp)
 		low = 15.0
 		low_plateau = 15.0
@@ -115,19 +123,17 @@ class TemperatureMembership
 		if temp > high
 			return 0.0
 		end
-		profiles = MembershipProfiles.new
-		return profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
+		return @profiles.plateau_profile(temp, low, low_plateau, high_plateau, high)
 	end
-	def temp_medium(temp)
+	def temp_warm(temp)
 		low = 15.0
 		low_plateau = 25.0
 		high_plateau = 35.0
 		high = 45.0
-		if temp < low  || temp > high
+		if temp < low or temp > high
 			return 0.0	
 		end
-		profiles = MembershipProfiles.new
-		return profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
+		return @profiles.plateau_profile(temp, low, low_plateau, high_plateau, high)
 	end
 	def temp_hot(temp)
 		low = 35.0
@@ -140,14 +146,18 @@ class TemperatureMembership
 		if temp > high
 			return 1.0
 		end
-		profiles = MembershipProfiles.new
-		return profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
+		return @profiles.plateau_profile(temp, low, low_plateau, high_plateau, high)
 	end
 end
 
 class BatteryMembership
+	def initialize
+		@profiles = MembershipProfiles.new
+	end
 	def voltage_low(voltage)
-		low = low_plateau =  high_plateau = 5.0
+		low = 5.0
+		low_plateau = 5.0
+		high_plateau = 5.0
 		high = 10.0
 		if voltage < low
 			return 1.0
@@ -155,19 +165,17 @@ class BatteryMembership
 		if voltage > high 
 			return 0.0
 		end
-		profiles = MembershipProfiles.new
-		return profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
+		return @profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
 	end
 	def voltage_medium(voltage)
 		low = 5.0
 		low_plateau = 10.0
 		high_plateau = 20.0	
 		high = 25.0
-		if voltage < low || voltage > high
+		if voltage < low or voltage > high
 			return 0.0
 		end
-		profiles = MembershipProfiles.new
-		return profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
+		return @profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
 	end
 	def voltage_high(voltage)
 		low = 25.0
@@ -180,19 +188,18 @@ class BatteryMembership
 		if voltage > high 
 			return 1.0
 		end
-		profiles = MembershipProfiles.new
-		return profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
+		return @profiles.plateau_profile(voltage, low, low_plateau, high_plateau, high)
 	end
 end
 
 class MembershipProfiles
 	def spike_profile(value, low, high)
 		value += (-low)
-		if low<0 && high<0
+		if low<0 and high<0
 			high = -(high-low)
-		elsif low<0 && high>0
+		elsif low<0 and high>0
 			high += -low
-		elsif low>0 && high>0
+		elsif low>0 and high>0
 			high -= low
 		end
 		peak = high/2.0
@@ -222,7 +229,7 @@ class MembershipProfiles
 			return 0.0
 		elsif value > high
 			return 0.0
-		elsif value>= low_plateau && value<=high_plateau
+		elsif value>= low_plateau and value<=high_plateau
 			return 1.0
 		elsif value < low_plateau 
 			return (value-low) * upslope
@@ -238,7 +245,7 @@ class FuzzyOperations
 		(a>b) ? a : b	
 	end
 	def or(a, b)
-		(a>b) ? b : a	
+		(a<b) ? a : b	
 	end
 	def not(a)
 		1.0 - a
@@ -252,6 +259,6 @@ if __FILE__ == $0
 		s.simulate
 		b.charge_control(s)
 		s.bump_timer
-		puts "#{count}: V=#{s.voltage} T=#{s.temperature} Mode=#{b.get_mode == 0 ? 'Trickle' : 'Fast' }"
+		puts "#{count}: V=#{s.voltage} T=#{s.temperature} Mode=#{b.mode == 0 ? 'Trickle' : 'Fast' }"
 	}	
 end
