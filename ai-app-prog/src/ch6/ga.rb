@@ -20,12 +20,16 @@ class Instructions
 	OVER = 0x04
 	NOP = 0x05
 	MAX_INSTRUCTIONS = NOP+1
-	NONE = 0
-	COUNT = 10
+	COUNT = 5
 	TIER1 = 1
 	TIER2 = (TIER1+1)*COUNT
 	TIER3 = (TIER1+TIER2+2)*COUNT
 	MAX_FITNESS = ((TIER3*COUNT) + (TIER2*COUNT) + (TIER1*COUNT)).to_f
+	
+	NONE = 0
+	STACK_VIOLATION = 1
+	MATH_VIOLATION = 2
+
 	STACK_DEPTH = 25
 end
 
@@ -139,8 +143,7 @@ class Genetic
 		loop do
 			ret_fitness = @populations[@current_population][@@class_chrom].fitness.to_f / @max_fitness.to_f
 			@@class_chrom = 0 if @@class_chrom == MAX_CHROMS - 1
-			puts "checking fitness = #{@populations[@current_population][@@class_chrom].fitness}, @min_fitness = #{@min_fitness}, ret_fitness = #{ret_fitness}"
-			if @populations[@current_population][@@class_chrom].fitness > @min_fitness and rand < ret_fitness
+			if @populations[@current_population][@@class_chrom].fitness > @min_fitness && rand < ret_fitness
 				ret = @@class_chrom
 				@@class_chrom += 1
 				ret_fitness = @populations[@current_population][@@class_chrom].fitness
@@ -152,6 +155,7 @@ class Genetic
 	end
 	def perform_fitness_check
 		@max_fitness = 0.0
+		@avg_fitness = 0.0
 		@min_fitness = 1000.0
 		@total_fitness = 0.0
 		MAX_CHROMS.times {|chrom|
@@ -160,10 +164,13 @@ class Genetic
 			Instructions::COUNT.times {|i|	
 				args = [rand(32), rand(32), rand(32)]
 				answer = args[0]**3 + args[1]**2 + args[2]
-				result = interpret_stm(@populations[@current_population][chrom].program, @populations[@current_population][chrom].prog_size, args)
-				@populations[@current_population][chrom].fitness += Instructions::TIER1 if result == Instructions::NONE
-				@populations[@current_population][chrom].fitness += Instructions::TIER2 if @stack.size == 1
-				@populations[@current_population][chrom].fitness += Instructions::TIER3 if @stack.first == answer
+				begin 
+					interpret_stm(@populations[@current_population][chrom], args)
+					@populations[@current_population][chrom].fitness += Instructions::TIER2 if @stack.size == 1
+					@populations[@current_population][chrom].fitness += Instructions::TIER3 if @stack.first == answer
+				rescue Exception => x
+					@populations[@current_population][chrom].fitness += Instructions::TIER1 if x.message.to_i == Instructions::NONE
+				end
 			}	
 			if @populations[@current_population][chrom].fitness > @max_fitness	
 				@max_fitness = @populations[@current_population][chrom].fitness
@@ -176,51 +183,44 @@ class Genetic
 		printf("%d %6.4f %6.4f %6.4f\n", @@weird_x_value, @min_fitness, @avg_fitness, @max_fitness)
 		@@weird_x_value += 1
 	end
-	def interpret_stm(program, prog_length, args)
-		pc = -1
-		error = Instructions::NONE
-		args.size.downto(0) {|x| spush(args[x])	}
-		while error == Instructions::NONE && pc < prog_length
-			pc += 1
-			begin
-				case program[pc]
-					when Instructions::DUP
-						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(1)
-						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_not_full
-						spush(speek)
-					when Instructions::SWAP
-						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(2)
-						a = @stack.last.dup
-						@stack[@stack.size-1] = @stack[@stack.size-2]
-						@stack[@stack.size-2] = a
-					when Instructions::MUL
-						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(2)
-						a = spop
-						b = spop
-						spush(a * b)
-					when Instructions::ADD
-						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(2)
-						a = spop
-						b = spop
-						spush(a + b)
-					when Instructions::OVER
-						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(2)
-						spush(@stack[@stack.size-2].dup)
-				end
-			rescue Exception => x
-				error = x.message.to_i
+	def interpret_stm(pop, args)
+		@stack = []
+		(args.size-1).downto(0) {|x| spush(args[x])	}
+		0.upto(pop.prog_size - 1) {|x|
+			case pop.program[x]
+				when Instructions::DUP
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_elements(1)
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_not_full
+					spush(speek)
+				when Instructions::SWAP
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_elements(2)
+					a = @stack.last
+					@stack[@stack.size-1] = @stack[@stack.size-2]
+					@stack[@stack.size-2] = a
+				when Instructions::MUL
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_elements(2)
+					a = spop
+					b = spop
+					spush(a * b)
+				when Instructions::ADD
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_elements(2)
+					a = spop
+					b = spop
+					spush(a + b)
+				when Instructions::OVER
+					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if assert_stack_elements(2)
+					spush(@stack[@stack.size-2])
 			end
-		end
-		return error
+		}
 	end
 	def assert_stack_elements(x)
 		@stack.size < x
 	end
 	def assert_stack_not_full
-		!@stack.size == STACK_DEPTH
+		!@stack.size == Instructions::STACK_DEPTH
 	end
 	def spop	
-		x = speek.dup
+		x = speek
 		@stack.delete_at(@stack.size - 1)
 		return x
 	end
@@ -231,13 +231,12 @@ class Genetic
 		@stack.last
 	end
 	def init_population	
-		MAX_CHROMS.times {|x| init_member(x) }
-	end
-	def init_member(index)
-		@populations[@current_population] = [] if @populations[@current_population] == nil
-		@populations[@current_population][index] = Population.new
-		MAX_PROGRAM.times {|x| 
-			@populations[@current_population][index].program[x] = rand(Instructions::MAX_INSTRUCTIONS)
+		MAX_CHROMS.times {|x| 
+			@populations[@current_population] = [] if @populations[@current_population] == nil
+			@populations[@current_population][x] = Population.new
+			MAX_PROGRAM.times { 
+				@populations[@current_population][x].program << rand(Instructions::MAX_INSTRUCTIONS)
+			}
 		}
 	end
 end
