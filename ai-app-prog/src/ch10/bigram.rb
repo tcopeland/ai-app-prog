@@ -3,8 +3,9 @@
 class DataFile
 	def initialize(filename)
 		@bigram_array = Array.new(Bigram::MAX_WORDS, 0)
-		# parsefile code goes here
-		
+		File.open(filename, "r").each_byte {|byte|
+			puts byte.chr
+		}
 	end
 end
 
