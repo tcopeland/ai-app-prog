@@ -4,6 +4,8 @@ class Adaptive
 	MAX_ITEMS = 11
 	MAX_CUSTOMERS = 10
 	TOTAL_PROTOTYPE_VECTORS = 5
+	BETA = 1.0
+	VIGILANCE = 0.0
 	DATABASE = [
         [ 0,   0,   0,   0,   0,   1,   0,   0,   1,   0,   0],
         [ 0,   1,   0,   0,   0,   0,   0,   1,   0,   0,   1],
@@ -27,6 +29,7 @@ class Adaptive
 		}
 		@members = Array.new(TOTAL_PROTOTYPE_VECTORS, 0)
 		@membership = Array.new(MAX_CUSTOMERS, -1)
+		@num_prototype_vectors = 0
 	end
 	def perform_art1
 		and_result = Array.new(MAX_ITEMS)
@@ -41,10 +44,51 @@ class Adaptive
 						mag_pe = vector_magnitude(and_result)
 						mag_p = vector_magnitude(@prototype_vector[pvec])
 						mag_e = vector_magnitude(DATABASE[index])
+						result = mag_pe.to_f / (BETA + mag_p)
+						test = mag_e.to_f / (BETA + MAX_ITEMS.to_f)
+						if result > test	
+							if (mag_pe.to_f / mag_e.to_f) < VIGILANCE
+								old = 0
+								if @membership[index] != pvec
+									old = @membership[index]
+									@membership[index] = pvec
+									if old >= 0 
+										@members[old] -= 1
+										@num_prototype_vectors -= 1 if @members[old] == 0
+									end
+									@members[pvec] += 1
+									update_prototype_vectors(old) if old >=0 && old < TOTAL_PROTOTYPE_VECTORS
+								end
+							end
+						end
 					end
 				}
 			}
 		end
+	end
+	def update_prototype_vectors(cluster)
+		first = true
+		raise "Cluster < 0!!" if cluster < 0
+		0.upto(MAX_ITEMS) {|item|
+			@prototype_vector[cluster][item] = 0
+			@sum_vector[cluster][item] = 0
+		}
+		0.upto(MAX_CUSTOMERS-1) {|customer|
+			if @membership[customer] == cluster
+				if first
+					0.upto(MAX_ITEMS-1) {|item|
+						@prototype_vector[cluster][item] = DATABASE[customer][item]
+						@sum_vector[cluster][item] = DATABASE[customer][item]
+					}
+					first = false
+				else
+					0.upto(MAX_ITEMS-1) {|item|
+						@prototype_vector[cluster][item] = @prototype_vector[cluster][item] & DATABASE[customer][item]
+						@sum_vector[cluster][item] += DATABASE[customer][item]
+					}
+				end
+			end
+		}
 	end
 	def vector_magnitude(v)
 		res = 0
