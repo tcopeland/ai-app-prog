@@ -1,6 +1,5 @@
 #!/usr/local/bin/ruby
 
-# TODO sum_vector needs to be a map of words->occurrence count
 class Bigram
 	MAX_WORD_LEN=40
 	MAX_WORDS=1000
@@ -11,9 +10,8 @@ class Bigram
 	END_SYMBOL=1
 	
 	def initialize(debug)
-		@current_word = 2
 		@word_vector = Array.new(MAX_WORDS)
-		@sum_vector = Array.new(MAX_WORDS)
+		@occurrences = Hash.new
 		@@last_index = START_SYMBOL
 		
 		@word_vector << "<START>"
@@ -36,8 +34,11 @@ class Bigram
 	end
 
 	def next_word(word)
-		nextword = @word_vector.index(word) + 1
-		max = @sum_vector[@word_vector.index(word)]
+		nextwordindex = @word_vector.index(word) + 1
+		lim = rand(@occurrences[word] + 1)
+		while nextwordindex != @word_vector.index(word)
+			# TODO
+		end
 	end
 
 	def parse_corpus(filename)
@@ -68,10 +69,13 @@ class Bigram
 				end
 			end
 		}
+		if debug
+			puts "#{@word_vector.size} unique words in the corpus"
+		end
 	end
 
 	def load_word(word, order)
-		if @current_word == MAX_WORDS
+		if @word_vector.size == MAX_WORDS
 			puts "Too many words, increase MAX_WORDS!\n"
 			exit(1)
 		end
@@ -80,14 +84,14 @@ class Bigram
 		end
 		if order == FIRST_WORD
 			@bigram_array[START_SYMBOL][@word_vector.index(word)] += 1
-			@sum_vector[START_SYMBOL] += 1
+			@occurrences[START_SYMBOL] += 1
 		elsif order == LAST_WORD
 			@bigram_array[END_SYMBOL][@word_vector.index(word)] += 1
 			@bigram_array[@word_vector.index(word)][END_SYMBOL] += 1
-			@sum_vector[END_SYMBOL] += 1
+			@occurrences[END_SYMBOL] += 1
 		else
 			@bigram_array[@@last_index][@word_vector.index(word)] += 1
-			@sum_vector[@@last_index] += 1
+			@occurrences[@word_vector[@@last_index]] += 1
 		end
 		@@last_index = @word_vector.index(word)
 	end
