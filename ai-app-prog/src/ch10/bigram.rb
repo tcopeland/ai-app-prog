@@ -28,7 +28,12 @@ class DataFile
 					index = 0
 				end
 			elsif byte.chr == '.' or byte.chr == '?'
-				# TODO
+				word[index] = 0
+				index += 1
+				load_word(word, Bigram::MIDDLE_WORD)
+				load_word(word, Bigram::LAST_WORD)
+				index = 0
+				first = true
 			else
 				if byte != 10 and byte.chr != ','
 					word[index] = byte.chr
