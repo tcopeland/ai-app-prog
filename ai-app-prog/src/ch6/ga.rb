@@ -112,12 +112,13 @@ class StackMachine
 end
 
 class Generation
-	attr_reader :id, :crossovers, :mutations
+	attr_reader :id, :crossovers, :mutations, :minimum_fitness
 	@@classid = 0 
 	def initialize
 		@id = @@classid
 		@crossovers = 0
 		@mutations = 0
+		@minimum_fitness = 1000.0
 		@@classid += 1
 	end
 	def new_crossover
@@ -125,6 +126,11 @@ class Generation
 	end
 	def new_mutation
 		@mutations += 1
+	end
+	def check_for_minimum_fitness(x)
+		if x < @minimum_fitness
+			@minimum_fitness = x
+		end
 	end
 end
 
@@ -143,16 +149,16 @@ class Genetic
 	def run
 		g = nil
 		init_population
-		calculate_fitness
 		while g.id < MAX_GENERATIONS
 			g = Generation.new
+			calculate_fitness(g)
 			perform_selection(g)
 			@current_population = @current_population == 0 ? 1 : 0
-			calculate_fitness
+			calculate_fitness(g)
 			puts "Generation #{g.id}"
 			printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
 			printf("\tAverage fitness = %f\n", @average_fitness)
-			printf("\tMinimum fitness = %f\n", @min_fitness)
+			printf("\tMinimum fitness = %f\n", g.minimum_fitness)
 			printf("\tCrossovers = %d\n", g.crossovers)
 			printf("\tMutations = %d\n", g.mutations)
 			printf("\tPercentage = %f\n", @average_fitness.to_f/@max_fitness.to_f)
@@ -168,7 +174,7 @@ class Genetic
 		puts "Generation #{g.id}"
 		printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
 		printf("\tAverage fitness = %f\n", @average_fitness)
-		printf("\tMinimum fitness = %f\n", @min_fitness)
+		printf("\tMinimum fitness = %f\n", g.minimum_fitness)
 		printf("\tCrossovers = %d\n", g.crossovers)
 		printf("\tMutations = %d\n", g.mutations)
 		printf("\tPercentage = %f\n", @average_fitness.to_f/@max_fitness.to_f)
@@ -232,9 +238,8 @@ class Genetic
 		chrom - 1
 	end
 
-	def calculate_fitness
+	def calculate_fitness(g)
 		@max_fitness = 0.0
-		@min_fitness = 1000.0
 		@total_fitness = 0.0
 		MAX_CHROMS.times {|chrom|
 			@populations[@current_population][chrom].reset_fitness
@@ -253,8 +258,8 @@ class Genetic
 			}	
 			if @populations[@current_population][chrom].fitness > @max_fitness	
 				@max_fitness = @populations[@current_population][chrom].fitness
-			elsif @populations[@current_population][chrom].fitness < @min_fitness
-				@min_fitness = @populations[@current_population][chrom].fitness
+			else 
+				g.check_for_minimum_fitness(@populations[@current_population][chrom].fitness)
 			end
 			@total_fitness += @populations[@current_population][chrom].fitness
 		}
