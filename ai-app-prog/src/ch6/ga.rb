@@ -2,8 +2,8 @@
 
 class Population
 	attr_accessor :fitness, :prog_size, :program
-	def initialize(fitness)
-		@fitness = fitness
+	def initialize
+		@fitness = 0.0
 		@prog_size = Genetic::MAX_PROGRAM-1
 		@program = []
 	end
@@ -35,9 +35,9 @@ class Genetic
 	end
 	def init_member(index)
 		@populations[@current_population] = [] if @populations[@current_population] == nil
-		@populations[@current_population][index] = Population.new(0.0)
-		(MAX_PROGRAM-1).times {
-			|x| @populations[@current_population][index].program[x] = rand(Instructions::MAX_INSTRUCTIONS)
+		@populations[@current_population][index] = Population.new
+		(MAX_PROGRAM-1).times {|x| 
+			@populations[@current_population][index].program[x] = rand(Instructions::MAX_INSTRUCTIONS)
 		}
 	end
 	
