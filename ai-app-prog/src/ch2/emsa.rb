@@ -10,7 +10,7 @@ class Member
 	end
 	def copy_to(dest)
 	end
-	def tweak()
+	def tweak
 		y=0
 		x = rand(Emsa::MAX_LENGTH)
 		begin
@@ -19,6 +19,18 @@ class Member
 		temp = solution[x]
 		solution[x] = solution[y]
 		solution[y] = temp
+	end
+	def emit_solution
+		board = Array.new(MAX_LENGTH, '.')
+		board.each_index {|x| board[x] = Array.new(MAX_LENGTH, '.') }
+		0..upto(MAX_LENGTH-1) {|x| board[x][solution[x]]] = 'Q' }
+		0..upto(MAX_LENGTH-1) {|x|
+			0..upto(MAX_LENGTH-1) {|y|
+				p board[x][y]
+			}	
+			puts "\n"
+		}	
+		puts "\n\n"
 	end
 end
 
@@ -30,19 +42,6 @@ class Emsa
 	STEPS_PER_CHANGE=100
 
 	def compute_energy(member)
-	end
-
-	def emit_solution(member)
-		board = Array.new(MAX_LENGTH, '.')
-		board.each_index {|x| board[x] = Array.new(MAX_LENGTH, '.') }
-		0..upto(MAX_LENGTH-1) {|x| board[x][member.solution[x]]] = 'Q' }
-		0..upto(MAX_LENGTH-1) {|x|
-			0..upto(MAX_LENGTH-1) {|y|
-				p board[x][y]
-			}	
-			puts "\n"
-		}	
-		puts "\n\n"
 	end
 
 	def initialize
@@ -96,7 +95,7 @@ class Emsa
 		}
 		
 		if solution > 0
-			emit_solution(best)
+			best.emit_solution
 		end
 	end
 end
