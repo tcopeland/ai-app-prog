@@ -144,7 +144,7 @@ class Simulation
 
 	def simulate_ants
 		moving = 0
-		(0..(MAX_ANTS-1)).each {|k|
+		@ants.each_index {|k|
 			if @ants[k].path_index < MAX_CITIES
 				@ants[k].next_city=select_next_city(k)
 				@ants[k].tabu[@ants[k].next_city] = 1
@@ -162,8 +162,8 @@ class Simulation
 	end
 	
 	def update_trails
-		(0..(MAX_CITIES-1)).each {|x|
-			(0..(MAX_CITIES-1)).each {|y|
+		@pheromone.each_index {|x|
+			@pheromone.each_index {|y|
 				if x != y
 					@pheromone[x][y] *= (1.0 - RHO)
 					if @pheromone[x][y] < 0.0
@@ -173,8 +173,8 @@ class Simulation
 			}
 		}
 
-		(0..(MAX_ANTS-1)).each {|ant|
-			(0..(MAX_CITIES-1)).each {|i|
+		@pheromone.each_index {|ant|
+			@pheromone.each_index {|i|
 				if i < MAX_CITIES-1
 					from = @ants[ant].path[i]
 					to = @ants[ant].path[i+1]	
@@ -187,8 +187,8 @@ class Simulation
 			}
 		}
 
-		(0..(MAX_CITIES-1)).each {|x|
-			(0..(MAX_CITIES-1)).each {|y|
+		@pheromone.each_index {|x|
+			@pheromone.each_index {|y|
 				@pheromone[x][y] *= RHO
 			}
 		}
