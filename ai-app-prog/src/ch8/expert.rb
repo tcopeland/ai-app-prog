@@ -81,12 +81,14 @@ end
 class RulesetParser
 	def handle(ctx, toks)
 		# bail out now if no rules
-		return if !toks[ctx.ptr]delim?
+		return if !toks[ctx.ptr].delim?
 
-		ctx.ptr += 2 # skip delim and defrule
-		ctx.rules << Rule.new(toks[ctx.ptr].to_s)
+		ctx.bump(2) # skip delim and defrule
+		ctx.rules << Rule.new(toks[ctx.ptr].txt)
 	
-		while toks[ctx.ptr].open?
+		ctx.bump	
+		while (ctx.ptr <= toks.size - 1) && toks[ctx.ptr].open?
+			ctx.bump # skip delim 
 			ctx.push(RuleParser.new)
 			ctx.pop
 		end
@@ -117,6 +119,9 @@ class Ctx
 	def peek
 		@parser_stack.last
 	end
+	def bump(dist=1)
+		@ptr += dist
+	end
 end
 
 class Parser
@@ -138,4 +143,3 @@ end
 if __FILE__ == $0		
   e = Expert.new("winston.rbs")
 end
-

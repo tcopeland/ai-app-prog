@@ -30,14 +30,9 @@ end
 
 class RulesetParserTest < Test::Unit::TestCase
 	def test_simple
-		t = Tokenizer.new
-		t.tokenize("(defrule rulename)")
 		p = RulesetParser.new
 		c = Ctx.new
-		p.handle(c, t.tokens[0])
-		p.handle(c, t.tokens[1])
-		p.handle(c, t.tokens[2])
-		p.handle(c, t.tokens[3])
+		p.handle(c, Tokenizer.new.tokenize("(defrule rulename)"))
 		assert(c.rules.size == 1, "Should have parsed out 1 rule but parsed out #{c.rules.size}")
 		assert(c.rules[0].name == "rulename", "Rule name should be 'rulename' but is #{c.rules[0].name}")
 	end
