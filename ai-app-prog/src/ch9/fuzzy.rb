@@ -264,11 +264,35 @@ class PredatorMembershipFunctions
 	end
 end
 
+class Position
+	def initialize(x,y)
+		@x = x
+		@y = y
+	end
+end
+
+class Predator
+	def initialize(pos, heading)
+		@pos = pos
+		@heading = heading
+	end
+end
+
+class Prey
+	def initialize(pos, heading)
+		@pos = pos
+		@heading = heading
+	end
+end
+
+class Heading
+	def initialize(angle)
+		@angle = angle
+	end
+end
 
 if __FILE__ == $0
-	if ARGV[0] != nil and ARGV[0] == "pp"
-	 # run predator/prey thing
-	else
+	if ARGV[0] != nil and ARGV[0] == "battery"
 		b = Battery.new
 		s = Simulation.new(b)	
 		t = Timer.new
@@ -280,5 +304,12 @@ if __FILE__ == $0
 				puts "#{count} #{s.voltage.current} #{s.temperature.current}"
 			end
 		}
+	else
+		prey = Prey.new(Position.new(10,10), Heading.new(45))
+		predator = Predator.new(Position.new(80,80), Heading.new(90))
+		100.times {|time|
+			
+			puts time
+		}		
 	end	
 end
