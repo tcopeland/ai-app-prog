@@ -103,13 +103,13 @@ class Battery
 	def charge_control(simulation, timer)
 		@count += 1
 		if (@count % 10) == 0
-			if normalize(@bm.voltage_high(simulation.voltage)) >0
+			if normalize(@bm.high(simulation.voltage)) >0
 				@mode = TrickleCharge.new
 				timer.reset
 			elsif normalize(@tm.temp_hot(simulation.temperature.current)) > 0
 				@mode = TrickleCharge.new
 				timer.reset
-			elsif normalize(@ops.and(@ops.not(@bm.voltage_high(simulation.voltage)), @ops.not(@tm.temp_hot(simulation.temperature.current)))) > 0
+			elsif normalize(@ops.and(@ops.not(@bm.high(simulation.voltage)), @ops.not(@tm.temp_hot(simulation.temperature.current)))) > 0
 				@mode = FastCharge.new
 				timer.reset
 			end
@@ -198,7 +198,7 @@ class BatteryMembership
 		@med = PlateauProfile.new(5.0, 10.0, 20.0, 25.0)
 		@high = PlateauProfile.new(25.0, 30.0, 30.0, 30.0)
 	end
-	def voltage_low(voltage)
+	def low(voltage)
 		if voltage.current < @low.low
 			return 1.0
 		end
@@ -207,13 +207,13 @@ class BatteryMembership
 		end
 		return @low.compute(voltage.current)
 	end
-	def voltage_medium(voltage)
+	def medium(voltage)
 		if voltage.current < @med.low or voltage.current > @med.high
 			return 0.0
 		end
 		return @med.compute(voltage.current)
 	end
-	def voltage_high(voltage)
+	def high(voltage)
 		if voltage.current < @high.low
 			return 0.0
 		end
