@@ -1,7 +1,7 @@
 #!/usr/local/bin/ruby
 
 class Member
-	NUMBER_OF_QUEENS=6
+	NUMBER_OF_QUEENS=16
 	DX = [-1, 1, -1, 1]
 	DY = [-1, 1, 1, -1]
 	attr_accessor :energy, :solution
@@ -83,10 +83,15 @@ class Emsa
 	FINAL_TEMPERATURE=0.5
 	ALPHA=0.99
 	STEPS_PER_CHANGE=100
+	
+	def initialize(verbose)
+		@verbose = verbose
+		@stats = ""
+		@solution_found = false
+	end
 
 	def go
 		timer=0
-		@solution_found = false
 		temperature=INITIAL_TEMPERATURE
 	
 		current=Member.new
@@ -96,11 +101,11 @@ class Emsa
 		current.compute_energy
 		current.copy_into(working)
 		
-		stats = ""
 		use_new=false
 		output_interval = 0
 		while temperature > FINAL_TEMPERATURE
-			puts "Temperature: #{temperature}" unless output_interval % 20 != 0
+			puts "Temperature: #{temperature}" unless output_interval % 20 != 0 or !@verbose
+
 			accepted = 0
 			0.upto(STEPS_PER_CHANGE-1) {
 				use_new = false	
@@ -128,16 +133,24 @@ class Emsa
 					current.copy_into(working)
 				end
 			end
-			stats << "#{timer} #{temperature} #{@best.energy} #{accepted}\n"
+			@stats << "#{timer} #{temperature} #{@best.energy} #{accepted}\n"
 			timer += 1
-			puts "Best energy: #{@best.energy}" unless output_interval % 20 != 0
+			puts "Best energy: #{@best.energy}" unless output_interval % 20 != 0 or !@verbose
 			temperature *= ALPHA	
 			output_interval += 1
 		end		
 	end
 	
 	def print_stats_to_file
-		File.open("stats.txt", "w") {|file| file.write(stats) }
+		File.open("stats.txt", "w") {|file| file.write(@stats) }
+	end
+	
+	def best_energy
+		@best.energy
+	end
+
+	def solved
+		@best.energy == 0
 	end
 
 	def print_board
@@ -146,8 +159,16 @@ class Emsa
 end
 
 if __FILE__ == $0
-	e = Emsa.new
-	e.go
-	e.print_board
-	e.print_stats_to_file unless !ARGV.include?("-statsfile")
+	while true
+		e = Emsa.new(ARGV.include?("-v"))
+		e.go
+		if e.solved
+			puts "Solved!"
+			e.print_board
+			e.print_stats_to_file unless !ARGV.include?("-statsfile")
+			break
+		else 
+			puts "Failure, energy = #{e.best_energy}, retrying"
+		end
+	end
 end
