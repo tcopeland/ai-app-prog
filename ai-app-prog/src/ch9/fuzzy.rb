@@ -328,8 +328,8 @@ if __FILE__ == $0
 			end
 		}
 	else
-		prey = Prey.new(Position.new(10.0,10.0), Heading.new(45))
-		predator = Predator.new(Position.new(80.0,80.0), Heading.new(90))
+		prey = Prey.new(Position.new(10.0,10.0), Heading.new(60))
+		predator = Predator.new(Position.new(80.0,120.0), Heading.new(90))
 		100.times {
 			prey.move
 			predator.move
