@@ -109,6 +109,9 @@ class FuzzyOperations
 	def not(a)
 		1.0 - a
 	end
+	def normalize(input)
+		input >= 0.5 ? 1 : 0
+	end
 end
 
 class Timer
@@ -204,20 +207,17 @@ class Battery
 	def charge_control(simulation, timer)
 		@count += 1
 		if (@count % 10) == 0
-			if normalize(@battery_mf.high.compute(simulation.voltage.current)) >0
+			if @fuzzy.normalize(@battery_mf.high.compute(simulation.voltage.current)) >0
 				@mode = TrickleCharge.new
 				timer.reset
-			elsif normalize(@temperature_mf.hot.compute(simulation.temperature.current)) > 0
+			elsif @fuzzy.normalize(@temperature_mf.hot.compute(simulation.temperature.current)) > 0
 				@mode = TrickleCharge.new
 				timer.reset
-			elsif normalize(@fuzzy.and(@fuzzy.not(@battery_mf.high.compute(simulation.voltage.current)), @fuzzy.not(@temperature_mf.hot.compute(simulation.temperature.current)))) > 0
+			elsif @fuzzy.normalize(@fuzzy.and(@fuzzy.not(@battery_mf.high.compute(simulation.voltage.current)), @fuzzy.not(@temperature_mf.hot.compute(simulation.temperature.current)))) > 0
 				@mode = FastCharge.new
 				timer.reset
 			end
 		end
-	end
-	def normalize(input)
-		input >= 0.5 ? 1 : 0
 	end
 end
 
@@ -253,6 +253,7 @@ end
 
 # Predator/prey application
 class PredatorMembershipFunctions
+	attr_accessor :xleft, :farleft, :left, :center, :right, :farright, :xright
 	def initialize
 		@xleft = PlateauProfile.new(-180, -179, -70,-60, LowEndExcluder.new)
 		@farleft = PlateauProfile.new(-80, -70, -20, -10, MiddleExcluder.new)
@@ -301,9 +302,29 @@ class Predator < MovingObject
 	end
 	def move
 		super
-		# determine angle between current heading and prey
+		tmpx = @pos.x - @prey.pos.x
+		tmpy = @pos.y - @prey.pos.y
+		ang = Math.atan2(tmpx, tmpy)/(Math::PI/180)
 		# plug that into mbrship functions		
-		@heading.translate(1)
+		pmf = PredatorMembershipFunctions.new
+		fuz = FuzzyOperations.new	
+		change = 0
+		if fuz.normalize(pmf.xleft.compute(ang)) > 0
+			change=-15
+		elsif fuz.normalize(pmf.farleft.compute(ang)) > 0
+			change=-8
+		elsif fuz.normalize(pmf.left.compute(ang)) > 0
+			change=-1
+		elsif fuz.normalize(pmf.center.compute(ang)) > 0
+			change=0
+		elsif fuz.normalize(pmf.right.compute(ang)) > 0
+			change=1
+		elsif fuz.normalize(pmf.farright.compute(ang)) > 0
+			change=8
+		elsif fuz.normalize(pmf.xright.compute(ang)) > 0
+			change=15
+		end
+		@heading.translate(change)
 	end
 end
 
