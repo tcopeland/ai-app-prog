@@ -160,13 +160,13 @@ x += 1
 </pre>
 This bit me something fierce on the Ant Algorithm code.  Of course, what really bit me was that I didn't write any unit tests.  Gack.<p>
 <li>C has the <code>static</code> keyword which can be used inside functions to indicate that a variable is only initialized once.  This translates to a class-level variable in Ruby.  At least, that's the best comparison I can think of at the moment, comments are welcome.<p>
-<li>Some fairly verbose C idioms can go away when converting to Ruby... for example, instead of manually traversing an array to find the largest element, just use <code>Array.max</code>.  Thanks to Charles Comstock for suggesting this in lieu of my original suggestion of the O(n) <code>Array.sort[0]</code>.
-<li>If the C code references RAND_MAX, it's defined in stdlib.h.  On my current workstation it's #define'd as 2147483647.
+<li>Some fairly verbose C idioms can go away when converting to Ruby... for example, instead of manually traversing an array to find the largest element, just use <code>Array.max</code>.  Thanks to Charles Comstock for suggesting this in lieu of my original suggestion of the O(n) <code>Array.sort[0]</code>.<p>
+<li>If the C code references <code>RAND_MAX</code>, it's defined in <code>stdlib.h</code>.  On my Linux 2.4 workstation it's <code>2147483647</code>.<p>
 <li>The preprocessor can be tricky.  If you've got C code like:
 <pre>
 #define RAND_WEIGHT ( ((float)rand() / (float)RAND_MAX) - 0.5)
 </pre>
-remember that the rand() function is being called each time.  So you can't just define a Ruby constant RAND_WEIGHT - if you do, you'll always get the same value.  You need to define a new rand_weight() method and call that instead.
+remember that a call to the <code>rand()</code> function is being inserted each time the preprocessor expands the macro.  So you can't just define a Ruby constant RAND_WEIGHT - if you do, you'll always get the same value.  You need to define a new <code>rand_weight</code> method and call that instead.
 </ul>
 </body>
 </html>
