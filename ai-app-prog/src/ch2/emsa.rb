@@ -1,12 +1,24 @@
 #!/usr/local/bin/ruby
 
 class Member
-	attr_accessor :energy
+	attr_accessor :energy, :solution
 	def initialize
-		@solution=[]
 		@energy=0.0
+		@solution=Array.new(Emsa::MAX_LENGTH)
+		0..upto(Emsa::MAX_LENGTH-1) {|x| @solution[x] = x}
+		0..upto(Emsa::MAX_LENGTH-1) {|x| tweak}
 	end
 	def copy_to(dest)
+	end
+	def tweak()
+		y=0
+		x = rand(Emsa::MAX_LENGTH)
+		begin
+			y = rand(Emsa::MAX_LENGTH)
+		until x != y
+		temp = solution[x]
+		solution[x] = solution[y]
+		solution[y] = temp
 	end
 end
 
@@ -16,12 +28,6 @@ class Emsa
 	FINAL_TEMPERATURE=0.5
 	ALPHA=0.99
 	STEPS_PER_CHANGE=100
-
-	def initialize_solution(member)
-	end
-
-	def tweak_solution(member)
-	end
 
 	def compute_energy(member)
 	end
@@ -37,7 +43,6 @@ class Emsa
 		best=Member.new
 
 		File.open("stats.txt", "w") {|file|
-			initialize_solution(current)
 			compute_energy(current)
 			best.energy = 100.0	
 			
@@ -48,7 +53,7 @@ class Emsa
 				accepted = 0
 				0..upto(STEPS_PER_CHANGE-1) {|step|
 					use_new = 0	
-					tweak_solution(working)
+					working.tweak
 					compute_energy(working)
 	
 					if working.energy <= current.energy
