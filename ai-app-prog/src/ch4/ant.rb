@@ -60,8 +60,8 @@ class Simulation
 		(0..(MAX_CITIES-1)).each {|x|
 			(0..(MAX_CITIES-1)).each {|y|
 				if x != y and @distance[x][y] == 0.0	
-					xd = abs(@cities[x].x - @cities[y].x)
-					yd = abs(@cities[x].y - @cities[y].y)
+					xd = (@cities[x].x - @cities[y].x).abs
+					yd = (@cities[x].y - @cities[y].y).abs
 					@distance[x][y] = Math.sqrt(xd**2 + yd**2)
 					@distance[y][x] = @distance[x][y]
 				end
@@ -199,13 +199,6 @@ class Simulation
 		}
 	end
 	
-	def abs(x)
-		if x<0
-			return -x
-		end
-		return x
-	end
-
 	def main
 		current_time = 0
 		while current_time < MAX_TIME
