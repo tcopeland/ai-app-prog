@@ -35,7 +35,7 @@ class Member
 		0.upto(NUMBER_OF_QUEENS-1) {|x|
 			0.upto(NUMBER_OF_QUEENS-1) {|y|
 				putc board[x][y]
-				putc ' '
+				putc ' ' 
 			}	
 			puts "\n"
 		}	
@@ -96,7 +96,7 @@ class Emsa
 		use_new=false
 		output_interval = 0
 		while temperature > FINAL_TEMPERATURE
-			puts "Temperature: #{temperature}" unless output_interval % 20 != 0 or !@verbose
+			puts "Temperature: " + temperature.to_s unless output_interval % 20 != 0 or !@verbose
 
 			accepted = 0
 			0.upto(STEPS_PER_CHANGE-1) {
@@ -108,7 +108,7 @@ class Emsa
 					use_new = true
 				else
 					calc = Math.exp(-(working.energy - current.energy)/temperature)
-					if calc > rand()
+					if calc > rand
 						accepted += 1
 						use_new = true
 					end
@@ -132,19 +132,15 @@ class Emsa
 			output_interval += 1
 		end		
 	end
-	
 	def print_stats_to_file
 		File.open("stats.txt", "w") {|file| file.write(@stats) }
 	end
-	
 	def best_energy
 		@best.energy
 	end
-
 	def solved
 		@best.energy == 0
 	end
-
 	def print_board
 		@best.emit_solution unless !@solution_found
 	end
