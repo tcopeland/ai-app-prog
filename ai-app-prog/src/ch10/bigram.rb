@@ -20,40 +20,30 @@ class Bigram
 
 		@bigram_array = Array.new(MAX_WORDS)
 		@bigram_array.each {|slot| slot = Array.new(MAX_WORDS)}
-		@word = Array.new(MAX_WORD_LEN+1)
-		index = 0
+		word = ""
 		first = false
 		file = File.open(filename, "r")
 		file.each_byte {|byte|
 			if file.eof
-				if index > 0
-					word[index]=0
-					index += 1
+				if word.size > 0
 					load_word(word, LAST_WORD)
-					index = 0
 				end
 			elsif byte == 10 or byte == 13 or byte.chr == ' '
-				if index > 0
-					word[index] = 0
-					index += 1
+				if !word.empty?
 					if first
 						first = false
 						load_word(word, FIRST_WORD)
 					else
 						load_word(word, MIDDLE_WORD)
 					end	
-					index = 0
 				end
 			elsif byte.chr == '.' or byte.chr == '?'
-				word[index] = 0
-				index += 1
 				load_word(word, MIDDLE_WORD)
 				load_word(word, LAST_WORD)
-				index = 0
 				first = true
 			else
 				if byte != 10 and byte.chr != ','
-					word[index] = byte.chr
+					word << byte.chr
 				end
 			end
 		}
