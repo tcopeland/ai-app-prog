@@ -204,13 +204,13 @@ class Battery
 	def charge_control(simulation, timer)
 		@count += 1
 		if (@count % 10) == 0
-			if normalize(@battery_mf.high(simulation.voltage)) >0
+			if normalize(@battery_mf.high.compute(simulation.voltage.current)) >0
 				@mode = TrickleCharge.new
 				timer.reset
-			elsif normalize(@temperature_mf.hot(simulation.temperature.current)) > 0
+			elsif normalize(@temperature_mf.hot.compute(simulation.temperature.current)) > 0
 				@mode = TrickleCharge.new
 				timer.reset
-			elsif normalize(@fuzzy.and(@fuzzy.not(@battery_mf.high(simulation.voltage)), @fuzzy.not(@temperature_mf.hot(simulation.temperature.current)))) > 0
+			elsif normalize(@fuzzy.and(@fuzzy.not(@battery_mf.high.compute(simulation.voltage.current)), @fuzzy.not(@temperature_mf.hot.compute(simulation.temperature.current)))) > 0
 				@mode = FastCharge.new
 				timer.reset
 			end
@@ -222,36 +222,20 @@ class Battery
 end
 
 class TemperatureMembershipFunctions	
+	attr_accessor :cold, :warm, :hot
 	def initialize
 		@cold = PlateauProfile.new(15.0, 15.0, 15.0, 25.0, LowEndExcluder.new)
 		@warm = PlateauProfile.new(15.0, 25.0, 35.0, 45.0, MiddleExcluder.new)
 		@hot = PlateauProfile.new(35.0, 45.0, 45.0, 45.0, HighEndExcluder.new)
 	end
-	def cold(temp)
-		return @cold.compute(temp)
-	end
-	def warm(temp)
-		return @warm.compute(temp)
-	end
-	def hot(temp)
-		return @hot.compute(temp)
-	end
 end
 
 class BatteryMembershipFunctions
+	attr_accessor :low, :medium, :high
 	def initialize
 		@low = PlateauProfile.new(5.0, 5.0, 5.0, 10.0, LowEndExcluder.new)
-		@med = PlateauProfile.new(5.0, 10.0, 20.0, 25.0, MiddleExcluder.new)
+		@medium = PlateauProfile.new(5.0, 10.0, 20.0, 25.0, MiddleExcluder.new)
 		@high = PlateauProfile.new(25.0, 30.0, 30.0, 30.0, HighEndExcluder.new)
-	end
-	def low(voltage)
-		return @low.compute(voltage.current)
-	end
-	def medium(voltage)
-		return @med.compute(voltage.current)
-	end
-	def high(voltage)
-		return @high.compute(voltage.current)
 	end
 end
 
