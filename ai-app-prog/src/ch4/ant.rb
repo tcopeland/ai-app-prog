@@ -29,10 +29,9 @@ end
 class Cities
 	def initialize
 		@cities = []
-		(1..Simulation::MAX_CITIES).each { @cities.add_new }
-	end
-	def private : add_new
+		(1..Simulation::MAX_CITIES).each { 
 			@cities << City.new(rand(Simulation::MAX_DISTANCE), rand(Simulation::MAX_DISTANCE))
+		}
 	end
 	def dist_x(x, y)
 		(@cities[x].x - @cities[y].x).abs
@@ -74,7 +73,6 @@ class Simulation
 		@best.tour_length = 500000
 	
 		(0..(MAX_CITIES-1)).each {|x|
-			@cities.add_new
 			@distance[x] = []
 			@pheromone[x] = []
 			(0..(MAX_CITIES-1)).each {|y|
