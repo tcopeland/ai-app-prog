@@ -1,17 +1,14 @@
 #!/usr/local/bin/ruby
 
 class City
-	attr_accessor :x, :y
+	attr_accessor :x, :y, :id
 	def initialize(x,y,id)
 		@x = x
 		@y = y
 		@id = id
 	end
 	def distance_to(city2)
-		return Math.sqrt((x - city2.x).abs**2 + (y - city2.y).abs**2)
-	end
-	def get_id	
-		@id
+		Math.sqrt((x - city2.x).abs**2 + (y - city2.y).abs**2)
 	end
 end
 
@@ -23,9 +20,9 @@ class Ant
 		@path_index = 1
 		@tabu = Array.new(Simulation::MAX_CITIES, 0)
 		@path = Array.new(Simulation::MAX_CITIES, -1)	
-		@path[0] = @current_city.get_id
+		@path[0] = @current_city.id
 		@tour_length = 0.0
-		@tabu[@current_city.get_id] = 1
+		@tabu[@current_city.id] = 1
 	end
 end
 
@@ -76,8 +73,8 @@ class Ants
 		@ants.each_index {|k|
 			if @ants[k].path_index < Simulation::MAX_CITIES
 				@ants[k].next_city=select_next_city(@ants[k], pheromone, cities)
-				@ants[k].tabu[@ants[k].next_city.get_id] = 1
-				@ants[k].path[@ants[k].path_index] = @ants[k].next_city.get_id
+				@ants[k].tabu[@ants[k].next_city.id] = 1
+				@ants[k].path[@ants[k].path_index] = @ants[k].next_city.id
 				@ants[k].path_index += 1
 				@ants[k].tour_length += @ants[k].current_city.distance_to(@ants[k].next_city)
 				if @ants[k].path_index == Simulation::MAX_CITIES
@@ -106,7 +103,7 @@ class Ants
 		return cities.get(city % Simulation::MAX_CITIES)
 	end
 	def ant_product(ant, target_city, pheromone)
-		(pheromone[ant.current_city.get_id][target_city.get_id]**Simulation::ALPHA) * (1.0/(ant.current_city.distance_to(target_city))**Simulation::BETA)
+		(pheromone[ant.current_city.id][target_city.id]**Simulation::ALPHA) * (1.0/(ant.current_city.distance_to(target_city))**Simulation::BETA)
 	end
 	def get(index)
 		@ants[index]
@@ -114,7 +111,7 @@ class Ants
 end
 
 class Simulation
-	MAX_CITIES = 30
+	MAX_CITIES = 20
 	MAX_DISTANCE = 100
 	MAX_TOUR = MAX_CITIES * MAX_DISTANCE
 	MAX_ANTS = 30
@@ -129,14 +126,9 @@ class Simulation
 	def initialize
 		@cities = Cities.new
 		@ants = Ants.new(@cities)
-
 		@pheromone = []
 		@best_so_far = nil
-	
-		0.upto(MAX_CITIES-1) {|x|
-			@pheromone[x] = Array.new(MAX_CITIES, INIT_PHEROMONE)
-		}
-
+		0.upto(MAX_CITIES-1) {|x| @pheromone[x] = Array.new(MAX_CITIES, INIT_PHEROMONE) }
 		current_time = 0
 		while current_time < MAX_TIME
 			current_time += 1
