@@ -37,7 +37,6 @@ class Agent
 		@location = loc
 	end
 	def simulate
-		x = y = out = in = largest = winner = 0
 		if @direction == NORTH
 			percept(@location, @inputs[ArtificialLife::HERB_FRONT], ArtificialLife::NORTH_FRONT, 1)
 			percept(@location, @inputs[ArtificialLife::HERB_LEFT], ArtificialLife::NORTH_LEFT, 1)
@@ -59,6 +58,14 @@ class Agent
 			percept(@location, @inputs[ArtificialLife::HERB_RIGHT], ArtificialLife::WEST_RIGHT, -1)
 			percept(@location, @inputs[ArtificialLife::HERB_PROXIMITY], ArtificialLife::WEST_PROX, -1)
 		end
+		0.upto(ArtificialLife::MAX_OUTPUTS-1) {|out|
+			@actions[out] = @biaso[out]
+			0.upto(ArtificialLife::MAX_INPUTS-1) {|infoo|
+				@actions[out] += (@inputs[infoo] * @weight_oi[(out*Artificial_Life::MAX_INPUTS)+infoo])
+			}
+		}
+		largest = @actions.sort[0]
+		winner = @actions.index(largest)
 	end
 	def herbivore
 		@type == TYPE_HERBIVORE
