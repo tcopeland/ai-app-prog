@@ -23,6 +23,11 @@ class Agent
 		@weight_oi = Array.new(ArtificialLife::MAX_INPUTS * ArtificialLife::MAX_OUTPUTS)
 		@biaso = Array.new(ArtificialLife::MAX_INPUTS)
 		@actions = Array.new(ArtificialLife::MAX_INPUTS)
+	
+		@energy = ArtificialLife::MAX_ENERGY/2
+		@age = 0
+		@generation = 1
+		
 	end
 end
 
@@ -31,6 +36,24 @@ class OffsetPair
 	def initialize(x,y)
 		@x_offset = x
 		@y_offset = y
+	end
+end
+
+class Landscape
+	def initialize(size)
+		@landscape = Array.new(3)
+		@landscape.each_index {|x| 
+			@landscape[x] = Array.new(size, 0)
+			@landscape[x].each_index{|y| 
+				@landscape[x][y] = Array.new(size, 0) 
+			}
+		}
+	end
+	def empty_at(plane,x,y)
+		@landscape[plane][x][y] == 0
+	end
+	def bump(plane,x,y)
+		@landscape[plane][x][y] += 1
 	end
 end
 
@@ -112,13 +135,7 @@ class ArtificialLife
 		end
 
 		puts "Creating landscape" unless !@verbose
-		@landscape = Array.new(3)
-		@landscape.each_index {|x| 
-			@landscape[x] = Array.new(MAX_GRID, 0)
-			@landscape[x].each_index{|y| 
-				@landscape[x][y] = Array.new(MAX_GRID, 0) 
-			}
-		}
+		@landscape = Landscape.new(MAX_GRID)
 		@best_agent = []
 		@plants = []	
 		@agents = []	
@@ -128,9 +145,9 @@ class ArtificialLife
 			while true
 				x = rand(MAX_GRID)	
 				y = rand(MAX_GRID)
-				if @landscape[PLANT_PLANE][y][x] == 0
+				if @landscape.empty_at(PLANT_PLANE, y, x)
 					@plants << Plant.new(Location.new(x,y))
-					@landscape[PLANT_PLANE][y][x] += 1
+					@landscape.bump(PLANT_PLANE, y, x)
 					break
 				end
 			end
@@ -139,11 +156,7 @@ class ArtificialLife
 		puts "Creating agents" unless !@verbose
 		if !@seed_population
 			0.upto(MAX_AGENTS-1) {|x|
-				if x < (MAX_AGENTS/2)
-					@agents << Agent.new(TYPE_HERBIVORE)
-				else
-					@agents << Agent.new(TYPE_CARNIVORE)
-				end
+				@agents << Agent.new((x < (MAX_AGENTS/2)) ? TYPE_HERBIVORE : TYPE_CARNIVORE)	
 			}
 		else
 		end
