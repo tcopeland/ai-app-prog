@@ -106,10 +106,7 @@ class Simulation
 			if @ants[x].tour_length < @best.tour_length
 				@best = @ants[x]
 			end
-			if city_index == (MAX_CITIES-1)
-        city_index = 0
-      end
-      @ants[x] = Ant.new(city_index)
+      @ants[x] = Ant.new(city_index % (MAX_CITIES-1))
       city_index += 1
 		}
 	end
