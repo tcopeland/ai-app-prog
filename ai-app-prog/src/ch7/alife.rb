@@ -156,7 +156,7 @@ class ArtificialLife
 					y = rand(MAX_GRID)
 					if @landscape.empty_at(agent.type, y, x)
 						@landscape.bump(agent.type, y, x)
-						agent.set_location(Location.new(y,x)
+						agent.set_location(Location.new(y,x))
 						break
 					end
 				end
