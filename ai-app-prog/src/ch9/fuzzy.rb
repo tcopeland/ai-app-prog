@@ -378,9 +378,9 @@ if __FILE__ == $0
 			end
 		}
 	else
-		prey = MovingObject.new(Position.new(10.0,10.0), Heading.new(60))
-		predator = Predator.new(Position.new(120.0,80.0), Heading.new(90), prey)
-		1000.times {
+		prey = MovingObject.new(Position.new(20.0,20.0), Heading.new(60))
+		predator = Predator.new(Position.new(80.0,80.0), Heading.new(90), prey)
+		200.times {
 			prey.move
 			predator.move
 			puts "#{prey.pos.x.to_i} #{prey.pos.y.to_i} #{predator.pos.x.to_i} #{predator.pos.y.to_i}"

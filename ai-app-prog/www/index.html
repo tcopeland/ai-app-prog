@@ -52,11 +52,15 @@ in Ruby.  In other words. "non zero" in C needs to be translated to "not nil and
 <hr>
 <a name="fuzzy"></a>
 <h3>Chapter 9 - Fuzzy Logic</h3>
-<p>Updated 10/8/03: Battery charger simulation complete, code is <a href="http://rubyforge.org/cgi-bin/cvsweb.cgi/ai-app-prog/src/ch9/?cvsroot=ai-app-prog">here</a>.  Below is a graph (thanks gnuplot!) showing the relationships between the battery's voltage and temperature - you can see when the fast charger kicks in and when it falls back to trickle charge mode.  TODO:
+<p>Updated 10/16/03: Battery charger and predator prey examples complete, code is <a href="http://rubyforge.org/cgi-bin/viewcvs/cgi/viewcvs.cgi/ai-app-prog/src/ch9/?cvsroot=ai-app-prog">here</a>.  
 <ul>
-<li>Implement predator/prey example application using the membership functions listed in the book.
+<li>The predator/prey example was fun because I had to relearn some trigonometry.  Also, I had to tweak the membership functions a bit - the first time through I made the center spike profile too wide and so the predator kept waiting too long to turn towards the prey.
+<li>To run the programs and generate the graphs, move to the <code>src/ch9</code> directory and do a <code>./fuzzy.rb > predator_data.txt && ./predator_gnuplot</code> to regenerate the predator graph, or a <code>./fuzzy.rb -battery > battery_data.txt && ./battery_gnuplot</code> to regenerate the battery graph.
 </ul>
+<p>Battery charger example: below is a graph (thanks gnuplot!) showing the relationships between the battery's voltage and temperature - you can see when the fast charger kicks in and when it falls back to trickle charge mode. 
 <p><img src="ch9/battery.png"/>
+<p>Predator/prey example: below is an image of the predator seeing the prey and turning towards it.
+<p><img src="ch9/predator.png"/>
 
 </body>
 </html>
