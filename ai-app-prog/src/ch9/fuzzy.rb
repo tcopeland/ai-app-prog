@@ -252,6 +252,8 @@ if __FILE__ == $0
 		s.simulate
 		b.charge_control(s)
 		s.bump_timer
-		puts "#{count},#{s.voltage},#{s.temperature}"
+		if count % 25 == 0
+			puts "#{count},#{s.voltage},#{s.temperature}"
+		end
 	}	
 end
