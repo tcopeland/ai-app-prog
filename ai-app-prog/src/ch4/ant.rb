@@ -70,8 +70,8 @@ class Ants
 			if @ants[k].path_index < Simulation::MAX_CITIES
 				@ants[k].next_city=select_next_city(@ants[k], pheromone, distances)
 				@ants[k].tabu[@ants[k].next_city] = 1
-				@ants[k].path_index += 1
 				@ants[k].path[@ants[k].path_index] = @ants[k].next_city
+				@ants[k].path_index += 1
 				@ants[k].tour_length += distances.get(@ants[k].current_city, @ants[k].next_city)
 				if @ants[k].path_index == Simulation::MAX_CITIES
 					@ants[k].tour_length += distances.get(@ants[k].path[Simulation::MAX_CITIES-1], @ants[k].path[0])
