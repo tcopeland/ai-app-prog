@@ -3,6 +3,20 @@
 require 'test/unit'
 require 'fuzzy.rb'
 
+class TimerTest < Test::Unit::TestCase
+	def test_bump
+		t = Timer.new
+		t.bump
+		assert(t.elapsed == 1, "Timer.bump didn't increase elapsed time")
+	end
+	def test_reset
+		t = Timer.new
+		t.bump
+		t.reset
+		assert(t.elapsed == 0, "Timer.reset didn't zero elapsed time")
+	end
+end
+
 class BatteryMembershipTest < Test::Unit::TestCase
 	def test_low
 		b = BatteryMembership.new	
