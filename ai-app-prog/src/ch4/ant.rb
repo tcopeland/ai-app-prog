@@ -84,9 +84,9 @@ class Ants
 	end
 	def select_next_city(ant, pheromone, distance)
 		denom = 0.0
-		@ants.each_index {|x|
-			if ant.tabu[x] == 0
-				denom += ant_product(ant, x, pheromone, distance)
+		@ants.each_index {|target_city|
+			if ant.tabu[target_city] == 0
+				denom += ant_product(ant, target_city, pheromone, distance)
 			end
 		}
 		city=0
@@ -98,8 +98,8 @@ class Ants
 		end until !true
 		return city % Simulation::MAX_CITIES
 	end
-	def ant_product(ant,y, pheromone, distance)
-		(pheromone[ant.current_city][y]**Simulation::ALPHA) * ((1.0/distance[ant.current_city][y])**Simulation::BETA)
+	def ant_product(ant, target_city, pheromone, distance)
+		(pheromone[ant.current_city][target_city]**Simulation::ALPHA) * ((1.0/distance[ant.current_city][target_city])**Simulation::BETA)
 	end
 	def get(index)
 		@ants[index]
