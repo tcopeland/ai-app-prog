@@ -108,7 +108,7 @@ class Adaptive
 					first = false
 				else
 					0.upto(MAX_ITEMS-1) {|item|
-						@prototype_vector[cluster][item] = @prototype_vector[cluster][item] & DATABASE[customer][item]
+						@prototype_vector[cluster][item] = @prototype_vector[cluster][item] == 1 && DATABASE[customer][item] == 1
 						@sum_vector[cluster][item] += DATABASE[customer][item]
 					}
 				end
@@ -121,7 +121,7 @@ class Adaptive
 		res
 	end
 	def vector_bitwise_and(res, v, w)
-		0.upto(MAX_ITEMS-1) {|i| res[i] = v[i] & w[i] }
+		0.upto(MAX_ITEMS-1) {|i| res[i] = v[i]==1 && w[i]==1 }
 	end
 end
 
