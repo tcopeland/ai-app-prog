@@ -265,29 +265,52 @@ class PredatorMembershipFunctions
 end
 
 class Position
+	attr_accessor :x, :y
 	def initialize(x,y)
 		@x = x
 		@y = y
 	end
+	def translate(x,y)
+		@x += x
+		@y += y
+	end
+	def to_s	
+		"#{@x.to_i},#{@y.to_i}"
+	end
 end
 
-class Predator
+class MovingObject
+	attr_accessor :pos
 	def initialize(pos, heading)
 		@pos = pos
 		@heading = heading
 	end
+	def move
+		@pos.translate(@heading.x, @heading.y)
+	end
+	def to_s	
+		"#{@pos}:#{@heading}"
+	end
 end
 
-class Prey
-	def initialize(pos, heading)
-		@pos = pos
-		@heading = heading
-	end
+class Predator < MovingObject
+end
+
+class Prey < MovingObject
 end
 
 class Heading
-	def initialize(angle)
-		@angle = angle
+	def initialize(initialAngle)
+		@angle = initialAngle
+	end
+	def x
+		return Math.sin(@angle*(Math::PI/180))
+	end
+	def y
+		return Math.cos(@angle*(Math::PI/180))
+	end
+	def to_s	
+		"#{@angle}"
 	end
 end
 
@@ -305,11 +328,12 @@ if __FILE__ == $0
 			end
 		}
 	else
-		prey = Prey.new(Position.new(10,10), Heading.new(45))
-		predator = Predator.new(Position.new(80,80), Heading.new(90))
-		100.times {|time|
-			
-			puts time
+		prey = Prey.new(Position.new(10.0,10.0), Heading.new(45))
+		predator = Predator.new(Position.new(80.0,80.0), Heading.new(90))
+		100.times {
+			prey.move
+			predator.move
+			puts "#{prey.pos.x.to_i} #{prey.pos.y.to_i} #{predator.pos.x.to_i} #{predator.pos.y.to_i}"
 		}		
 	end	
 end
