@@ -12,7 +12,7 @@ class Member
 	end
 
 	def copy_to(dest)
-		0..upto(MAX_LENGTH-1) {|x|
+		0.upto(Emsa::MAX_LENGTH-1) {|x|
 			dest.solution[x] = @solution[x]
 		}
 		dest.energy = @energy
@@ -44,11 +44,11 @@ class Member
 	end
 	def compute_energy
 		board = create_new_board
-		0.upto(MAX_LENGTH-1) {|x|
-			board[i][@solution[i]] = 'Q';
+		0.upto(Emsa::MAX_LENGTH-1) {|x|
+			board[x][@solution[x]] = 'Q';
 		}
 		conflicts = 0
-		0.upto(MAX_LENGTH-1) {|i|
+		0.upto(Emsa::MAX_LENGTH-1) {|i|
 			x = i
 			y = solution[i]
 			0.upto(3) {|j|
@@ -57,7 +57,7 @@ class Member
 				while true	
 					tempx += DX[j]
 					tempy += DY[j]
-					if tempx<0 || tempx >= MAX_LENGTH || tempy<0 || tempy>=MAX_LENGTH 
+					if tempx<0 || tempx >= Emsa::MAX_LENGTH || tempy<0 || tempy>=Emsa::MAX_LENGTH 
 						break
 					end
 					if board[tempx][tempy] == 'Q'
