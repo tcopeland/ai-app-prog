@@ -11,7 +11,7 @@ class Member
 		0.upto(Emsa::MAX_LENGTH-1) {|x| tweak}
 	end
 
-	def copy_to(dest)
+	def copy_into(dest)
 		0.upto(Emsa::MAX_LENGTH-1) {|x|
 			dest.solution[x] = @solution[x]
 		}
@@ -87,7 +87,7 @@ class Emsa
 	STEPS_PER_CHANGE=100
 
 	def initialize
-		timer=solution=use_new=accepted=0
+		timer=solution=use_new=0
 		temperature=INITIAL_TEMPERATURE
 	
 		current=Member.new
@@ -98,7 +98,7 @@ class Emsa
 			current.compute_energy
 			best.energy = 100.0	
 			
-			current.copy_to(working)
+			current.copy_into(working)
 		
 			while temperature > FINAL_TEMPERATURE
 				puts "Temperature: #{temperature}"
@@ -111,8 +111,7 @@ class Emsa
 					if working.energy <= current.energy
 						use_new = 1
 					else
-						delta = working.energy - current.energy
-						calc = Math.exp(-delta/temperature)
+						calc = Math.exp(-(working.energy - current.energy)/temperature)
 						if calc > rand()
 							accepted += 1
 							use_new = 1
@@ -122,12 +121,12 @@ class Emsa
 
 				if use_new == 1
 					use_new = 0
-					working.copy_to(current)
+					working.copy_into(current)
 					if current.energy < best.energy
-						current.copy_to(best)
+						current.copy_into(best)
 						solution = 1
 					else
-						current.copy_to(working)
+						current.copy_into(working)
 					end
 				end
 			end		
@@ -143,8 +142,6 @@ class Emsa
 		end
 	end
 end
-
-
 
 if __FILE__ == $0
 	Emsa.new
