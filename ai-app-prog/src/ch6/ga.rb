@@ -32,6 +32,10 @@ class Genetic
 	MAX_PROGRAM=6
 	MAX_GENERATIONS=10000
 	MAX_CHROMS=3000
+	MUTATION_PROB = 0.02
+	CROSSOVER_PROB = 0.8
+	XPROB = 1.0 - CROSSOVER_PROB
+	MPROB = 1.0 - MUTATION_PROB
 	def initialize
 		@current_population=0
 		@current_crossovers=0
@@ -54,7 +58,42 @@ class Genetic
 	def perform_selection
 		0.step(MAX_CHROMS-1, 2) {|chrom|
 			par1 = select_parent
+			par2 = select_parent
+			child1 = chrom
+			child2 = chrom+1
+			perform_reproduction(par1, par2, child1, child2)
 		}
+	end
+	def perform_reproduction(para, parb, childa, childb)
+		next_pop = @current_population == 0 ? 1 : 0
+		cross_point = 0
+		if rand > XPROB
+			if @populations[@current_population][para].prog_size - 2 > @populations[@current_population][parb].prog_size
+				cross_point = rand(@populations[@current_population][para].prog_size - 2) + 1
+			else	
+				cross_point = rand(@populations[@current_population][parb].prog_size - 2) + 1
+			end
+			@current_crossovers += 1
+		else		
+			cross_point = MAX_PROGRAM
+		end
+		(CROSSPOINT-1).times {|i|
+			@populations[next_pop][childa].program[i] = mutate(@populations[next_pop][childa].program[i])
+			@populations[next_pop][childb].program[i] = mutate(@populations[next_pop][childb].program[i])
+		}
+		CROSSPOINT.upto(MAX_PROGRAM-1) {|i|
+			@populations[next_pop][childa].program[i] = mutate(@populations[@current_population][parb].program[i])
+			@populations[next_pop][childb].program[i] = mutate(@populations[@current_population][para].program[i])
+		}
+		@populations[next_pop][childa].prog_size = @populations[@current_population][para].prog_size
+		@populations[next_pop][childb].prog_size = @populations[@current_population][parb].prog_size
+	end
+	def mutate(gene)
+		if rand > MPROB
+			gene = rand(MAX_INSTRUCTIONS)
+			@current_mutations += 1
+		end
+		gene
 	end
 	def select_parent
 		chrom = 0
@@ -71,7 +110,8 @@ class Genetic
 					break
 			end
 			chrom += 1
-		end	
+		end
+		return ret	
 	end
 	def perform_fitness_check(file)
 		@max_fitness = 0
