@@ -162,6 +162,18 @@ class PlateauProfile
 	end
 end
 
+class PredatorMembershipFunctions
+	def initialize
+		@xleft = PlateauProfile.new(-180, -179, -70,-60)
+		@farleft = PlateauProfile.new(-80, -70, -20,-10)
+		@left = PlateauProfile.new(-15, -12, -8,-5)
+		@center = SpikeProfile.new(-7, 7)
+		@right = PlateauProfile.new(5, 8, 12, 15)
+		@farright = PlateauProfile.new(10, 20, 70, 80)
+		@xright = PlateauProfile.new(60, 70, 179, 180)
+	end
+end
+
 class TemperatureMembershipFunctions	
 	def initialize
 		@cold = PlateauProfile.new(15.0, 15.0, 15.0, 25.0)
@@ -266,15 +278,19 @@ class FuzzyOperations
 end
 
 if __FILE__ == $0
-	b = Battery.new
-	s = Simulation.new(b)	
-	t = Timer.new
-	3000.times {|count|
-		s.simulate(t)
-		b.charge_control(s, t)
-		t.bump
-		if count % 25 == 0
-			puts "#{count} #{s.voltage.current} #{s.temperature.current}"
-		end
-	}	
+	if ARGV[0] != nil and ARGV[0] == "pp"
+	 # run predator/prey thing
+	else
+		b = Battery.new
+		s = Simulation.new(b)	
+		t = Timer.new
+		3000.times {|count|
+			s.simulate(t)
+			b.charge_control(s, t)
+			t.bump
+			if count % 25 == 0
+				puts "#{count} #{s.voltage.current} #{s.temperature.current}"
+			end
+		}
+	end	
 end
