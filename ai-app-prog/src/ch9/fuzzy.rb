@@ -12,6 +12,19 @@ class FastCharge
 	end 
 end
 
+class Timer
+	attr_accessor :elapsed
+	def initialize
+		@elapsed = 0
+	end
+	def reset
+		@elapsed = 0
+	end
+	def bump
+		@elapsed += 1
+	end
+end
+
 class Simulation
 	attr_accessor :temperature, :voltage
 
@@ -19,18 +32,9 @@ class Simulation
 		@battery = battery
 		@voltage = 20.0
 		@temperature = 12.0
-		@timer = 0.0
 		@load = [0.02, 0.04, 0.06, 0.08, 0.1]
 		@current_load = 0.02
 		@t=0.0
-	end
-
-	def reset_timer
-		@timer = 0
-	end
-
-	def bump_timer
-		@timer += 1
 	end
 
 	def charge
@@ -46,26 +50,26 @@ class Simulation
 		end
 	end
 	
-	def simulate	
+	def simulate(timer)	
 		if rand < 0.02
 			@current_load = rand(@load.size)
 		end
 		@voltage -= @load[@current_load]
-		@voltage += (charge * Math.sqrt(@timer))/@battery.mode.load
+		@voltage += (charge * Math.sqrt(timer.elapsed))/@battery.mode.load
 		center_voltage
 		if @battery.mode.kind_of? FastCharge
 			if @voltage > 25
-				@temperature += (@load[@current_load] * (Math.sqrt(@timer)/25.0)) * 10.0
+				@temperature += (@load[@current_load] * (Math.sqrt(timer.elapsed)/25.0)) * 10.0
 			elsif @voltage > 15
-				@temperature += (@load[@current_load] * (Math.sqrt(@timer)/20.0)) * 10.0
+				@temperature += (@load[@current_load] * (Math.sqrt(timer.elapsed)/20.0)) * 10.0
 			else	
-				@temperature += (@load[@current_load] * (Math.sqrt(@timer)/15.0)) * 10.0
+				@temperature += (@load[@current_load] * (Math.sqrt(timer.elapsed)/15.0)) * 10.0
 			end
 		else 
 			if @temperature > 20.0
-				@temperature -= (@load[@current_load] * (Math.sqrt(@timer)/20.0)) * 10.0
+				@temperature -= (@load[@current_load] * (Math.sqrt(timer.elapsed)/20.0)) * 10.0
 			else
-				@temperature -= (@load[@current_load] * (Math.sqrt(@timer)/100.0)) * 10.0
+				@temperature -= (@load[@current_load] * (Math.sqrt(timer.elapsed)/100.0)) * 10.0
 			end
 		end
 		if @temperature < 0.0	
@@ -86,18 +90,18 @@ class Battery
 		@bm = BatteryMembership.new
 		@ops = FuzzyOperations.new
 	end
-	def charge_control(simulation)
+	def charge_control(simulation, timer)
 		@count += 1
 		if (@count % 10) == 0
 			if normalize(@bm.voltage_high(simulation.voltage)) >0
 				@mode = TrickleCharge.new
-				simulation.reset_timer
+				timer.reset
 			elsif normalize(@tm.temp_hot(simulation.temperature)) > 0
 				@mode = TrickleCharge.new
-				simulation.reset_timer
+				timer.reset
 			elsif normalize(@ops.and(@ops.not(@bm.voltage_high(simulation.voltage)), @ops.not(@tm.temp_hot(simulation.temperature)))) > 0
 				@mode = FastCharge.new
-				simulation.reset_timer
+				timer.reset
 			end
 		end
 	end
@@ -252,11 +256,12 @@ end
 
 if __FILE__ == $0
 	b = Battery.new
-	s = Simulation.new(b)
+	s = Simulation.new(b)	
+	t = Timer.new
 	3000.times {|count|
-		s.simulate
-		b.charge_control(s)
-		s.bump_timer
+		s.simulate(t)
+		b.charge_control(s, t)
+		t.bump
 		if count % 25 == 0
 			puts "#{count},#{s.voltage},#{s.temperature}"
 		end
