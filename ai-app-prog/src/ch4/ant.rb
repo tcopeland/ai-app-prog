@@ -125,7 +125,7 @@ class Simulation
 		(0..(MAX_ANTS-1)).each {|k|
 			if @ants[k].path_index < MAX_CITIES
 				@ants[k].next_city=select_next_city(k)
-				@ants[k].tabu[@ants[k].next_city] = 1a
+				@ants[k].tabu[@ants[k].next_city] = 1
 				@ants[k].path_index += 1
 				@ants[k].path[@ants[k].path_index] = @ants[k].next_city
 				@ants[k].tour_length += distance[@ants[k].current_city][@ants[k].next_city]
@@ -211,16 +211,15 @@ class Simulation
 					restart_ants
 				end
 				puts "Time is #{current_time} #{best}"
+			end
 		end	
 		puts "Best tour = #{best}\n\n"
 		emit_data_file(best)
 	end
 end
 
-
-
 if __FILE__ == $0
-	puts Common::MAX_CITIES
-	s = Simulator.new
+	puts Simulation::MAX_CITIES
+	s = Simulation.new
 	s.main
 end
