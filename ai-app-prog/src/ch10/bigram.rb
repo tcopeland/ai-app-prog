@@ -84,6 +84,12 @@ class Bigram
 		}
 		if @debug
 			puts "#{@word_vector.size} unique words in the corpus"
+			a = @occurrences.sort {|a,b| 
+				b[1] <=> a[1]
+			}
+			a.each {|x|
+				puts "#{x[0]} occurred #{x[1]} times"
+			}
 		end
 	end
 
