@@ -298,6 +298,10 @@ class Predator < MovingObject
 		super(pos, heading)
 		@prey = prey
 	end
+	def move
+		super
+		@heading.translate(1)
+	end
 end
 
 class Heading
@@ -309,6 +313,14 @@ class Heading
 	end
 	def y
 		return Math.cos(@angle*(Math::PI/180))
+	end
+	def translate(angle)
+		@angle += angle
+		if @angle > 360
+			@angle =- 360
+		elsif @angle < 0
+			@angle += 360
+		end
 	end
 	def to_s	
 		"#{@angle}"
