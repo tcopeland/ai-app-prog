@@ -1,7 +1,7 @@
 #!/usr/local/bin/ruby
 
 class Population
-	attr_accessor :fitness, :prog_size, :program
+	attr_reader :fitness, :prog_size, :program
 	def initialize
 		reset_fitness
 		@prog_size = Genetic::MAX_PROGRAM-1
@@ -9,6 +9,9 @@ class Population
 	end
 	def reset_fitness
 		@fitness = 0.0
+	end
+	def to_s
+		"@fitness = #{@fitness}"
 	end
 end
 
@@ -120,14 +123,8 @@ class Genetic
 	def run
 		generation = 0
 		init_population
-
-		# added this hack to init both parts of the array
-		@current_population = 1
-		init_population
-		@current_population = 0
-		# added this hack to init both parts of the array
-
 		perform_fitness_check
+
 		while generation < MAX_GENERATIONS
 			@current_crossovers = @current_mutations = 0
 			perform_selection
@@ -172,8 +169,8 @@ class Genetic
 		}
 	end
 	def perform_selection
-		0.step(MAX_CHROMS-1, 2) {|chrom|
-			perform_reproduction(select_parent, select_parent, chrom, chrom+1)
+		0.step(MAX_CHROMS-1, 2) {|x|
+			perform_reproduction(select_parent, select_parent, x, x+1)
 		}
 	end
 	def perform_reproduction(para, parb, childa, childb)
@@ -189,56 +186,39 @@ class Genetic
 		else		
 			cross_point = MAX_PROGRAM
 		end
+		@populations[next_pop] = [] if @populations[next_pop] == nil
+		@populations[next_pop][childa] = Population.new if @populations[next_pop][childa] == nil
+		@populations[next_pop][childb] = Population.new if @populations[next_pop][childb] == nil
 		cross_point.times {|i|
-			@populations[next_pop][childa].program[i] = mutate(@populations[next_pop][childa].program[i])
-			@populations[next_pop][childb].program[i] = mutate(@populations[next_pop][childb].program[i])
+			@populations[next_pop][childa].program[i] = mutate(@populations[@current_population][childa].program[i])
+			@populations[next_pop][childb].program[i] = mutate(@populations[@current_population][childb].program[i])
 		}
 		cross_point.upto(MAX_PROGRAM-1) {|i|
 			@populations[next_pop][childa].program[i] = mutate(@populations[@current_population][parb].program[i])
 			@populations[next_pop][childb].program[i] = mutate(@populations[@current_population][para].program[i])
 		}
-		@populations[next_pop][childa].prog_size = @populations[@current_population][para].prog_size
-		@populations[next_pop][childb].prog_size = @populations[@current_population][parb].prog_size
 	end
 	def mutate(gene)
 		if rand > MPROB
 			gene = rand(Instructions::MAX_INSTRUCTIONS)
 			@current_mutations += 1
 		end
-		gene
+		return gene
 	end
-
-#int selectParent( void )
-#{
-#  static int chrom = 0;
-#  int ret = -1;
-#  float retFitness = 0.0;
-#  float fitMarker = ((getSRand() * totFitness) * 0.25);
-#  do {
-#    retFitness += populations[curPop][chrom].fitness;
-#    if (retFitness >= fitMarker) {
-#      ret = chrom;
-#    }
-#    if (++chrom == MAX_CHROMS) chrom = 0;
-#  } while (ret == -1);
-#  return ret;
 
 	def select_parent
 		@@class_chrom = 0
 		ret_fitness = 0.0	
 		fit_marker = rand * @total_fitness * 0.25
-		counter = 0
-		loop do
-			counter += 1
+		loop do	
 			ret_fitness += @populations[@current_population][@@class_chrom].fitness
-			if ret_fitness >= fit_marker
-				@@class_chrom += 1	
-				return @@class_chrom - 1
-			end
-			@@class_chrom = 0 if (@@class_chrom + 1) == MAX_CHROMS
 			@@class_chrom += 1	
+			break if ret_fitness >= fit_marker
+			@@class_chrom = 0 if @@class_chrom == MAX_CHROMS
 		end
+		return @@class_chrom - 1
 	end
+
 	def perform_fitness_check
 		@max_fitness = 0.0
 		@avg_fitness = 0.0
