@@ -88,7 +88,41 @@ class Simulation
       @ants[x] = Ant.new(city_index)
 		}
 	end
+	
+	def ant_product(x,y)
+		(@pheromone[x][y]**ALPHA) * ((1.0/@distance[x][y])**BETA)
+	end
 
+	def select_next_city(ant)
+		denom = 0.0
+		(0..(MAX_CITIES-1)).each {|x|
+			if @ants[ant].tabu[x] == 0
+				denom += ant_product(@ants[ant].current_city, x)
+			end
+		}
+		if denom == 0.0
+			puts "Denom should not be 0.0!"
+			exit
+		end
+		to=0
+		begin
+			p=0.0
+			to += 1
+			if to >= MAX_CITIES
+				to = 0
+			end
+			if @ants[ant].tabu[to] == 0
+				p = ant_product(@ants[ant].current_city, to)/denom
+				if rand() < p
+					break
+				end
+			end
+		end until !true	
+	end
+
+	def simulate_ants
+	end
+	
 	def abs(x)
 		if x<0
 			return -x
