@@ -112,11 +112,19 @@ class StackMachine
 end
 
 class Generation
-	attr_reader :id
+	attr_reader :id, :crossovers, :mutations
 	@@classid = 0 
 	def initialize
 		@id = @@classid
+		@crossovers = 0
+		@mutations = 0
 		@@classid += 1
+	end
+	def new_crossover
+		@crossovers += 1
+	end
+	def new_mutation
+		@mutations += 1
 	end
 end
 
@@ -130,26 +138,23 @@ class Genetic
 	MPROB = 1.0 - MUTATION_PROB
 	def initialize
 		@current_population=0
-		@current_crossovers=0
-		@current_mutations=0
 		@populations = []
 	end
 	def run
-		g = Generation.new
+		g = nil
 		init_population
-		perform_fitness_check
-
+		calculate_fitness
 		while g.id < MAX_GENERATIONS
-			@current_crossovers = @current_mutations = 0
-			perform_selection
+			g = Generation.new
+			perform_selection(g)
 			@current_population = @current_population == 0 ? 1 : 0
-			perform_fitness_check
+			calculate_fitness
 			puts "Generation #{g.id}"
 			printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
 			printf("\tAverage fitness = %f\n", @average_fitness)
 			printf("\tMinimum fitness = %f\n", @min_fitness)
-			printf("\tCrossovers = %d\n", @current_crossovers)
-			printf("\tMutation = %d\n", @current_mutations)
+			printf("\tCrossovers = %d\n", g.crossovers)
+			printf("\tMutations = %d\n", g.mutations)
 			printf("\tPercentage = %f\n", @average_fitness.to_f/@max_fitness.to_f)
 			if g.id > (MAX_GENERATIONS * 0.25) && (@average_fitness / @max_fitness) > 0.98
 				puts "Converged"
@@ -159,14 +164,13 @@ class Genetic
 				puts "Found solution"
 				break
 			end
-			g = Generation.new
 		end
 		puts "Generation #{g.id}"
 		printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
 		printf("\tAverage fitness = %f\n", @average_fitness)
 		printf("\tMinimum fitness = %f\n", @min_fitness)
-		printf("\tCrossovers = %d\n", @current_crossovers)
-		printf("\tMutation = %d\n", @current_mutations)
+		printf("\tCrossovers = %d\n", g.crossovers)
+		printf("\tMutations = %d\n", g.mutations)
 		printf("\tPercentage = %f\n", @average_fitness.to_f/@max_fitness.to_f)
 		MAX_CHROMS.times {|i|
 			if @populations[@current_population][i].fitness == @max_fitness
@@ -181,40 +185,38 @@ class Genetic
 		}
 	end
 
-	def perform_selection
+	def perform_selection(g)
 		0.step(MAX_CHROMS-1, 2) {|c|
-			perform_reproduction(select_parent, select_parent, c, c+1)
+			perform_reproduction(g, select_parent, select_parent, c, c+1)
 		}
 	end
 
-	def perform_reproduction(para, parb, childa, childb)
-		cross_point = 0
+	def perform_reproduction(g, para, parb, childa, childb)
+		cross_point = MAX_PROGRAM
 		if rand > XPROB
 			cross_point = rand(@populations[@current_population][parb].prog_size - 2) + 1
-			@current_crossovers += 1
-		else		
-			cross_point = MAX_PROGRAM
+			g.new_crossover
 		end
 		next_pop = @current_population == 0 ? 1 : 0
 		@populations[next_pop] = [] if @populations[next_pop] == nil
 		@populations[next_pop][childa] = Population.new if @populations[next_pop][childa] == nil
 		@populations[next_pop][childb] = Population.new if @populations[next_pop][childb] == nil
 		cross_point.times {|i|
-			@populations[next_pop][childa].program[i] = mutate(@populations[@current_population][childa].program[i])
-			@populations[next_pop][childb].program[i] = mutate(@populations[@current_population][childb].program[i])
+			@populations[next_pop][childa].program[i] = mutate(g, @populations[@current_population][childa].program[i])
+			@populations[next_pop][childb].program[i] = mutate(g, @populations[@current_population][childb].program[i])
 		}
 		cross_point.upto(MAX_PROGRAM-1) {|i|
-			@populations[next_pop][childa].program[i] = mutate(@populations[@current_population][parb].program[i])
-			@populations[next_pop][childb].program[i] = mutate(@populations[@current_population][para].program[i])
+			@populations[next_pop][childa].program[i] = mutate(g, @populations[@current_population][parb].program[i])
+			@populations[next_pop][childb].program[i] = mutate(g, @populations[@current_population][para].program[i])
 		}		
 	end
 
-	def mutate(gene)
+	def mutate(g, gene)
 		if rand > MPROB
 			gene = rand(Instructions::MAX_INSTRUCTIONS)
-			@current_mutations += 1
+			g.new_mutation
 		end
-		return gene
+		gene
 	end
 
 	def select_parent
@@ -227,12 +229,11 @@ class Genetic
 			break if ret_fitness >= fit_marker
 			chrom = 0 if chrom == MAX_CHROMS
 		end
-		return chrom - 1
+		chrom - 1
 	end
 
-	def perform_fitness_check
+	def calculate_fitness
 		@max_fitness = 0.0
-		@average_fitness = 0.0
 		@min_fitness = 1000.0
 		@total_fitness = 0.0
 		MAX_CHROMS.times {|chrom|
