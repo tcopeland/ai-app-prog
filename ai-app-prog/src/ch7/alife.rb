@@ -18,6 +18,10 @@ class Agent
 	TYPE_HERBIVORE=0
 	TYPE_CARNIVORE=1
 	MAX_ENERGY=60
+	NORTH=0
+	SOUTH=1
+	EAST=2
+	WEST=3
 	attr_reader :type, :energy, :parent, :age, :generation, :location, :direction, :inputs, :weight_oi, :biaso, :actions
 	def initialize(type)
 		@type = type
@@ -33,7 +37,28 @@ class Agent
 		@location = loc
 	end
 	def simulate
-		# TODO
+		x = y = out = in = largest = winner = 0
+		if @direction == NORTH
+			percept(@location, @inputs[ArtificialLife::HERB_FRONT], ArtificialLife::NORTH_FRONT, 1)
+			percept(@location, @inputs[ArtificialLife::HERB_LEFT], ArtificialLife::NORTH_LEFT, 1)
+			percept(@location, @inputs[ArtificialLife::HERB_RIGHT], ArtificialLife::NORTH_RIGHT, 1)
+			percept(@location, @inputs[ArtificialLife::HERB_PROXIMITY], ArtificialLife::NORTH_PROX, 1)
+		elsif @direction == SOUTH
+			percept(@location, @inputs[ArtificialLife::HERB_FRONT], ArtificialLife::NORTH_FRONT, -1)
+			percept(@location, @inputs[ArtificialLife::HERB_LEFT], ArtificialLife::NORTH_LEFT, -1)
+			percept(@location, @inputs[ArtificialLife::HERB_RIGHT], ArtificialLife::NORTH_RIGHT, -1)
+			percept(@location, @inputs[ArtificialLife::HERB_PROXIMITY], ArtificialLife::NORTH_PROX, -1)
+		elsif @direction == WEST
+			percept(@location, @inputs[ArtificialLife::HERB_FRONT], ArtificialLife::WEST_FRONT, 1)
+			percept(@location, @inputs[ArtificialLife::HERB_LEFT], ArtificialLife::WEST_LEFT, 1)
+			percept(@location, @inputs[ArtificialLife::HERB_RIGHT], ArtificialLife::WEST_RIGHT, 1)
+			percept(@location, @inputs[ArtificialLife::HERB_PROXIMITY], ArtificialLife::WEST_PROX, 1)
+		elsif @direction == EAST
+			percept(@location, @inputs[ArtificialLife::HERB_FRONT], ArtificialLife::WEST_FRONT, -1)
+			percept(@location, @inputs[ArtificialLife::HERB_LEFT], ArtificialLife::WEST_LEFT, -1)
+			percept(@location, @inputs[ArtificialLife::HERB_RIGHT], ArtificialLife::WEST_RIGHT, -1)
+			percept(@location, @inputs[ArtificialLife::HERB_PROXIMITY], ArtificialLife::WEST_PROX, -1)
+		end
 	end
 	def herbivore
 		@type == TYPE_HERBIVORE
@@ -101,10 +126,6 @@ class ArtificialLife
 	HERB_PLANE=0
 	CARN_PLANE=1
 	PLANT_PLANE=2
-	NORTH=0
-	SOUTH=1
-	EAST=2
-	WEST=3
 	MAX_DIRECTION=4
 
 	# these may turn into instance variables
