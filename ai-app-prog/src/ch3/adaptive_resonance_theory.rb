@@ -118,7 +118,7 @@ class Adaptive
 	end
 	def create_new_prototype_vector(example)
 		cluster = 0 
-		0.upto(TOTAL_PROTOTYPE_VECTORS-1) {|x|
+		@members.each_index {|x|
 			if @members[x] == 0
 				cluster = x
 				break
