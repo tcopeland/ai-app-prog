@@ -38,3 +38,15 @@ class RulesetParserTest < Test::Unit::TestCase
 	end
 end
 
+class RuleParserTest < Test::Unit::TestCase
+	def test_simple
+		p = RuleParser.new
+		c = Ctx.new
+		c.rules << Rule.new("test")
+		p.handle(c, Tokenizer.new.tokenize("has-hair ?)=>(add(is-hairy ?)"))
+		assert(c.rules[0].antecedents.size == 1, "This rule should have 1 antecedent but has #{c.rules[0].antecedents.size}")
+		assert(c.rules[0].antecedents[0].name == "has-hair", "Wrong name for antecedent: #{c.rules[0].antecedents[0].name}")
+		assert(c.rules[0].antecedents[0].result == "?", "Wrong result for antecedent: #{c.rules[0].antecedents[0].result}")
+	end
+end
+

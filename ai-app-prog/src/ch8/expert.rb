@@ -1,13 +1,21 @@
 #!/usr/local/bin/ruby
 
 class Rule
-	attr_reader :name
+	attr_reader :name, :antecedents
 	def initialize(name)
 		@name = name
+		@antecedents = []
 	end
 end
 
 class Fact
+	attr_reader :name, :result
+	def initialize(name, result)
+		@name, @result = name, result
+	end
+	def to_s
+		"Fact (#{@name}, #{@result})"
+	end
 end
 
 class FactParser
@@ -23,6 +31,9 @@ class Token
 	end
 	def defrule?
 		false
+	end
+	def to_s
+		@txt
 	end
 end
 
@@ -83,13 +94,14 @@ class RulesetParser
 		# bail out now if no rules
 		return if !toks[ctx.ptr].delim?
 
-		ctx.bump(2) # skip delim and defrule
+		ctx.bump(2) # skip delim and "defrule"
 		ctx.rules << Rule.new(toks[ctx.ptr].txt)
 	
 		ctx.bump	
-		while (ctx.ptr <= toks.size - 1) && toks[ctx.ptr].open?
+		while (ctx.ptr <= toks.size - 2) && toks[ctx.ptr].open?
 			ctx.bump # skip delim 
 			ctx.push(RuleParser.new)
+			ctx.peek.handle(ctx, toks)
 			ctx.pop
 		end
 		
@@ -98,6 +110,11 @@ class RulesetParser
 end
 
 class RuleParser
+		def handle(ctx, toks)
+			# has-hair ?
+			ctx.rules.last.antecedents << Fact.new(toks[ctx.ptr].txt, toks[ctx.ptr + 1].txt)
+			ctx.bump
+		end
 end
 
 class FactParser
