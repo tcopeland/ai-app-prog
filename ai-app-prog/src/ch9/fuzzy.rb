@@ -129,32 +129,34 @@ class PlateauProfile
 		@high = high
 	end
 	def compute(value)
-		tmplp = @low_plateau
-		tmphp = @high_plateau
-		tmph = @high
-		value += -@low
+		tmp_low_plateau = @low_plateau
+		tmp_high_plateau = @high_plateau
+		tmp_high = @high
+		tmp_low = @low
+
+		value += -tmp_low
 		if @low < 0.0
-			tmplp += -@low
-			tmphp += -@low
-			tmph += -@low
+			tmp_low_plateau += -tmp_low
+			tmp_high_plateau += -tmp_low
+			tmp_high += -tmp_low
 		else
-			tmplp -= @low
-			tmphp -= @low
-			tmph -= @low
+			tmp_low_plateau -= tmp_low
+			tmp_high_plateau -= tmp_low
+			tmp_high -= tmp_low
 		end
-		tmpl = 0
-		upslope = (1.0/(tmplp - tmpl))
-		downslope = (1.0/(tmph - tmphp))
-		if value< tmpl
+		tmp_low = 0
+		upslope = (1.0/(tmp_low_plateau - tmp_low))
+		downslope = (1.0/(tmp_high - tmp_high_plateau))
+		if value< tmp_low
 			return 0.0
-		elsif value> tmph
+		elsif value> tmp_high
 			return 0.0
-		elsif value>= tmplp and value<=tmphp
+		elsif value>= tmp_low_plateau and value<=tmp_high_plateau
 			return 1.0
-		elsif value< tmplp 
-			return (value-tmpl) * upslope
-		elseif value> tmphp
-			return (tmph-value)*downslope
+		elsif value< tmp_low_plateau 
+			return (value-tmp_low) * upslope
+		elseif value> tmp_high_plateau
+			return (tmp_high-value)*downslope
 		end
 		return 0.0
 	end
