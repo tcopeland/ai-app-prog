@@ -1,15 +1,114 @@
 #!/usr/local/bin/ruby
 
-class TrickleCharge
-	def load	
-		return 1.0
-	end 
+class SpikeProfile
+	def initialize(low, high)
+		@low = low	
+		@high = high
+	end
+	def compute(value)
+		temp_low = @low
+		temp_high = @high
+    value += (-temp_low)
+    if temp_low<0 and temp_high<0
+      temp_high = -(temp_high-temp_low)
+    elsif temp_low<0 and temp_high>0
+      temp_high += -temp_low
+    elsif temp_low>0 and temp_high>0
+      temp_high -= temp_low
+    end
+    peak = temp_high/2.0
+    temp_low = 0.0
+    if value<peak
+      return value/peak
+    elsif value>peak
+      return (temp_high-value)/peak
+    end
+    return 1.0
+	end
 end
 
-class FastCharge
-	def load	
-		return 10.0
-	end 
+class PlateauProfile
+	attr_accessor :low, :low_plateau, :high_plateau, :high
+	def initialize(low, low_plateau, high_plateau, high, excluder)
+		@low = low	
+		@low_plateau = low_plateau
+		@high_plateau = high_plateau
+		@high = high
+		@excluder = excluder
+	end
+	def compute(value)
+		if value < @low or value > @high
+			return @excluder.evaluate(value, low, high)
+		end
+		tmp_low_plateau = @low_plateau
+		tmp_high_plateau = @high_plateau
+		tmp_high = @high
+		tmp_low = @low
+
+		value += -tmp_low
+		if @low < 0.0
+			tmp_low_plateau += -tmp_low
+			tmp_high_plateau += -tmp_low
+			tmp_high += -tmp_low
+		else
+			tmp_low_plateau -= tmp_low
+			tmp_high_plateau -= tmp_low
+			tmp_high -= tmp_low
+		end
+		tmp_low = 0
+		upslope = (1.0/(tmp_low_plateau - tmp_low))
+		downslope = (1.0/(tmp_high - tmp_high_plateau))
+		if value< tmp_low
+			return 0.0
+		elsif value> tmp_high
+			return 0.0
+		elsif value>= tmp_low_plateau and value<=tmp_high_plateau
+			return 1.0
+		elsif value< tmp_low_plateau 
+			return (value-tmp_low) * upslope
+		elseif value> tmp_high_plateau
+			return (tmp_high-value)*downslope
+		end
+		return 0.0
+	end
+end
+
+class LowEndExcluder
+	def evaluate(value, low, high)
+		if value < low
+      return 1.0
+    end
+    return 0.0
+	end
+end
+
+class MiddleExcluder
+	def evaluate(value, low, high)
+		if value < low or value > high
+      return 0.0
+    end
+	end
+end
+
+class HighEndExcluder
+	def evaluate(value, low, high)
+		if value < low
+      return 0.0
+    end
+		return 1.0
+	end
+end
+
+class FuzzyOperations
+	def and(a, b)
+		(a>b) ? a : b	
+	end
+	def or(a, b)
+		(a<b) ? a : b	
+	end
+	def not(a)
+		1.0 - a
+	end
 end
 
 class Timer
@@ -24,6 +123,7 @@ class Timer
 		@elapsed += 1
 	end
 end
+
 
 class ConstrainedValue
 	attr_accessor :current
@@ -47,6 +147,7 @@ class ConstrainedValue
 	end
 end
 
+# Battery charger application
 class Simulation
 	attr_accessor :temperature, :voltage
 	LOAD = [0.02, 0.04, 0.06, 0.08, 0.1]
@@ -120,90 +221,6 @@ class Battery
 	end
 end
 
-class LowEndExcluder
-	def evaluate(value, low, high)
-		if value < low
-      return 1.0
-    end
-    return 0.0
-	end
-end
-
-class MiddleExcluder
-	def evaluate(value, low, high)
-		if value < low or value > high
-      return 0.0
-    end
-	end
-end
-
-class HighEndExcluder
-	def evaluate(value, low, high)
-		if value < low
-      return 0.0
-    end
-		return 1.0
-	end
-end
-
-class PlateauProfile
-	attr_accessor :low, :low_plateau, :high_plateau, :high
-	def initialize(low, low_plateau, high_plateau, high, excluder)
-		@low = low	
-		@low_plateau = low_plateau
-		@high_plateau = high_plateau
-		@high = high
-		@excluder = excluder
-	end
-	def compute(value)
-		if value < @low or value > @high
-			return @excluder.evaluate(value, low, high)
-		end
-		tmp_low_plateau = @low_plateau
-		tmp_high_plateau = @high_plateau
-		tmp_high = @high
-		tmp_low = @low
-
-		value += -tmp_low
-		if @low < 0.0
-			tmp_low_plateau += -tmp_low
-			tmp_high_plateau += -tmp_low
-			tmp_high += -tmp_low
-		else
-			tmp_low_plateau -= tmp_low
-			tmp_high_plateau -= tmp_low
-			tmp_high -= tmp_low
-		end
-		tmp_low = 0
-		upslope = (1.0/(tmp_low_plateau - tmp_low))
-		downslope = (1.0/(tmp_high - tmp_high_plateau))
-		if value< tmp_low
-			return 0.0
-		elsif value> tmp_high
-			return 0.0
-		elsif value>= tmp_low_plateau and value<=tmp_high_plateau
-			return 1.0
-		elsif value< tmp_low_plateau 
-			return (value-tmp_low) * upslope
-		elseif value> tmp_high_plateau
-			return (tmp_high-value)*downslope
-		end
-		return 0.0
-	end
-end
-
-class PredatorMembershipFunctions
-	def initialize
-		@xleft = PlateauProfile.new(-180, -179, -70,-60, LowEndExcluder.new)
-		@farleft = PlateauProfile.new(-80, -70, -20, -10, MiddleExcluder.new)
-		@left = PlateauProfile.new(-15, -12, -8, -5, MiddleExcluder.new)
-		@center = SpikeProfile.new(-7, 7)
-		@right = PlateauProfile.new(5, 8, 12, 15, MiddleExcluder.new)
-		@farright = PlateauProfile.new(10, 20, 70, 80, MiddleExcluder.new)
-		@xright = PlateauProfile.new(60, 70, 179, 180, MiddleExcluder.new)
-	end
-end
-
 class TemperatureMembershipFunctions	
 	def initialize
 		@cold = PlateauProfile.new(15.0, 15.0, 15.0, 25.0, LowEndExcluder.new)
@@ -238,44 +255,31 @@ class BatteryMembershipFunctions
 	end
 end
 
-class SpikeProfile
-	def initialize(low, high)
-		@low = low	
-		@high = high
-	end
-	def compute(value)
-		temp_low = @low
-		temp_high = @high
-    value += (-temp_low)
-    if temp_low<0 and temp_high<0
-      temp_high = -(temp_high-temp_low)
-    elsif temp_low<0 and temp_high>0
-      temp_high += -temp_low
-    elsif temp_low>0 and temp_high>0
-      temp_high -= temp_low
-    end
-    peak = temp_high/2.0
-    temp_low = 0.0
-    if value<peak
-      return value/peak
-    elsif value>peak
-      return (temp_high-value)/peak
-    end
-    return 1.0
+class TrickleCharge
+	def load	
+		return 1.0
+	end 
+end
+
+class FastCharge
+	def load	
+		return 10.0
+	end 
+end
+
+# Predator/prey application
+class PredatorMembershipFunctions
+	def initialize
+		@xleft = PlateauProfile.new(-180, -179, -70,-60, LowEndExcluder.new)
+		@farleft = PlateauProfile.new(-80, -70, -20, -10, MiddleExcluder.new)
+		@left = PlateauProfile.new(-15, -12, -8, -5, MiddleExcluder.new)
+		@center = SpikeProfile.new(-7, 7)
+		@right = PlateauProfile.new(5, 8, 12, 15, MiddleExcluder.new)
+		@farright = PlateauProfile.new(10, 20, 70, 80, MiddleExcluder.new)
+		@xright = PlateauProfile.new(60, 70, 179, 180, MiddleExcluder.new)
 	end
 end
 
-class FuzzyOperations
-	def and(a, b)
-		(a>b) ? a : b	
-	end
-	def or(a, b)
-		(a<b) ? a : b	
-	end
-	def not(a)
-		1.0 - a
-	end
-end
 
 if __FILE__ == $0
 	if ARGV[0] != nil and ARGV[0] == "pp"
