@@ -171,6 +171,21 @@ class Simulation
 			}
 		}
 	end
+
+	def emit_data_file(ant)
+		f = File.new("cities.dat", "w")
+		(0..(MAX_CITIES-1)).each {|x|
+			f.write "#{@cities[x].x} #{@cities[x].y}"
+		}
+		f.close
+
+		f = File.new("solution.dat", "w")
+		(0..(MAX_CITIES-1)).each {|x|
+			f.write "#{@cities[@ants[ant].path[city]].x} #{@cities[@ants[ant].path[city]].y}"
+		}
+		f.write "#{@cities[@ants[ant].path[0]].x} #{@cities[@ants[ant].path[0]].y}"
+		f.close
+	end
 	
 	def abs(x)
 		if x<0
