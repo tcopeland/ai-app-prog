@@ -87,7 +87,7 @@ class Emsa
 	ALPHA=0.99
 	STEPS_PER_CHANGE=100
 
-	def initialize
+	def initialize(print_stats_to_file)
 		timer=solution=use_new=0
 		temperature=INITIAL_TEMPERATURE
 	
@@ -95,55 +95,65 @@ class Emsa
 		working=Member.new
 		best=Member.new
 
-		File.open("stats.txt", "w") {|file|
-			current.compute_energy
-			best.energy = 100.0	
+		stats = ""
+		current.compute_energy
+		best.energy = 100.0	
 			
-			current.copy_into(working)
+		current.copy_into(working)
 		
-			while temperature > FINAL_TEMPERATURE
-				puts "Temperature: #{temperature}"
-				accepted = 0
-				0.upto(STEPS_PER_CHANGE-1) {
-					use_new = 0	
-					working.tweak
-					working.compute_energy
+		output_interval = 0
+		while temperature > FINAL_TEMPERATURE
+			puts "Temperature: #{temperature}" unless output_interval % 20 != 0
+			accepted = 0
+			0.upto(STEPS_PER_CHANGE-1) {
+				use_new = 0	
+				working.tweak
+				working.compute_energy
 	
-					if working.energy <= current.energy
+				if working.energy <= current.energy
+					use_new = 1
+				else
+					calc = Math.exp(-(working.energy - current.energy)/temperature)
+					if calc > rand()
+						accepted += 1
 						use_new = 1
-					else
-						calc = Math.exp(-(working.energy - current.energy)/temperature)
-						if calc > rand()
-							accepted += 1
-							use_new = 1
-						end
-					end
-				}
-
-				if use_new == 1
-					use_new = 0
-					working.copy_into(current)
-					if current.energy < best.energy
-						current.copy_into(best)
-						solution = 1
-					else
-						current.copy_into(working)
 					end
 				end
-			
-				file.write("#{timer} #{temperature} #{best.energy} #{accepted}\n")
-				timer += 1
-				puts "Best energy: #{best.energy}"
-				temperature *= ALPHA	
-			end		
-		}
+			}
+
+			if use_new == 1
+				use_new = 0
+				working.copy_into(current)
+				if current.energy < best.energy
+					current.copy_into(best)
+					solution = 1
+				else
+					current.copy_into(working)
+				end
+			end
+			stats << "#{timer} #{temperature} #{best.energy} #{accepted}\n"
+			timer += 1
+			puts "Best energy: #{best.energy}" unless output_interval % 20 != 0
+			temperature *= ALPHA	
+			output_interval += 1
+		end		
 		
 		if solution > 0
 			best.emit_solution
+		end
+		
+		if print_stats_to_file
+			File.open("stats.txt", "w") {|file|
+				file.write(stats)
+			}
 		end
 	end
 end
 
 if __FILE__ == $0
-	Emsa.new
+	stats_file = false
+	if ARGV.size > 0
+		stats_file = ARGV.include?("-statsfile")
+	end
+	Emsa.new(stats_file)
 end
