@@ -53,10 +53,18 @@ class Genetic
 	def run
 		generation = 0
 		init_population
+
+		# added this hack to init both parts of the array
+		@current_population = 1
+		init_population
+		@current_population = 0
+		# added this hack to init both parts of the array
+
 		perform_fitness_check
 		while generation < MAX_GENERATIONS
 			@current_crossovers = @current_mutations = 0
 			perform_selection
+			@current_population = @current_population == 0 ? 1 : 0
 			generation += 1
 			if generation % 100 == 0 
 				puts "Generation " + (generation-1).to_s
@@ -71,7 +79,7 @@ class Genetic
 				puts "Converged"
 				break
 			end
-			if @max_fitness == MAX_FIT
+			if @max_fitness == Instructions::MAX_FITNESS
 				puts "Found solution"
 				break
 			end
@@ -81,7 +89,7 @@ class Genetic
 			printf("\tMinimum fitness = %f\n", @min_fitness)
 			printf("\tCrossovers = %d\n", @current_crossovers)
 			printf("\tMutation = %d\n", @current_mutations)
-			printf("\tpercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
+			printf("\tPercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
 			MAX_CHROMS.times {|i|
 				if @populations[@current_population][i].fitness == @max_fitness
 					printf("Program %3d : ", i)
@@ -131,7 +139,7 @@ class Genetic
 	end
 	def mutate(gene)
 		if rand > MPROB
-			gene = rand(MAX_INSTRUCTIONS)
+			gene = rand(Instructions::MAX_INSTRUCTIONS)
 			@current_mutations += 1
 		end
 		gene
@@ -159,7 +167,6 @@ class Genetic
 		@min_fitness = 1000.0
 		@total_fitness = 0.0
 		MAX_CHROMS.times {|chrom|
-			puts "chrom = " + chrom.to_s if chrom % 100 == 0
 			@populations[@current_population][chrom].reset_fitness
 			Instructions::COUNT.times {|i|	
 				args = [rand(32), rand(32), rand(32)]
