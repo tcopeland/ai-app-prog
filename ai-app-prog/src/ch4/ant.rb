@@ -139,6 +139,39 @@ class Simulation
 		return moving
 	end
 	
+	def update_trails
+		(0..(MAX_CITIES-1)).each {|x|
+			(0..(MAX_CITIES-1)).each {|y|
+				if x != y
+					@pheromone[x][y] *= (1.0 - RHO)
+					if @pheromone[x][y] < 0.0
+						@pheromone[x][y] = INIT_PHEROMONE
+					end
+				end
+			}
+		}
+
+		(0..(MAX_ANTS-1)).each {|ant|
+			(0..(MAX_CITIES-1)).each {|i|
+				if i < MAX_CITIES-1
+					from = @ants[ant].path[i]
+					to = @ants[ant].path[i+1]	
+				else
+					from = @ants[ant].path[i]
+					to = @ants[ant].path[0]
+				end
+				@pheromone[from][to] += (QVAL/@ants[ant].tour_length)
+				@pheromone[to][from] = @pheromone[from][to]
+			}
+		}
+
+		(0..(MAX_CITIES-1)).each {|x|
+			(0..(MAX_CITIES-1)).each {|y|
+				@pheromone[x][y] *= RHO
+			}
+		}
+	end
+	
 	def abs(x)
 		if x<0
 			return -x
