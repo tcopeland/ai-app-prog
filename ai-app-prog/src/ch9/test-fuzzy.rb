@@ -26,15 +26,15 @@ class ConstrainedValueTest < Test::Unit::TestCase
 		v.subtract 4
 		assert(v.current == 4, "ConstrainedValue.subtract busted")
 	end
-	def test_center_high
+	def test_constrain_high
 		v = ConstrainedValue.new(36, 0.0, 35.0)
-		v.center
-		assert(v.current == 35.0, "ConstrainedValue.center didn't reign in high value")
+		v.constrain
+		assert(v.current == 35.0, "ConstrainedValue.constrain didn't reign in high value")
 	end
-	def test_center_low
+	def test_constrain_low
 		v = ConstrainedValue.new(-2.0, 0.0, 35.0)
-		v.center
-		assert(v.current == 0.0, "ConstrainedValue.center didn't reign in low value")
+		v.constrain
+		assert(v.current == 0.0, "ConstrainedValue.constrain didn't reign in low value")
 	end
 end
 

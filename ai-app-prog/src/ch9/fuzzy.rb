@@ -38,7 +38,7 @@ class ConstrainedValue
 	def subtract(amount)
 		@current -= amount	
 	end
-	def center
+	def constrain
 		if @current < @low
 			@current = @low
 		elsif @current > @high
@@ -70,7 +70,7 @@ class Simulation
 		end
 		@voltage.subtract LOAD[@current_load]
 		@voltage.add (charge * Math.sqrt(timer.elapsed))/@battery.mode.load
-		@voltage.center
+		@voltage.constrain
 		if @battery.mode.kind_of? FastCharge
 			if @voltage.current > 25
 				@temperature.add (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/25.0)) * 10.0
@@ -86,7 +86,7 @@ class Simulation
 				@temperature.subtract (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/100.0)) * 10.0
 			end
 		end
-		@temperature.center
+		@temperature.constrain
 		@t += 1
 	end
 end
