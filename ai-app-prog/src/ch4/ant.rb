@@ -57,16 +57,16 @@ class Ants
 			city_index += 1
 		}	
 	end
-	def restart(best)
+	def restart(best_so_far)
     city_index = 0
 		@ants.each_index {|x| 
-			if @ants[x].tour_length < best.tour_length
-				best = @ants[x]
+			if @ants[x].tour_length < best_so_far.tour_length
+				best_so_far = @ants[x]
 			end
       @ants[x] = Ant.new(city_index % (Simulation::MAX_CITIES-1))
       city_index += 1
 		}
-		return best
+		return best_so_far
 	end
 	def simulate(distance, pheromone)
 		moving = 0
@@ -136,8 +136,8 @@ class Simulation
 	
 		@distance = []
 		@pheromone = []
-		@best = Ant.new(0)
-		@best.tour_length = 500000
+		@best_so_far = Ant.new(0)
+		@best_so_far.tour_length = 500000
 	
 		(0..MAX_CITIES-1).each {|x|
 			@distance[x] = []
@@ -163,12 +163,12 @@ class Simulation
 			if @ants.simulate(@distance, @pheromone) == 0
 				update_trails
 				if current_time != MAX_TIME
-					@best = @ants.restart(@best)
+					@best_so_far = @ants.restart(@best_so_far)
 				end
-				#puts "Time is #{current_time} #{@best.tour_length}"
+				#puts "Time is #{current_time} #{@best_so_far.tour_length}"
 			end
 		end	
-		puts "Best tour = #{@best.tour_length}\n\n"
+		puts "Best tour = #{@best_so_far.tour_length}\n\n"
 		@cities.write("cities.txt")
 		write_solution()
 	end
@@ -209,9 +209,9 @@ class Simulation
 	def write_solution()
 		File.open("solution.txt", "w") {|f|
 			(0..MAX_CITIES-1).each {|x|
-				f.write "#{@cities.get(@best.path[x]).x} #{@cities.get(@best.path[x]).y}\n"
+				f.write "#{@cities.get(@best_so_far.path[x]).x} #{@cities.get(@best_so_far.path[x]).y}\n"
 			}
-			f.write "#{@cities.get(@best.path[0]).x} #{@cities.get(@best.path[0]).y}\n"
+			f.write "#{@cities.get(@best_so_far.path[0]).x} #{@cities.get(@best_so_far.path[0]).y}\n"
 		}
 	end
 end
