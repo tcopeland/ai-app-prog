@@ -33,6 +33,16 @@ class Emsa
 	end
 
 	def emit_solution(member)
+		board = Array.new(MAX_LENGTH, '.')
+		board.each_index {|x| board[x] = Array.new(MAX_LENGTH, '.') }
+		0..upto(MAX_LENGTH-1) {|x| board[x][member.solution[x]]] = 'Q' }
+		0..upto(MAX_LENGTH-1) {|x|
+			0..upto(MAX_LENGTH-1) {|y|
+				p board[x][y]
+			}	
+			puts "\n"
+		}	
+		puts "\n\n"
 	end
 
 	def initialize
