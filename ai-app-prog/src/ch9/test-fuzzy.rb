@@ -3,6 +3,23 @@
 require 'test/unit'
 require 'fuzzy.rb'
 
+class BatteryMembershipTest < Test::Unit::TestCase
+	def test_low
+		b = BatteryMembership.new	
+		assert(b.voltage_low(1.0) == 1.0, "Voltage below low end should have resulted in 1.0")
+		assert(b.voltage_low(11.0) == 0.0, "Voltage above high end should have resulted in 0.0")
+	end
+	def test_medium
+		b = BatteryMembership.new	
+		assert(b.voltage_medium(2.0) == 0.0, "Voltage below low end should have resulted in 0.0")
+		assert(b.voltage_medium(30.0) == 0.0, "Voltage above high end should have resulted in 0.0")
+	end
+	def test_high
+		b = BatteryMembership.new	
+		assert(b.voltage_high(20.0) == 0.0, "Voltage below low end should have resulted in 0.0")
+		assert(b.voltage_high(35.0) == 1.0, "Voltage above high end should have resulted in 1.0")
+	end
+end
 
 class MembershipProfilesTest < Test::Unit::TestCase
 	def test_spike

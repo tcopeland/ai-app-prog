@@ -3,7 +3,7 @@
 <title>AI Application Programming Ruby port</title>
 </head>
 <body>
-<p>In an effort to learn more about AI programming techniques, I'm trying to port M. Tim Jones' <a href="http://www.charlesriver.com/titles/aiapp.html">AI Application Programming</a> examples to Ruby. 
+<p>In an effort to learn more about AI programming techniques, I'm trying to port M. Tim Jones' <a href="http://www.charlesriver.com/titles/aiapp.html">AI Application Programming</a> examples from C to Ruby. 
 
 <p>The relevant chapters are:
 <ul>
@@ -15,11 +15,19 @@
 <li>Artificial Life
 <li>Expert Systems
 <li>Fuzzy Logic
+<p>Updated 10/2/03: About 50% done, code is <a href="http://rubyforge.org/cgi-bin/cvsweb.cgi/ai-app-prog/src/ch9/?cvsroot=ai-app-prog">here</a>.  Should consider writing something to generate graphs to illustrate the effects of applying the membership functions.
 <li>The Bigram Model (Hidden Markov Models)
 <li>Intelligent Agents
 </ul>
 
 <p>Tim was kind enough to pass on the book's <a href="ai-errata.pdf">erratum</a> to me - current as of Sep 30 2003.
+
+<p>Here are some general thoughts on porting.  I'm a novice at both Ruby and C, so take these with a grain of salt.
+<ul>
+<li>The code in this book (so far) doesn't use pointers, setjmp(), or other hairy C stuff - it's mostly just loops and functions.  This makes porting it a lot easier.
+<li>If someone wanted to do this and preserve speed, it'd probably be best to just write Ruby extensions that wrap the AI stuff (thx to Rich Kilmer for this comment)
+<li>So far I've pretty much just ported it straight over - only adding a few objects as necessary.  There's some stuff that could turn into some nice objects, i.e., the voltage membership functions in the fuzzy logic examples.
+</ul>
 
 
 </body>
