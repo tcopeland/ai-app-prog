@@ -112,6 +112,7 @@ class StackMachine
 end
 
 class Generation
+	attr_accessor :average_fitness
 	attr_reader :id, :crossovers, :mutations, :minimum_fitness, :maximum_fitness
 	@@classid = 0 
 	def initialize
@@ -120,6 +121,7 @@ class Generation
 		@mutations = 0
 		@minimum_fitness = 1000.0
 		@maximum_fitness = 0.0
+		@average_fitness = 0.0
 		@@classid += 1
 	end
 	def new_crossover
@@ -134,6 +136,15 @@ class Generation
 		elsif x > @maximum_fitness
 			@maximum_fitness = x
 		end
+	end
+	def print_me
+		puts "Generation #{id}"
+		printf("\tMaximum fitness = %f (%g)\n", @maximum_fitness, Instructions::MAX_FITNESS)
+		printf("\tAverage fitness = %f\n", @average_fitness)
+		printf("\tMinimum fitness = %f\n", @minimum_fitness)
+		printf("\tCrossovers = %d\n", @crossovers)
+		printf("\tMutations = %d\n", @mutations)
+		printf("\tPercentage = %f\n", @average_fitness.to_f/@maximum_fitness)
 	end
 end
 
@@ -158,14 +169,8 @@ class Genetic
 			perform_selection(g)
 			@current_population = @current_population == 0 ? 1 : 0
 			calculate_fitness(g)
-			puts "Generation #{g.id}"
-			printf("\tMaximum fitness = %f (%g)\n", g.maximum_fitness, Instructions::MAX_FITNESS)
-			printf("\tAverage fitness = %f\n", @average_fitness)
-			printf("\tMinimum fitness = %f\n", g.minimum_fitness)
-			printf("\tCrossovers = %d\n", g.crossovers)
-			printf("\tMutations = %d\n", g.mutations)
-			printf("\tPercentage = %f\n", @average_fitness.to_f/g.maximum_fitness)
-			if g.id > (MAX_GENERATIONS * 0.25) && (@average_fitness / g.maximum_fitness) > 0.98
+			g.print_me
+			if g.id > (MAX_GENERATIONS * 0.25) && (g.average_fitness / g.maximum_fitness) > 0.98
 				puts "Converged"
 				break
 			end
@@ -174,13 +179,7 @@ class Genetic
 				break
 			end
 		end
-		puts "Generation #{g.id}"
-		printf("\tMaximum fitness = %f (%g)\n", g.maximum_fitness, Instructions::MAX_FITNESS)
-		printf("\tAverage fitness = %f\n", @average_fitness)
-		printf("\tMinimum fitness = %f\n", g.minimum_fitness)
-		printf("\tCrossovers = %d\n", g.crossovers)
-		printf("\tMutations = %d\n", g.mutations)
-		printf("\tPercentage = %f\n", @average_fitness.to_f/g.maximum_fitness)
+		g.print_me
 		MAX_CHROMS.times {|i|
 			if @populations[@current_population][i].fitness == g.maximum_fitness
 				printf("Program %3d : ", i)
@@ -261,7 +260,7 @@ class Genetic
 			g.check_minimax(@populations[@current_population][chrom].fitness)
 			@total_fitness += @populations[@current_population][chrom].fitness
 		}
-		@average_fitness = @total_fitness.to_f / MAX_CHROMS.to_f
+		g.average_fitness = @total_fitness.to_f / MAX_CHROMS.to_f
 	end
 
 	def init_population	
