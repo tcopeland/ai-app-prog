@@ -5,6 +5,7 @@ class DataFile
 		@bigram_array = Array.new(Bigram::MAX_WORDS, 0)
 		@word = Array.new(Bigram::MAX_WORDS+1)
 		index = 0
+		first = false
 		file = File.open(filename, "r")
 		file.each_byte {|byte|
 			if file.eof
@@ -15,7 +16,19 @@ class DataFile
 					index = 0
 				end
 			elsif byte == 10 or byte == 13 or byte.chr == ' '
+				if index > 0
+					word[index] = 0
+					index += 1
+					if first
+						first = false
+						load_word(word, Bigram::FIRST_WORD)
+					else
+						load_word(word, Bigram::MIDDLE_WORD)
+					end	
+					index = 0
+				end
 			elsif byte.chr == '.' or byte.chr == '?'
+				# TODO
 			else
 				if byte != 10 and byte.chr != ','
 					word[index] = byte.chr
