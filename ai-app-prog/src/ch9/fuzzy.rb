@@ -297,9 +297,11 @@ class Predator < MovingObject
 	def initialize(pos, heading, prey)
 		super(pos, heading)
 		@prey = prey
+		@membership = PredatorMembershipFunctions.new
 	end
 	def move
 		super
+			
 		@heading.translate(1)
 	end
 end
