@@ -16,7 +16,7 @@ class Ant
 		@path_index = 1
 		@tabu = []
 		@path = []	
-		(0..(Simulation::MAX_CITIES-1)).each {|x|
+		(0..Simulation::MAX_CITIES-1).each {|x|
 			@tabu[x] = 0
 			@path[x] = -1
 		}
@@ -29,7 +29,7 @@ end
 class Cities
 	def initialize
 		@cities = []
-		(1..Simulation::MAX_CITIES).each { 
+		(0..Simulation::MAX_CITIES-1).each { 
 			@cities << City.new(rand(Simulation::MAX_DISTANCE), rand(Simulation::MAX_DISTANCE))
 		}
 	end
@@ -72,17 +72,17 @@ class Simulation
 		@best = Ant.new(0)
 		@best.tour_length = 500000
 	
-		(0..(MAX_CITIES-1)).each {|x|
+		(0..MAX_CITIES-1).each {|x|
 			@distance[x] = []
 			@pheromone[x] = []
-			(0..(MAX_CITIES-1)).each {|y|
+			(0..MAX_CITIES-1).each {|y|
 				@distance[x][y] = 0.0
 				@pheromone[x][y] = INIT_PHEROMONE	
 			}
 		}
 
-		(0..(MAX_CITIES-1)).each {|x|
-			(0..(MAX_CITIES-1)).each {|y|
+		(0..MAX_CITIES-1).each {|x|
+			(0..MAX_CITIES-1).each {|y|
 				if x != y and @distance[x][y] == 0.0	
 					@distance[x][y] = Math.sqrt((@cities.dist_x(x,y))**2 + (@cities.dist_y(x,y))**2)
 					@distance[y][x] = @distance[x][y]
@@ -91,7 +91,7 @@ class Simulation
 		}
 
 		city_index = 0
-		(0..(MAX_ANTS-1)).each {|x|
+		(0..MAX_ANTS-1).each {|x|
 			if city_index == (MAX_CITIES-1)
 				city_index = 0
 			end
@@ -102,7 +102,7 @@ class Simulation
 	
 	def restart_ants
     city_index = 0
-		(0..(MAX_ANTS-1)).each {|x| 
+		(0..MAX_ANTS-1).each {|x| 
 			if @ants[x].tour_length < @best.tour_length
 				@best = @ants[x]
 			end
