@@ -194,13 +194,13 @@ end
 
 class PredatorMembershipFunctions
 	def initialize
-		@xleft = PlateauProfile.new(-180, -179, -70,-60)
-		@farleft = PlateauProfile.new(-80, -70, -20,-10)
-		@left = PlateauProfile.new(-15, -12, -8,-5)
+		@xleft = PlateauProfile.new(-180, -179, -70,-60, LowEndExcluder.new)
+		@farleft = PlateauProfile.new(-80, -70, -20, -10, MiddleExcluder.new)
+		@left = PlateauProfile.new(-15, -12, -8, -5, MiddleExcluder.new)
 		@center = SpikeProfile.new(-7, 7)
-		@right = PlateauProfile.new(5, 8, 12, 15)
-		@farright = PlateauProfile.new(10, 20, 70, 80)
-		@xright = PlateauProfile.new(60, 70, 179, 180)
+		@right = PlateauProfile.new(5, 8, 12, 15, MiddleExcluder.new)
+		@farright = PlateauProfile.new(10, 20, 70, 80, MiddleExcluder.new)
+		@xright = PlateauProfile.new(60, 70, 179, 180, MiddleExcluder.new)
 	end
 end
 

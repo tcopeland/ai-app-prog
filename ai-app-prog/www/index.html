@@ -20,6 +20,9 @@
 </ul>
 
 <p>Tim was kind enough to pass on the book's <a href="ai-errata.pdf">erratum</a> to me - current as of Oct 06 2003.
+<p>This project is hosted by RubyForge, forums and such-like are <a href="http://rubyforge.org/projects/ai-app-prog/">here</a>.
+
+<hr>
 
 <h3>General musings</h3>
 <ul>
@@ -45,11 +48,13 @@ in Ruby.  In other words. "non zero" in C needs to be translated to "not nil and
 <li>If someone wanted to do this and preserve speed, it'd probably be best to just write Ruby extensions that wrap the AI stuff (thx to Rich Kilmer for this comment)
 <li>Writing more tests will alleviate some problems I'm having - i.e., forgetting the "@" on a instance variable.  It's kind of an odd situation, though... I don't really understand how some of the algorithms work, so writing tests for them is hard since I have to step thru the entire function with sample values.  I feel like the tests I'm writing are too high-level or something.
 </ul>
+
+<hr>
 <a name="fuzzy"></a>
 <h3>Chapter 9 - Fuzzy Logic</h3>
 <p>Updated 10/8/03: Battery charger simulation complete, code is <a href="http://rubyforge.org/cgi-bin/cvsweb.cgi/ai-app-prog/src/ch9/?cvsroot=ai-app-prog">here</a>.  Below is a graph (thanks gnuplot!) showing the relationships between the battery's voltage and temperature - you can see when the fast charger kicks in and when it falls back to trickle charge mode.  TODO:
 <ul>
-<li>Implement predator/prey example application given the provided membership functions
+<li>Implement predator/prey example application using the membership functions listed in the book.
 </ul>
 <p><img src="ch9/battery.png"/>
 
