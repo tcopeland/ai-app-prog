@@ -6,50 +6,53 @@ end
 class Fact
 end
 
-class Antecedent
-end
-
-class Consequent
-end
-
 class FactParser
 end
 
-class DefRuleParser
-end
-
-class Parser
-	def parse(txt)
-		ctx = Ctx.new
-		txt.each {|x|
-			if x == "("
-				ctx.descend
-			elsif x == ")"
-				ctx.ascend
-			end
-		}	
+class Token
+	def initialize(txt)
+		@txt = txt
 	end
 end
 
-class Ctx
+class DelimiterToken < Token
+end
+
+class CmdToken < Token
+	def defrule?
+		@txt == "defrule"
+	end
+end
+
+class Tokenizer
+	attr_reader :tokens
 	def initialize
-		@rules = []
+		@tokens = []
+		@cur = ""
 	end
-	def descend
-		@depth += 1
+	def parse(txt)
+		txt.each_byte {|x|
+			c = x.chr
+			if c == '(' || c == ')'
+				shift_accumulator if !@cur.empty?
+				@tokens << DelimiterToken.new(c)
+			elsif c =~ /\s/
+				shift_accumulator if !@cur.empty?
+			else 
+				@cur << c
+			end
+		}
+		shift_accumulator if !@cur.empty?	
 	end
-	def ascend
-		@depth -= 1
-	end
-	def done
-		@depth == 0
+	private
+	def shift_accumulator
+		@tokens << CmdToken.new(@cur)
+		@cur = ""
 	end
 end
 
 class Expert
 	def initialize(input)
-		p = Parser.new(input)
-		p.parse
 	end
 end
 
