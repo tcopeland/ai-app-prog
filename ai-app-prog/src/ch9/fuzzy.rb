@@ -257,11 +257,11 @@ class PredatorMembershipFunctions
 	def initialize
 		@xleft = PlateauProfile.new(-180, -179, -70,-60, LowEndExcluder.new)
 		@farleft = PlateauProfile.new(-80, -70, -20, -10, MiddleExcluder.new)
-		@left = PlateauProfile.new(-15, -12, -8, -5, MiddleExcluder.new)
-		@center = SpikeProfile.new(-7, 7)
-		@right = PlateauProfile.new(5, 8, 12, 15, MiddleExcluder.new)
+		@left = PlateauProfile.new(-15, -12, -3, -2, MiddleExcluder.new)
+		@center = SpikeProfile.new(-2, 7)
+		@right = PlateauProfile.new(2, 3, 12, 15, MiddleExcluder.new)
 		@farright = PlateauProfile.new(10, 20, 70, 80, MiddleExcluder.new)
-		@xright = PlateauProfile.new(60, 70, 179, 180, MiddleExcluder.new)
+		@xright = PlateauProfile.new(60, 70, 179, 180, HighEndExcluder.new)
 	end
 end
 
@@ -302,33 +302,46 @@ class Predator < MovingObject
 	end
 	def move
 		super
-		tmpx = @pos.x - @prey.pos.x
-		tmpy = @pos.y - @prey.pos.y
-		ang = Math.atan2(tmpx, tmpy)/(Math::PI/180)
+		tmpx = @prey.pos.x - @pos.x
+		tmpy = @prey.pos.y - @pos.y
+		desired_heading = Math.atan2(tmpx, tmpy)/(Math::PI/180)
+		if desired_heading < 0
+			desired_heading = 360 - ((360-desired_heading)%360)
+		end
+		#puts "current heading = #{@heading}"
+		#puts "desired heading = #{desired_heading}"
+	
+		diff = desired_heading - @heading.angle
+		if desired_heading < @heading.angle && diff > 0
+			diff = -diff
+		end
+		#puts "diff is #{diff}"
 		# plug that into mbrship functions		
 		pmf = PredatorMembershipFunctions.new
 		fuz = FuzzyOperations.new	
 		change = 0
-		if fuz.normalize(pmf.xleft.compute(ang)) > 0
+		if fuz.normalize(pmf.xleft.compute(diff)) > 0
 			change=-15
-		elsif fuz.normalize(pmf.farleft.compute(ang)) > 0
+		elsif fuz.normalize(pmf.farleft.compute(diff)) > 0
 			change=-8
-		elsif fuz.normalize(pmf.left.compute(ang)) > 0
+		elsif fuz.normalize(pmf.left.compute(diff)) > 0
 			change=-1
-		elsif fuz.normalize(pmf.center.compute(ang)) > 0
+		elsif fuz.normalize(pmf.center.compute(diff)) > 0
 			change=0
-		elsif fuz.normalize(pmf.right.compute(ang)) > 0
+		elsif fuz.normalize(pmf.right.compute(diff)) > 0
 			change=1
-		elsif fuz.normalize(pmf.farright.compute(ang)) > 0
+		elsif fuz.normalize(pmf.farright.compute(diff)) > 0
 			change=8
-		elsif fuz.normalize(pmf.xright.compute(ang)) > 0
+		elsif fuz.normalize(pmf.xright.compute(diff)) > 0
 			change=15
 		end
+		#puts "change = #{change}"
 		@heading.translate(change)
 	end
 end
 
 class Heading
+	attr_accessor :angle
 	def initialize(initialAngle)
 		@angle = initialAngle
 	end
@@ -366,11 +379,15 @@ if __FILE__ == $0
 		}
 	else
 		prey = MovingObject.new(Position.new(10.0,10.0), Heading.new(60))
-		predator = Predator.new(Position.new(80.0,120.0), Heading.new(90), prey)
-		100.times {
+		predator = Predator.new(Position.new(120.0,80.0), Heading.new(90), prey)
+		1000.times {
 			prey.move
 			predator.move
 			puts "#{prey.pos.x.to_i} #{prey.pos.y.to_i} #{predator.pos.x.to_i} #{predator.pos.y.to_i}"
+			dist = Math.sqrt((prey.pos.x-predator.pos.x)**2 + (prey.pos.y-predator.pos.y)**2)
+			if dist < 5.0
+				exit
+			end
 		}		
 	end	
 end
