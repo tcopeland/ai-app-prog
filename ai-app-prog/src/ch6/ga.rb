@@ -181,6 +181,7 @@ class Genetic
 				ret_fitness = @populations[@current_population][@@class_chrom].fitness.to_f / @max_fitness.to_f
 				@@class_chrom = 0 if @@class_chrom == MAX_CHROMS - 1
 				#puts "@@class_chrom == #{@@class_chrom}, @populations[@current_population][@@class_chrom].fitness = #{@populations[@current_population][@@class_chrom].fitness}, @min_fitness = #{@min_fitness}, ret_fitness = #{ret_fitness}"
+				#if @populations[@current_population][@@class_chrom].fitness >= @min_fitness && rand < ret_fitness
 				if @populations[@current_population][@@class_chrom].fitness >= @min_fitness && rand < 0.5
 					ret = @@class_chrom
 					@@class_chrom += 1
