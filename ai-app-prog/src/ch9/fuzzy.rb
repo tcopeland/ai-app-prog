@@ -13,43 +13,54 @@ class Simulation
 		@timer = 0.0
 		@load = [0.02, 0.04, 0.06, 0.08, 0.1]
 		@current_load = 0.0
-		@t=0
+		@t=0.0
 	end
 
-	def charge(t)
-		result = Math.sin(t/100.0)
-		return result < 0.0 ? 0.0:result 
+	def reset_timer
+		@timer = 0
 	end
-	
-	def simulate	
-		@t=0
-		if rand < 0.02
-			@current_load = rand(@load.size)
-		end
-		@voltage -= @load[@current_load]
-		if @battery.get_mode == FAST_CHARGE	
-			@voltage += charge(@t) * Math.sqrt(@timer)
-		else
-			@voltage += (charge(@t) * Math.sqrt(@timer))/10.0
-		end
+
+	def bump_timer
+		@timer += 1
+	end
+
+	def charge
+		result = Math.sin(@t/100.0)
+		return result < 0.0 ? 0.0:result
+	end
+
+	def center_voltage
 		if @voltage < 0.0
 			@voltage = 0.0
 		elsif @voltage > 35.0
 			@voltage = 35.0
 		end
+	end
+	
+	def simulate	
+		if rand < 0.02
+			@current_load = rand(@load.size)
+		end
+		@voltage -= @load[@current_load]
+		if @battery.get_mode == FAST_CHARGE	
+			@voltage += charge * Math.sqrt(@timer)
+		else
+			@voltage += (charge * Math.sqrt(@timer))/10.0
+		end
+		center_voltage
 		if @battery.get_mode == FAST_CHARGE
 			if @voltage > 25
-				@temperature += (@load[@current_load] * Math.sqrt(@timer)/25.0) * 10.0
+				@temperature += (@load[@current_load] * (Math.sqrt(@timer)/25.0)) * 10.0
 			elsif voltage > 15
-				@temperature += (@load[@current_load] * Math.sqrt(@timer)/20.0) * 10.0
+				@temperature += (@load[@current_load] * (Math.sqrt(@timer)/20.0)) * 10.0
 			else	
-				@temperature += (@load[@current_load] * Math.sqrt(@timer)/15.0) * 10.0
+				@temperature += (@load[@current_load] * (Math.sqrt(@timer)/15.0)) * 10.0
 			end
 		else 
 			if @temperature > 20.0
-				@temperature -= (@load[@current_load] * Math.sqrt(@timer)/20.0) * 10.0
+				@temperature -= (@load[@current_load] * (Math.sqrt(@timer)/20.0)) * 10.0
 			else
-				@temperature -= (@load[@current_load] * Math.sqrt(@timer)/100.0) * 10.0
+				@temperature -= (@load[@current_load] * (Math.sqrt(@timer)/100.0)) * 10.0
 			end
 		end
 		if @temperature < 0.0	
@@ -57,7 +68,7 @@ class Simulation
 		elsif @temperature > 40.0
 			@temperature = 40.0
 		end
-		@t +=1
+		@t += 1
 	end
 end
 
@@ -74,10 +85,13 @@ class Battery
 		if (@count % 10) == 0
 			if normalize(bm.voltage_high(simulation.voltage))
 				@mode = TRICKLE_CHARGE
+				simulation.reset_timer
 			elsif normalize(tm.temp_hot(simulation.temperature))
 				@mode = TRICKLE_CHARGE
-			elsif normalize(ops.and(ops.not(bm.voltage_high(simulation.voltage), tm.temp_hot(simulation.temperature))))
+				simulation.reset_timer
+			elsif normalize(ops.and(ops.not(bm.voltage_high(simulation.voltage), ops.not(tm.temp_hot(simulation.temperature)))))
 				@mode = FAST_CHARGE
+				simulation.reset_timer
 			end
 		end
 	end
@@ -85,7 +99,7 @@ class Battery
 		return @mode
 	end
 	def normalize(input)
-		input >= 0.5 ? 1 : 0
+		return input >= 0.5 ? 1 : 0
 	end
 end
 
@@ -203,7 +217,7 @@ class MembershipProfiles
 		end
 		low = 0
 		upslope = (1.0/(low_plateau - low))
-		downslope = (1/0/(high - high_plateau))
+		downslope = (1.0/(high - high_plateau))
 		if value < low
 			return 0.0
 		elsif value > high
@@ -237,6 +251,7 @@ if __FILE__ == $0
 	3000.times {|count|
 		s.simulate
 		b.charge_control(s)
-		puts "#{count}: #{s.voltage} #{s.temperature} #{b.get_mode.to_s}"
+		s.bump_timer
+		puts "#{count}: V=#{s.voltage} T=#{s.temperature} Mode=#{b.get_mode == 0 ? 'Trickle' : 'Fast' }"
 	}	
 end
