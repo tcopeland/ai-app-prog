@@ -43,6 +43,8 @@ class Genetic
 		@current_mutations=0
 		@populations = []
 		@stack = [] 
+		@@weird_x_value = 0
+		@@class_chrom = 0
 	end
 	def run
 		generation = 0
@@ -131,21 +133,19 @@ class Genetic
 		gene
 	end
 	def select_parent
-		chrom = 0
+		@@class_chrom = 0
 		ret = -1
 		ret_fitness = 0.0
 		loop do
-			ret_fitness = @populations[@current_population][chrom].fitness / @max_fitness
-			chrom = 0 if chrom == MAX_CHROM
-			if @populations[@current_population][chrom].fitness > @min_fitness
-				if rand < ret_fitness
-					ret = chrom
-					chrom += 1
-					ret_fitness = @populations[@current_population][chrom].fitness
-					break
-				end
+			ret_fitness = @populations[@current_population][@@class_chrom].fitness / @max_fitness
+			@@class_chrom = 0 if @@class_chrom == MAX_CHROMS - 1
+			if @populations[@current_population][@@class_chrom].fitness > @min_fitness and rand < ret_fitness
+				ret = @@class_chrom
+				@@class_chrom += 1
+				ret_fitness = @populations[@current_population][@@class_chrom].fitness
+				break
 			end
-			chrom += 1
+			@@class_chrom += 1
 		end
 		return ret	
 	end
@@ -154,6 +154,7 @@ class Genetic
 		@min_fitness = 1000
 		@total_fitness = 0
 		MAX_CHROMS.times {|chrom|
+			puts "chrom = " + chrom.to_s if chrom % 100 == 0
 			@populations[@current_population][chrom].reset_fitness
 			Instructions::COUNT.times {|i|	
 				args = [rand(32), rand(32), rand(32)]
@@ -171,14 +172,15 @@ class Genetic
 			@total_fitness += @populations[@current_population][chrom].fitness
 		}
 		@avg_fitness = @total_fitness.to_f / MAX_CHROMS.to_f
-		printf("%d %6.4f %6.4f %6.4f\n", x, @min_fitness, @avg_fitness, @max_fitness)
-		x += 1
+		printf("%d %6.4f %6.4f %6.4f\n", @@weird_x_value, @min_fitness, @avg_fitness, @max_fitness)
+		@@weird_x_value += 1
 	end
 	def interpret_stm(program, prog_length, args)
-		pc = 0
+		pc = -1
 		error = Instructions::NONE
 		args.size.downto(0) {|x| spush(args[x])	}
 		while error == Instructions::NONE && pc < prog_length
+			pc += 1
 			begin
 				case program[pc]
 					when Instructions::DUP
@@ -204,7 +206,6 @@ class Genetic
 						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(2)
 						spush(@stack[@stack.size-2].dup)
 				end
-				pc += 1
 			rescue Exception => x
 				error = x.message.to_i
 			end
