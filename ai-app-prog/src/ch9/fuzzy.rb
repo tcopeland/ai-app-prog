@@ -25,22 +25,24 @@ class Timer
 	end
 end
 
-class Voltage
-	attr_accessor :volts
-	def initialize(start)
-		@volts = start
+class ConstrainedValue
+	attr_accessor :current
+	def initialize(start, low, high)
+		@current = start
+		@low = low
+		@high = high
 	end
 	def add(amount)
-		@volts += amount	
+		@current += amount	
 	end
 	def subtract(amount)
-		@volts -= amount	
+		@current -= amount	
 	end
 	def center
-		if @volts < 0.0
-			@volts = 0.0
-		elsif @volts > 35.0
-			@volts = 35.0
+		if @current < @low
+			@current = @low
+		elsif @current > @high
+			@current = @high
 		end
 	end
 end
@@ -51,8 +53,8 @@ class Simulation
 
 	def initialize(battery)
 		@battery = battery
-		@voltage = Voltage.new(20.0)
-		@temperature = 12.0
+		@voltage = ConstrainedValue.new(20.0, 0.0, 35.0)
+		@temperature = ConstrainedValue.new(12.0, 0.0, 40.0)
 		@current_load = LOAD[0]
 		@t=0.0
 	end
@@ -70,25 +72,21 @@ class Simulation
 		@voltage.add (charge * Math.sqrt(timer.elapsed))/@battery.mode.load
 		@voltage.center
 		if @battery.mode.kind_of? FastCharge
-			if @voltage.volts > 25
-				@temperature += (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/25.0)) * 10.0
-			elsif @voltage.volts > 15
-				@temperature += (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/20.0)) * 10.0
+			if @voltage.current > 25
+				@temperature.add (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/25.0)) * 10.0
+			elsif @voltage.current > 15
+				@temperature.add (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/20.0)) * 10.0
 			else	
-				@temperature += (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/15.0)) * 10.0
+				@temperature.add (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/15.0)) * 10.0
 			end
 		else 
-			if @temperature > 20.0
-				@temperature -= (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/20.0)) * 10.0
+			if @temperature.current > 20.0
+				@temperature.subtract (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/20.0)) * 10.0
 			else
-				@temperature -= (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/100.0)) * 10.0
+				@temperature.subtract (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/100.0)) * 10.0
 			end
 		end
-		if @temperature < 0.0	
-			@temperature = 0.0
-		elsif @temperature > 40.0
-			@temperature = 40.0
-		end
+		@temperature.center
 		@t += 1
 	end
 end
@@ -108,10 +106,10 @@ class Battery
 			if normalize(@bm.voltage_high(simulation.voltage)) >0
 				@mode = TrickleCharge.new
 				timer.reset
-			elsif normalize(@tm.temp_hot(simulation.temperature)) > 0
+			elsif normalize(@tm.temp_hot(simulation.temperature.current)) > 0
 				@mode = TrickleCharge.new
 				timer.reset
-			elsif normalize(@ops.and(@ops.not(@bm.voltage_high(simulation.voltage)), @ops.not(@tm.temp_hot(simulation.temperature)))) > 0
+			elsif normalize(@ops.and(@ops.not(@bm.voltage_high(simulation.voltage)), @ops.not(@tm.temp_hot(simulation.temperature.current)))) > 0
 				@mode = FastCharge.new
 				timer.reset
 			end
@@ -203,28 +201,28 @@ class BatteryMembership
 		@high = PlateauProfile.new(25.0, 30.0, 30.0, 30.0)
 	end
 	def voltage_low(voltage)
-		if voltage.volts < @low.low
+		if voltage.current < @low.low
 			return 1.0
 		end
-		if voltage.volts > @low.high 
+		if voltage.current > @low.high 
 			return 0.0
 		end
-		return @low.compute(voltage.volts)
+		return @low.compute(voltage.current)
 	end
 	def voltage_medium(voltage)
-		if voltage.volts < @med.low or voltage.volts > @med.high
+		if voltage.current < @med.low or voltage.current > @med.high
 			return 0.0
 		end
-		return @med.compute(voltage.volts)
+		return @med.compute(voltage.current)
 	end
 	def voltage_high(voltage)
-		if voltage.volts < @high.low
+		if voltage.current < @high.low
 			return 0.0
 		end
-		if voltage.volts > @high.high 
+		if voltage.current > @high.high 
 			return 1.0
 		end
-		return @high.compute(voltage.volts)
+		return @high.compute(voltage.current)
 	end
 end
 
@@ -270,7 +268,7 @@ if __FILE__ == $0
 		b.charge_control(s, t)
 		t.bump
 		if count % 25 == 0
-			puts "#{count},#{s.voltage.volts},#{s.temperature}"
+			puts "#{count},#{s.voltage.current},#{s.temperature.current}"
 		end
 	}	
 end
