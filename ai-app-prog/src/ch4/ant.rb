@@ -174,8 +174,8 @@ class Simulation
 
 	def emit_data_file(ant)
 		File.open("cities.txt", "w") {|f|
-			(0..(MAX_CITIES-1)).each {|x|
-				f.write "#{@cities[x].x} #{@cities[x].y}\n"
+			@cities.each {|city|
+				f.write "#{city.x} #{city.y}\n"
 			}
 		}
 		File.open("solution.txt", "w") {|f|
