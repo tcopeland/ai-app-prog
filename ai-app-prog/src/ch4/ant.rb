@@ -72,7 +72,7 @@ class Ants
 		moving = 0
 		@ants.each_index {|k|
 			if @ants[k].path_index < Simulation::MAX_CITIES
-				@ants[k].next_city=select_next_city(k, pheromone, distance)
+				@ants[k].next_city=select_next_city(@ants[k], pheromone, distance)
 				@ants[k].tabu[@ants[k].next_city] = 1
 				@ants[k].path_index += 1
 				@ants[k].path[@ants[k].path_index] = @ants[k].next_city
@@ -89,20 +89,20 @@ class Ants
 	def select_next_city(ant, pheromone, distance)
 		denom = 0.0
 		@ants.each_index {|x|
-			if @ants[ant].tabu[x] == 0
-				denom += ant_product(@ants[ant].current_city, x, pheromone, distance)
+			if ant.tabu[x] == 0
+				denom += ant_product(ant.current_city, x, pheromone, distance)
 			end
 		}
 		city=0
 		begin
 			p=0.0
-			city += 1
-			if @ants[ant].tabu[city % Simulation::MAX_CITIES] == 0
-				p = ant_product(@ants[ant].current_city, city % Simulation::MAX_CITIES, pheromone, distance)/denom
+			if ant.tabu[city % Simulation::MAX_CITIES] == 0
+				p = ant_product(ant.current_city, city % Simulation::MAX_CITIES, pheromone, distance)/denom
 				if rand() < p
 					break
 				end
 			end
+			city += 1
 		end until !true
 		return city % Simulation::MAX_CITIES
 	end
