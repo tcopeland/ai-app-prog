@@ -1,38 +1,91 @@
 #!/usr/local/bin/ruby
 
+TRICKLE_CHARGE = 0
+FAST_CHARGE = 1
+
 class Simulation
-	@voltage = 20.0
-	@temperature = 12.0
-	@timer = 0.0
-	@load = [0.02, 0.04, 0.06, 0.08, 0.1]
-	@current_load = 0.0
+	attr_accessor :temperature, :voltage
+
+	def initialize(battery)
+		@battery = battery
+		@voltage = 20.0
+		@temperature = 12.0
+		@timer = 0.0
+		@load = [0.02, 0.04, 0.06, 0.08, 0.1]
+		@current_load = 0.0
+		@t=0
+	end
+
 	def charge(t)
 		result = Math.sin(t/100.0)
 		return result < 0.0 ? 0.0:result 
 	end
+	
 	def simulate	
-
+		@t=0
+		if rand < 0.02
+			@current_load = rand(@load.size)
+		end
+		@voltage -= @load[@current_load]
+		if @battery.get_mode == FAST_CHARGE	
+			@voltage += charge(@t) * Math.sqrt(@timer)
+		else
+			@voltage += (charge(@t) * Math.sqrt(@timer))/10.0
+		end
+		if @voltage < 0.0
+			@voltage = 0.0
+		elsif @voltage > 35.0
+			@voltage = 35.0
+		end
+		if @battery.get_mode == FAST_CHARGE
+			if @voltage > 25
+				@temperature += (@load[@current_load] * Math.sqrt(@timer)/25.0) * 10.0
+			elsif voltage > 15
+				@temperature += (@load[@current_load] * Math.sqrt(@timer)/20.0) * 10.0
+			else	
+				@temperature += (@load[@current_load] * Math.sqrt(@timer)/15.0) * 10.0
+			end
+		else 
+			if @temperature > 20.0
+				@temperature -= (@load[@current_load] * Math.sqrt(@timer)/20.0) * 10.0
+			else
+				@temperature -= (@load[@current_load] * Math.sqrt(@timer)/100.0) * 10.0
+			end
+		end
+		if @temperature < 0.0	
+			@temperature = 0.0
+		elsif @temperature > 40.0
+			@temperature = 40.0
+		end
+		@t +=1
 	end
 end
 
 class Battery
-	TRICKLE_CHARGE = 0
-	FAST_CHARGE = 1
-	@i = 0
-	def charge_control
+	@mode = TRICKLE_CHARGE
+	def initialize
+		@count = 0
+	end
+	def charge_control(simulation)
 		tm = TemperatureMembership.new
 		bm = BatteryMembership.new
 		ops = FuzzyOperations.new
-		i += 1
-		if (i % 10) == 0
-			if normalize(bm.voltage_high(voltage))
-				mode = TRICKLE_CHARGE
-			elsif normalize(tm.temp_hot(temperature))
-				mode = TRICKLE_CHARGE
-			elsif normalize(ops.and(ops.not(bm.voltage_high(voltage), tm.temp_hot(temperature))))
-				mode = FAST_CHARGE
+		@count += 1
+		if (@count % 10) == 0
+			if normalize(bm.voltage_high(simulation.voltage))
+				@mode = TRICKLE_CHARGE
+			elsif normalize(tm.temp_hot(simulation.temperature))
+				@mode = TRICKLE_CHARGE
+			elsif normalize(ops.and(ops.not(bm.voltage_high(simulation.voltage), tm.temp_hot(simulation.temperature))))
+				@mode = FAST_CHARGE
 			end
 		end
+	end
+	def get_mode	
+		return @mode
+	end
+	def normalize(input)
+		input >= 0.5 ? 1 : 0
 	end
 end
 
@@ -179,5 +232,11 @@ class FuzzyOperations
 end
 
 if __FILE__ == $0
-	
+	b = Battery.new
+	s = Simulation.new(b)
+	3000.times {|count|
+		s.simulate
+		b.charge_control(s)
+		puts "#{count}: #{s.voltage} #{s.temperature} #{b.get_mode.to_s}"
+	}	
 end
