@@ -1,6 +1,8 @@
 #!/usr/local/bin/ruby
 
 class Member
+	DX = [-1, 1, -1, 1]
+	DY = [-1, 1, 1, -1]
 	attr_accessor :energy, :solution
 	def initialize
 		@energy=0.0
@@ -16,14 +18,13 @@ class Member
 		begin
 			y = rand(Emsa::MAX_LENGTH)
 		until x != y
-		temp = solution[x]
-		solution[x] = solution[y]
-		solution[y] = temp
+		temp = @solution[x]
+		@solution[x] = @solution[y]
+		@solution[y] = temp
 	end
 	def emit_solution
-		board = Array.new(MAX_LENGTH, '.')
-		board.each_index {|x| board[x] = Array.new(MAX_LENGTH, '.') }
-		0..upto(MAX_LENGTH-1) {|x| board[x][solution[x]]] = 'Q' }
+		board = create_new_board
+		0..upto(MAX_LENGTH-1) {|x| board[x][@solution[x]]] = 'Q' }
 		0..upto(MAX_LENGTH-1) {|x|
 			0..upto(MAX_LENGTH-1) {|y|
 				p board[x][y]
@@ -31,6 +32,38 @@ class Member
 			puts "\n"
 		}	
 		puts "\n\n"
+	end
+	def compute_energy
+		board = create_new_board
+		0..upto(MAX_LENGTH-1) {|x|
+			board[i][@solution[i]] = 'Q';
+		}
+		conflicts = 0
+		0..upto(MAX_LENGTH-1) {|i|
+			x = i
+			y = solution[i]
+			0..upto(3) {|j|
+				tempx = x
+				tempy = y
+				while true	
+					tempx += DX[j]
+					tempy += DY[j]
+					if tempx<0 || tempx >= MAX_LENGTH || tempy<0 || tempy>=MAX_LENGTH 
+						break
+					end
+					if board[tempx][tempy] == 'Q'
+						conflicts += 1
+					end
+				end
+			}
+		}
+		@energy = conflicts	
+	end
+
+	def create_new_board
+		board = Array.new(MAX_LENGTH, '.')
+		board.each_index {|x| board[x] = Array.new(MAX_LENGTH, '.') }
+		return board
 	end
 end
 
@@ -41,8 +74,6 @@ class Emsa
 	ALPHA=0.99
 	STEPS_PER_CHANGE=100
 
-	def compute_energy(member)
-	end
 
 	def initialize
 		timer=step=solution=use_new=accepted=0
