@@ -12,18 +12,43 @@ end
 class Consequent
 end
 
+class FactParser
+end
+
+class DefRuleParser
+end
+
 class Parser
-	def initialize(f)
-		@filename = f
+	def parse(txt)
+		ctx = Ctx.new
+		txt.each {|x|
+			if x == "("
+				ctx.descend
+			elsif x == ")"
+				ctx.ascend
+			end
+		}	
 	end
-	def parse
-			
+end
+
+class Ctx
+	def initialize
+		@rules = []
+	end
+	def descend
+		@depth += 1
+	end
+	def ascend
+		@depth -= 1
+	end
+	def done
+		@depth == 0
 	end
 end
 
 class Expert
-	def initialize(filename)
-		p = Parser.new(filename)
+	def initialize(input)
+		p = Parser.new(input)
 		p.parse
 	end
 end
