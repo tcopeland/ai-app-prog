@@ -105,23 +105,23 @@ class BackProp
 		}
 		printf("Network is %g%% correct\n", (sum.to_f/MAX_SAMPLES.to_f)*100)
 
-		test_inputs(2.0, 1.0, 1.0, 1.0, "2111")
-		test_inputs(1.0, 1.0, 1.0, 2.0, "1112")
-		test_inputs(0.0, 0.0, 0.0, 0.0, "0000")
-		test_inputs(0.0, 1.0, 1.0, 1.0, "0111")
-		test_inputs(2.0, 0.0, 1.0, 3.0, "2013")
-		test_inputs(2.0, 1.0, 0.0, 3.0, "2103")
-		test_inputs(0.0, 1.0, 0.0, 3.0, "0103")
+		test_inputs(2.0, 1.0, 1.0, 1.0)
+		test_inputs(1.0, 1.0, 1.0, 2.0)
+		test_inputs(0.0, 0.0, 0.0, 0.0)
+		test_inputs(0.0, 1.0, 1.0, 1.0)
+		test_inputs(2.0, 0.0, 1.0, 3.0)
+		test_inputs(2.0, 1.0, 0.0, 3.0)
+		test_inputs(0.0, 1.0, 0.0, 3.0)
 
 		file.close			
 	end
-	def test_inputs(a, b, c, d, display)
+	def test_inputs(a, b, c, d)
 		@inputs[0] = a
 		@inputs[1] = b
 		@inputs[2] = c
 		@inputs[3] = d
 		feed_forward
-		puts display + " action " + STRINGS[action(@actual)]
+		puts a.to_i.to_s + b.to_i.to_s + c.to_i.to_s + d.to_i.to_s + " action " + STRINGS[action(@actual)]
 	end
 	def action(vector)
 		selection = 0
