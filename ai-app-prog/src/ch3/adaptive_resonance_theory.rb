@@ -1,11 +1,6 @@
 #!/usr/local/bin/ruby
 
 class Adaptive
-	MAX_ITEMS = 11
-	MAX_CUSTOMERS = 10
-	TOTAL_PROTOTYPE_VECTORS = 5
-	BETA = 1.0
-	VIGILANCE = 0.0
 	DATABASE = [
         [ 0,   0,   0,   0,   0,   1,   0,   0,   1,   0,   0],
         [ 0,   1,   0,   0,   0,   0,   0,   1,   0,   0,   1],
@@ -18,21 +13,31 @@ class Adaptive
         [ 0,   0,   0,   0,   1,   0,   0,   1,   0,   0,   0],
         [ 0,   0,   1,   0,   0,   1,   0,   0,   1,   0,   0]	
 	]
+	ITEM_NAMES = [
+    "Hammer", "Paper", "Snickers", "Screwdriver",
+    "Pen", "Kit-Kat", "Wrench", "Pencil",
+    "Heath-Bar", "Tape-Measure", "Binder"]
+	
+	MAX_CUSTOMERS = 10
+	TOTAL_PROTOTYPE_VECTORS = 5
+	BETA = 1.0
+	VIGILANCE = 0.0
+
 	def initialize
 		@prototype_vector	= Array.new(TOTAL_PROTOTYPE_VECTORS, 0)
 		@prototype_vector.each_index {|x|
-			@prototype_vector[x] = Array.new(MAX_ITEMS, 0)
+			@prototype_vector[x] = Array.new(ITEM_NAMES.size, 0)
 		}
 		@sum_vector	= Array.new(TOTAL_PROTOTYPE_VECTORS, 0)
 		@sum_vector.each_index {|x|
-			@sum_vector[x] = Array.new(MAX_ITEMS, 0)
+			@sum_vector[x] = Array.new(ITEM_NAMES.size, 0)
 		}
 		@members = Array.new(TOTAL_PROTOTYPE_VECTORS, 0)
 		@membership = Array.new(MAX_CUSTOMERS, -1)
 		@num_prototype_vectors = 0
 	end
 	def perform_art1
-		and_result = Array.new(MAX_ITEMS)
+		and_result = Array.new(ITEM_NAMES.size)
 		count = 50
 		exit = false
 		mag_pe = mag_p = mag_e = 0
@@ -46,7 +51,7 @@ class Adaptive
 						mag_p = vector_magnitude(@prototype_vector[pvec])
 						mag_e = vector_magnitude(DATABASE[index])
 						result = mag_pe.to_f / (BETA + mag_p)
-						test = mag_e.to_f / (BETA + MAX_ITEMS.to_f)
+						test = mag_e.to_f / (BETA + ITEM_NAMES.size.to_f)
 						if result > test	
 							if (mag_pe.to_f / mag_e.to_f) < VIGILANCE
 								old = 0
@@ -85,7 +90,7 @@ class Adaptive
 			end
 		}
 		@num_prototype_vectors += 1
-		0.upto(MAX_ITEMS-1) {|i|
+		0.upto(ITEM_NAMES.size-1) {|i|
 			@prototype_vector[cluster][i] = example[i]
 		}	
 		@members[cluster] = 1
@@ -94,20 +99,20 @@ class Adaptive
 	def update_prototype_vectors(cluster)
 		first = true
 		raise "Cluster < 0!!" if cluster < 0
-		0.upto(MAX_ITEMS) {|item|
+		0.upto(ITEM_NAMES.size) {|item|
 			@prototype_vector[cluster][item] = 0
 			@sum_vector[cluster][item] = 0
 		}
 		0.upto(MAX_CUSTOMERS-1) {|customer|
 			if @membership[customer] == cluster
 				if first
-					0.upto(MAX_ITEMS-1) {|item|
+					0.upto(ITEM_NAMES.size-1) {|item|
 						@prototype_vector[cluster][item] = DATABASE[customer][item]
 						@sum_vector[cluster][item] = DATABASE[customer][item]
 					}
 					first = false
 				else
-					0.upto(MAX_ITEMS-1) {|item|
+					0.upto(ITEM_NAMES.size-1) {|item|
 						@prototype_vector[cluster][item] = (@prototype_vector[cluster][item] == 1 && DATABASE[customer][item] == 1) ? 1 : 0
 						@sum_vector[cluster][item] += DATABASE[customer][item]
 					}
@@ -118,19 +123,43 @@ class Adaptive
 	def display_customer_database
 		0.upto(TOTAL_PROTOTYPE_VECTORS-1) {|cluster|
 			puts "ProtoVector: #{cluster}"
-			0.upto(MAX_ITEMS-1) {|item|
+			0.upto(ITEM_NAMES.size-1) {|item|
 				printf("%1d ", @prototype_vector[cluster][item])
 			}
 			puts "\n"
 			0.upto(MAX_CUSTOMERS-1) {|customer|
 				if @membership[customer] == cluster
 					puts "Customer #{customer}"
-					0.upto(MAX_ITEMS-1) {|item|
+					0.upto(ITEM_NAMES.size-1) {|item|
 						printf("%1d ", DATABASE[customer][item])
 					}
 					puts " : #{@membership[customer]} :"
 				end
 			}
+		}
+	end
+	def make_recommendations
+		0.upto(MAX_CUSTOMERS-1) {|customer|
+			best = -1
+			val = 0
+			0.upto(ITEM_NAMES.size-1) {|item|
+				if DATABASE[customer][item] == 0 && @sum_vector[@membership[customer]][item] > val
+					best = item
+					val = @sum_vector[@membership[customer]][item]
+				end
+			}
+			puts "For customer #{customer}"
+			if best > 0
+				puts "The best recommendation is #{best} (#{ITEM_NAMES[best]})"
+				puts "Owned by #{@sum_vector[@membership[customer]][best]} out of #{@members[@membership[customer]]} members of this cluster"
+			else
+				puts "No recommendation can be made"
+			end
+			printf("Already owns: ")
+			0.upto(ITEM_NAMES.size-1) {|item|
+				printf("%s ", ITEM_NAMES[item]) if DATABASE[customer][item] == 1
+			}
+			puts "\n"
 		}
 	end
 	def vector_magnitude(v)
@@ -139,7 +168,7 @@ class Adaptive
 		res
 	end
 	def vector_bitwise_and(res, v, w)
-		0.upto(MAX_ITEMS-1) {|i| res[i] = (v[i]==1 && w[i]==1) ? 1 : 0 }
+		0.upto(ITEM_NAMES.size-1) {|i| res[i] = (v[i]==1 && w[i]==1) ? 1 : 0 }
 	end
 end
 
@@ -147,4 +176,5 @@ if __FILE__ == $0
 	a = Adaptive.new	
 	a.perform_art1
 	a.display_customer_database
+	a.make_recommendations
 end
