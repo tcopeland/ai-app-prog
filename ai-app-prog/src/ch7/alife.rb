@@ -15,6 +15,9 @@ class Plant
 end
 
 class Agent
+	TYPE_HERBIVORE=0
+	TYPE_CARNIVORE=1
+	MAX_ENERGY=60
 	attr_reader :type, :energy, :parent, :age, :generation, :location, :direction, :inputs, :weight_oi, :biaso, :actions
 	def initialize(type)
 		@type = type
@@ -22,13 +25,37 @@ class Agent
 		@weight_oi = Array.new(ArtificialLife::MAX_INPUTS * ArtificialLife::MAX_OUTPUTS)
 		@biaso = Array.new(ArtificialLife::MAX_INPUTS)
 		@actions = Array.new(ArtificialLife::MAX_INPUTS)
-	
-		@energy = ArtificialLife::MAX_ENERGY/2
+		@energy = MAX_ENERGY/2
 		@age = 0
 		@generation = 1
 	end
 	def set_location(loc)
 		@location = loc
+	end
+	def simulate
+		# TODO
+	end
+	def herbivore
+		@type == TYPE_HERBIVORE
+	end
+	def carnivore
+		@type == TYPE_CARNIVORE
+	end
+end
+
+class Agents
+	FILENAME="agents.dat"
+	def initialize
+		@agents = []
+	end
+	def add(agent)
+		@agents << agent
+	end
+	def carnivores
+		@agents.collect{|a| (a.carnivore) ? a : nil}.compact
+	end
+	def herbivores
+		@agents.collect{|a| (a.herbivore) ? a : nil}.compact
 	end
 end
 
@@ -51,8 +78,6 @@ class Landscape
 end
 
 class ArtificialLife
-	TYPE_HERBIVORE=0
-	TYPE_CARNIVORE=1
 	TYPE_DEAD=-1
 	HERB_FRONT=0
 	CARN_FRONT=1
@@ -84,7 +109,6 @@ class ArtificialLife
 
 	# these may turn into instance variables
 	MAX_FOOD_ENERGY=15
-	MAX_ENERGY=60
 	REPRODUCE_ENERGY=0.9
 	MAX_AGENTS=36
 	MAX_PLANTS=35
@@ -101,7 +125,6 @@ class ArtificialLife
 	WEST_PROX = [Location.new(1,0), Location.new(1,-1), Location.new(0,-1), Location.new(-1,-1), Location.new(-1,0), Location.new(9,9)]
 
 	STATS_FILENAME="stats.dat"
-	AGENTS_FILENAME="agents.dat"
 	RUNTIME_FILENAME="runtime.dat"
 
 	def initialize(args)
@@ -144,9 +167,10 @@ class ArtificialLife
 
 		puts "Creating agents" unless !@verbose
 		if !@seed_population
+			@agents = Agents.new
 			0.upto(MAX_AGENTS-1) {|x|
-				agent = Agent.new((x < (MAX_AGENTS/2)) ? TYPE_HERBIVORE : TYPE_CARNIVORE)	
-				@agents << agent
+				agent = Agent.new((x < (MAX_AGENTS/2)) ? Agent::TYPE_HERBIVORE : Agent::TYPE_CARNIVORE)	
+				@agents.add(agent)
 				while true
 					x = rand(MAX_GRID)	
 					y = rand(MAX_GRID)
@@ -201,6 +225,9 @@ class ArtificialLife
 	end
 
 	def simulate
+		@agents.herbivores {|agent|
+			agent.simulate
+		}
 	end
 
 	def getWeight
