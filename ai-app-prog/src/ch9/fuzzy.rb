@@ -121,8 +121,8 @@ class Battery
 end
 
 class LowEndExcluder
-	def result(value, profile)
-		if value < profile.low
+	def evaluate(value, low, high)
+		if value < low
       return 1.0
     end
     return 0.0
@@ -130,16 +130,16 @@ class LowEndExcluder
 end
 
 class MiddleExcluder
-	def result(value, profile)
-		if value < profile.low or value > profile.high
+	def evaluate(value, low, high)
+		if value < low or value > high
       return 0.0
     end
 	end
 end
 
 class HighEndExcluder
-	def result(value, profile)
-		if value < profile.low
+	def evaluate(value, low, high)
+		if value < low
       return 0.0
     end
 		return 1.0
@@ -148,13 +148,17 @@ end
 
 class PlateauProfile
 	attr_accessor :low, :low_plateau, :high_plateau, :high
-	def initialize(low, low_plateau, high_plateau, high)
+	def initialize(low, low_plateau, high_plateau, high, excluder)
 		@low = low	
 		@low_plateau = low_plateau
 		@high_plateau = high_plateau
 		@high = high
+		@excluder = excluder
 	end
 	def compute(value)
+		if value < @low or value > @high
+			return @excluder.evaluate(value, low, high)
+		end
 		tmp_low_plateau = @low_plateau
 		tmp_high_plateau = @high_plateau
 		tmp_high = @high
@@ -202,64 +206,34 @@ end
 
 class TemperatureMembershipFunctions	
 	def initialize
-		@cold = PlateauProfile.new(15.0, 15.0, 15.0, 25.0)
-		@warm = PlateauProfile.new(15.0, 25.0, 35.0, 45.0)
-		@hot = PlateauProfile.new(35.0, 45.0, 45.0, 45.0)
+		@cold = PlateauProfile.new(15.0, 15.0, 15.0, 25.0, LowEndExcluder.new)
+		@warm = PlateauProfile.new(15.0, 25.0, 35.0, 45.0, MiddleExcluder.new)
+		@hot = PlateauProfile.new(35.0, 45.0, 45.0, 45.0, HighEndExcluder.new)
 	end
 	def cold(temp)
-		if temp < @cold.low 
-			return 1.0	
-		end
-		if temp > @cold.high
-			return 0.0
-		end
 		return @cold.compute(temp)
 	end
 	def warm(temp)
-		if temp < @warm.low or temp > @warm.high
-			return 0.0	
-		end
 		return @warm.compute(temp)
 	end
 	def hot(temp)
-		if temp < @hot.low 
-			return 0.0	
-		end
-		if temp > @hot.high
-			return 1.0
-		end
 		return @hot.compute(temp)
 	end
 end
 
 class BatteryMembershipFunctions
 	def initialize
-		@low = PlateauProfile.new(5.0, 5.0, 5.0, 10.0)
-		@med = PlateauProfile.new(5.0, 10.0, 20.0, 25.0)
-		@high = PlateauProfile.new(25.0, 30.0, 30.0, 30.0)
+		@low = PlateauProfile.new(5.0, 5.0, 5.0, 10.0, LowEndExcluder.new)
+		@med = PlateauProfile.new(5.0, 10.0, 20.0, 25.0, MiddleExcluder.new)
+		@high = PlateauProfile.new(25.0, 30.0, 30.0, 30.0, HighEndExcluder.new)
 	end
 	def low(voltage)
-		if voltage.current < @low.low
-			return 1.0
-		end
-		if voltage.current > @low.high 
-			return 0.0
-		end
 		return @low.compute(voltage.current)
 	end
 	def medium(voltage)
-		if voltage.current < @med.low or voltage.current > @med.high
-			return 0.0
-		end
 		return @med.compute(voltage.current)
 	end
 	def high(voltage)
-		if voltage.current < @high.low
-			return 0.0
-		end
-		if voltage.current > @high.high 
-			return 1.0
-		end
 		return @high.compute(voltage.current)
 	end
 end
