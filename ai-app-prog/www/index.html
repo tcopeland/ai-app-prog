@@ -12,7 +12,7 @@
 <li><a href="#ant">Ant Algorithms</a>
 <li>Neural Networks and the Backpropagation Algorithm
 <li>Genetic Algorithms
-<li>Artificial Life
+<li><a href="#alife">Artificial Life</a>
 <li>Expert Systems
 <li><a href="#fuzzy">Fuzzy Logic</a>
 <li><a href="#bigram">The Bigram Model (Hidden Markov Models)</a>
@@ -37,6 +37,7 @@ Q . . . . . . .
 . Q . . . . . .
 . . . . . Q . .
 </pre>
+
 <hr>
 
 <a name="ant"></a>
@@ -47,6 +48,12 @@ Q . . . . . . .
 <li>Here's the graph of the cities and the calculated shortest path for 30 cities traversed by 30 ants.  It took 90 seconds to run:
 <p><img src="ch4/cities.png"/>
 </ul>
+
+<hr>
+
+<a name="alife"></a>
+<h3><a href="#top">Chapter 7 - Artificial Life</a></h3>
+<p>Updated 10/31/03: Just getting started, code is <a href="http://rubyforge.org/cgi-bin/viewcvs/cgi/viewcvs.cgi/ai-app-prog/src/ch7/?cvsroot=ai-app-prog">here</a>.  This is going to take a while; there are about 1050 lines of code to translate, while other chapters had much less - simulated annealing, for example, was only 280 lines of code.
 
 <hr>
 
@@ -68,15 +75,13 @@ Q . . . . . . .
 
 <a name="bigram"></a>
 <h3><a href="#top">Chapter 10 - The Bigram Model</a></h3>
-<p>10/30/03: Done, code is <a href="http://rubyforge.org/cgi-bin/viewcvs/cgi/viewcvs.cgi/ai-app-prog/src/ch10/?cvsroot=ai-app-prog">here</a>.  Here are a couple of the more lucid examples produced (I used some quotes from <a href="http://www.comnett.net/~rex/cslewis.htm">C. S. Lewis</a> as the corpus):
+<p>10/30/03: Done, code is <a href="http://rubyforge.org/cgi-bin/viewcvs/cgi/viewcvs.cgi/ai-app-prog/src/ch10/?cvsroot=ai-app-prog">here</a>.  Here's a sample run (I used some quotes from <a href="http://www.comnett.net/~rex/cslewis.htm">C. S. Lewis</a> as the corpus):
 <pre>
-Badness spoiled goodness has some natural superior; everything except unformed matter inferior Without sin.
-</pre>
-<pre>
-The Moral Law tells us from above even where such understanding possible continues it.
-</pre>
-<pre>
-It's a man does his solitude silence and can't really get rid of it.
+ It is always something couldn't guessed That's one reasons I suppose must conclude.
+ It's Badness is idle talk any final victory over materialism No Christian indeed no good game without rules In.
+ Safety happiness can only cobblers to say whether teeth were being well governed Everything except some natural inferior.
+ When humans should have need of the reasons It's a real Right and the percentage cannot increased.
+ Perfect humility dispenses with the first sketch As long as judging value result Who can be found to the.
 </pre>
 <p>TODO: Refactor some of those arrays into classes - especially bigram_array.
 
