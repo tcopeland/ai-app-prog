@@ -26,8 +26,18 @@
 <hr>
 
 <a name="ant"></a>
-<h3><a href="#top">Chapter 1 - Simulated Annealing</a></h3>
-<p>Updated 10/22/03: Starting work on this one, <a href="http://rubyforge.org/cgi-bin/viewcvs/cgi/viewcvs.cgi/ai-app-prog/src/ch1/?cvsroot=ai-app-prog">code is here</a>.
+<h3><a href="#top">Chapter 2 - Simulated Annealing</a></h3>
+<p>Updated 10/23/03: Done with translation of the n-Queens solver, <a href="http://rubyforge.org/cgi-bin/viewcvs/cgi/viewcvs.cgi/ai-app-prog/src/ch2/?cvsroot=ai-app-prog">code is here</a>.  Here's a solution with 8 queens (took about 16 seconds to run):
+<pre>
+. . Q . . . . .
+. . . . Q . . .
+. . . . . . . Q
+. . . Q . . . .
+Q . . . . . . .
+. . . . . . Q .
+. Q . . . . . .
+. . . . . Q . .
+</pre>
 <hr>
 
 <a name="ant"></a>
@@ -47,6 +57,7 @@
 <li>The predator/prey example was fun because I had to relearn some trigonometry.  Also, I had to tweak the membership functions a bit - the first time through I made the center spike profile too wide and so the predator kept waiting too long to turn towards the prey.
 <li>To regenerate the predator graph: <p><code>./fuzzy.rb > predator_data.txt && ./predator_gnuplot</code>
 <li>To regenerate the battery graph: <p><code>./fuzzy.rb -battery > battery_data.txt && ./battery_gnuplot</code>
+<li>TODO: Write partial FCL parser, encode rules, load from file
 </ul>
 <p>Battery charger example: below is a graph (thanks gnuplot!) showing the relationships between the battery's voltage and temperature - you can see when the fast charger kicks in and when it falls back to trickle charge mode. 
 <p><img src="ch9/battery.png"/>
@@ -87,12 +98,12 @@ begin
 	# do stuff
 end until !true
 </pre>
-<li>C code like this:
+<li>Translate pre- and post-increment statements correctly.  C code like this:
 <pre>
 int x = 0;
 printf("Value = %d\n", x++);
 </pre>
-prints out "Value = 0".  Since Ruby doesn't have an unary ++ operator, make sure you put the incrementor _after_ the print statement.  Like this:
+prints out "Value = 0".  Since Ruby doesn't have an postincrement operator, make sure you put the incrementor _after_ the print statement.  Like this:
 <pre>
 x = 0
 puts "Value = #{x}\n"
