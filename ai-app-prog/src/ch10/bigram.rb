@@ -25,10 +25,13 @@ class Bigram
 	def build_sentence
 		max = 0
 		word = next_word(@word_vector[START_SYMBOL])
-		while word != "<END>" and max < 100
+		while word != "<END>"
 			print " #{word}"
 			word = next_word(word)
-			max += rand(12) + 1
+			max += rand(12) + 1	
+			if max > 100
+				break
+			end
 		end
 		puts ".\n"	
 	end
@@ -112,7 +115,10 @@ if __FILE__ == $0
 		puts "./bigram -f <filename> [-v]"
 		exit
 	end
+	puts "Creating new Bigram object" unless !ARGV.include?("-v")
 	b = Bigram.new(ARGV.include?("-v"))
+	puts "Parsing corpus" unless !ARGV.include?("-v")
 	b.parse_corpus(ARGV[ARGV.index("-f")+1])
+	puts "Building the sentence" unless !ARGV.include?("-v")
 	b.build_sentence
 end
