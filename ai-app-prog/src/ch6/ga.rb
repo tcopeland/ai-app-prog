@@ -71,11 +71,11 @@ class StackMachine
 	def initialize(pop,args)
 		@pop = pop
 		@stack = Stack.new
-		(args.size-1).downto(0) {|x| @stack.push(args[x])	}
+		args.reverse.each {|x| @stack.push(x) }
 	end
 	def solve
-		0.upto(pop.prog_size - 1) {|x|
-			case pop.program[x]
+		0.upto(@pop.prog_size - 1) {|x|
+			case @pop.program[x]
 				when Instructions::DUP
 					@stack.assert_elements(1)
 					@stack.assert_not_full
