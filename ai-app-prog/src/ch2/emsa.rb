@@ -4,8 +4,8 @@ class Member
 	DX = [-1, 1, -1, 1]
 	DY = [-1, 1, 1, -1]
 	attr_accessor :energy, :solution
-	def initialize
-		@energy=0.0
+	def initialize(energy=0.0)
+		@energy=energy
 		@solution=Array.new(Emsa::MAX_LENGTH)
 		0.upto(Emsa::MAX_LENGTH-1) {|x| @solution[x] = x}
 		0.upto(Emsa::MAX_LENGTH-1) {|x| tweak}
@@ -88,41 +88,40 @@ class Emsa
 	STEPS_PER_CHANGE=100
 
 	def initialize(print_stats_to_file)
-		timer=solution=use_new=0
+		timer=solution=0
 		temperature=INITIAL_TEMPERATURE
 	
 		current=Member.new
 		working=Member.new
-		best=Member.new
+		best=Member.new(100.0)
 
-		stats = ""
 		current.compute_energy
-		best.energy = 100.0	
-			
 		current.copy_into(working)
 		
+		stats = ""
+		use_new=false
 		output_interval = 0
 		while temperature > FINAL_TEMPERATURE
 			puts "Temperature: #{temperature}" unless output_interval % 20 != 0
 			accepted = 0
 			0.upto(STEPS_PER_CHANGE-1) {
-				use_new = 0	
+				use_new = false	
 				working.tweak
 				working.compute_energy
 	
 				if working.energy <= current.energy
-					use_new = 1
+					use_new = true
 				else
 					calc = Math.exp(-(working.energy - current.energy)/temperature)
 					if calc > rand()
 						accepted += 1
-						use_new = 1
+						use_new = true
 					end
 				end
 			}
 
-			if use_new == 1
-				use_new = 0
+			if use_new
+				use_new = false
 				working.copy_into(current)
 				if current.energy < best.energy
 					current.copy_into(best)
