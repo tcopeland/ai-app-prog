@@ -129,16 +129,15 @@ class Genetic
 			@current_crossovers = @current_mutations = 0
 			perform_selection
 			@current_population = @current_population == 0 ? 1 : 0
+			perform_fitness_check
 			generation += 1
-			if generation % 100 == 0
-				puts "Generation " + (generation-1).to_s
-				printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
-				printf("\tAverage fitness = %f\n", @avg_fitness)
-				printf("\tMinimum fitness = %f\n", @min_fitness)
-				printf("\tCrossovers = %d\n", @current_crossovers)
-				printf("\tMutation = %d\n", @current_mutations)
-				printf("\tPercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
-			end
+			puts "Generation " + (generation-1).to_s
+			printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
+			printf("\tAverage fitness = %f\n", @avg_fitness)
+			printf("\tMinimum fitness = %f\n", @min_fitness)
+			printf("\tCrossovers = %d\n", @current_crossovers)
+			printf("\tMutation = %d\n", @current_mutations)
+			printf("\tPercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
 			if generation > (MAX_GENERATIONS * 0.25) && (@avg_fitness / @max_fitness) > 0.98
 				puts "Converged"
 				break
@@ -213,12 +212,7 @@ class Genetic
 		@@class_chrom = 0
 		ret_fitness = 0.0	
 		fit_marker = rand * @total_fitness * 0.25
-		c = 0
 		loop do		
-			c += 1
-			if c % 1000 == 0
-				puts "ret_fitness = #{ret_fitness}"
-			end
 			ret_fitness += @populations[@current_population][@@class_chrom].fitness
 			@@class_chrom += 1	
 			break if ret_fitness >= fit_marker
@@ -256,7 +250,6 @@ class Genetic
 				@min_fitness = @populations[@current_population][chrom].fitness
 			end
 			@total_fitness += @populations[@current_population][chrom].fitness
-			puts "@max_fitness = #{@max_fitness}; @min_fitness = #{@min_fitness}; @total_fitness = #{@total_fitness}"
 		}
 		@avg_fitness = @total_fitness.to_f / MAX_CHROMS.to_f
 	end
