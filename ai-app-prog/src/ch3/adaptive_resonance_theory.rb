@@ -108,11 +108,29 @@ class Adaptive
 					first = false
 				else
 					0.upto(MAX_ITEMS-1) {|item|
-						@prototype_vector[cluster][item] = @prototype_vector[cluster][item] == 1 && DATABASE[customer][item] == 1
+						@prototype_vector[cluster][item] = (@prototype_vector[cluster][item] == 1 && DATABASE[customer][item] == 1) ? 1 : 0
 						@sum_vector[cluster][item] += DATABASE[customer][item]
 					}
 				end
 			end
+		}
+	end
+	def display_customer_database
+		0.upto(TOTAL_PROTOTYPE_VECTORS-1) {|cluster|
+			puts "ProtoVector: #{cluster}"
+			0.upto(MAX_ITEMS-1) {|item|
+				printf("%1d ", @prototype_vector[cluster][item])
+			}
+			puts "\n"
+			0.upto(MAX_CUSTOMERS-1) {|customer|
+				if @membership[customer] == cluster
+					puts "Customer #{customer}"
+					0.upto(MAX_ITEMS-1) {|item|
+						printf("%1d ", DATABASE[customer][item])
+					}
+					puts " : #{@membership[customer]} :"
+				end
+			}
 		}
 	end
 	def vector_magnitude(v)
@@ -121,11 +139,12 @@ class Adaptive
 		res
 	end
 	def vector_bitwise_and(res, v, w)
-		0.upto(MAX_ITEMS-1) {|i| res[i] = v[i]==1 && w[i]==1 }
+		0.upto(MAX_ITEMS-1) {|i| res[i] = (v[i]==1 && w[i]==1) ? 1 : 0 }
 	end
 end
 
 if __FILE__ == $0
 	a = Adaptive.new	
 	a.perform_art1
+	a.display_customer_database
 end
