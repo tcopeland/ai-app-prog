@@ -25,18 +25,27 @@ class CmdToken < Token
 end
 
 class Tokenizer
+	COMMENT_START = ";"
+	DELIMITER = Regexp.new('\(|\)')
+	WHITESPACE = Regexp.new('\s')
 	attr_reader :tokens
 	def initialize
 		@tokens = []
 		@cur = ""
+		@discarding = false
 	end
 	def parse(txt)
 		txt.each_byte {|x|
 			c = x.chr
-			if c == '(' || c == ')'
+			if @discarding
+				@discarding = false if x == 10
+			elsif c == COMMENT_START
+				shift_accumulator if !@cur.empty?
+				@discarding = true
+			elsif DELIMITER.match(c)
 				shift_accumulator if !@cur.empty?
 				@tokens << DelimiterToken.new(c)
-			elsif c =~ /\s/
+			elsif WHITESPACE.match(c)
 				shift_accumulator if !@cur.empty?
 			else 
 				@cur << c

@@ -21,5 +21,10 @@ class TokenizerTest < Test::Unit::TestCase
 		assert(t.tokens[1].kind_of?(CmdToken))
 		assert(t.tokens[1].defrule?)
 	end
+	def test_discard_comments
+		t = Tokenizer.new
+		t.parse("; this is a comment, followed by a defrule   \n (defrule")
+		assert(t.tokens.size == 2)
+	end
 end
 
