@@ -66,13 +66,15 @@ class Genetic
 			perform_selection
 			@current_population = @current_population == 0 ? 1 : 0
 			generation += 1
-			puts "Generation " + (generation-1).to_s
-			printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
-			printf("\tAverage fitness = %f\n", @avg_fitness)
-			printf("\tMinimum fitness = %f\n", @min_fitness)
-			printf("\tCrossovers = %d\n", @current_crossovers)
-			printf("\tMutation = %d\n", @current_mutations)
-			printf("\tpercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
+			if generation % 100 == 0
+				puts "Generation " + (generation-1).to_s
+				printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
+				printf("\tAverage fitness = %f\n", @avg_fitness)
+				printf("\tMinimum fitness = %f\n", @min_fitness)
+				printf("\tCrossovers = %d\n", @current_crossovers)
+				printf("\tMutation = %d\n", @current_mutations)
+				printf("\tpercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
+			end
 			if generation > (MAX_GENERATIONS * 0.25) && (@avg_fitness / @max_fitness) > 0.98
 				puts "Converged"
 				break
@@ -141,23 +143,22 @@ class Genetic
 	def select_parent
 		@@class_chrom = 0
 		ret = -1
-		ret_fitness = 0.0
-		loop do
+		begin
+			loop do
 			ret_fitness = @populations[@current_population][@@class_chrom].fitness.to_f / @max_fitness.to_f
-			@@class_chrom = 0 if @@class_chrom == MAX_CHROMS - 1
-			
-			#puts "ret_fitness = #{ret_fitness}, @populations[@current_population][@@class_chrom].fitness = #{@populations[@current_population][@@class_chrom].fitness}, @min_fitness = #{@min_fitness}"
-			# OVER AND OVER AND OVER
-			# ret_fitness = 0.0, @populations[@current_population][@@class_chrom].fitness = 0.0, @min_fitness = 0.0
-			# OVER AND OVER AND OVER
-
-			if @populations[@current_population][@@class_chrom].fitness > @min_fitness && rand < ret_fitness
-				ret = @@class_chrom
-				@@class_chrom += 1
-				ret_fitness = @populations[@current_population][@@class_chrom].fitness
-				break
+				@@class_chrom = 0 if @@class_chrom == MAX_CHROMS - 1
+				
+				#puts "ret_fitness = #{ret_fitness}, @populations[@current_population][@@class_chrom].fitness = #{@populations[@current_population][@@class_chrom].fitness}, @min_fitness = #{@min_fitness}, @@class_chrom=#{@@class_chrom}"
+	
+				if @populations[@current_population][@@class_chrom].fitness > @min_fitness && rand < ret_fitness
+					ret = @@class_chrom
+					@@class_chrom += 1
+					ret_fitness = @populations[@current_population][@@class_chrom].fitness
+					raise "STOP"
+				end
+				@@class_chrom += 1	
 			end
-			@@class_chrom += 1
+		rescue Exception => e
 		end
 		return ret	
 	end
@@ -173,10 +174,14 @@ class Genetic
 				answer = args[0]**3 + args[1]**2 + args[2]
 				begin 
 					interpret_stm(@populations[@current_population][chrom], args)
+					# no stack crashes, so some points
+					@populations[@current_population][chrom].fitness += Instructions::TIER1
+					# only one answer, more points
 					@populations[@current_population][chrom].fitness += Instructions::TIER2 if @stack.size == 1
+					# w00t!
 					@populations[@current_population][chrom].fitness += Instructions::TIER3 if @stack.first == answer
 				rescue Exception => x
-					@populations[@current_population][chrom].fitness += Instructions::TIER1 if x.message.to_i == Instructions::NONE
+					# no points if there was an error
 				end
 			}	
 			if @populations[@current_population][chrom].fitness > @max_fitness	
