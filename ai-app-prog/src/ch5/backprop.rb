@@ -46,7 +46,7 @@ class BackProp
 		  Element.new(0.0, 1.0, 0.0, 1.0, [0.0, 0.0, 0.0, 1.0])
 		]
 	end
-	def rand_weight
+	def create_random_weight
 		(rand(RAND_MAX) / RAND_MAX) - 0.5
 	end
 	def run
@@ -129,7 +129,7 @@ class BackProp
 				selection = index
 			end
 		}
-		return selection
+		selection
 	end
 	def back_propagate
 		OUTPUT_NEURONS.times {|output|
@@ -187,13 +187,13 @@ class BackProp
 		INPUT_NEURONS.times {|input|
 			HIDDEN_NEURONS.times {|hid|
 				@wih[input] = [] if @wih[input] == nil
-				@wih[input][hid] = rand_weight
+				@wih[input][hid] = create_random_weight
 			}
 		}
 		HIDDEN_NEURONS.times {|hid|
 			OUTPUT_NEURONS.times {|output|
 				@who[hid] = [] if @who[hid] == nil
-				@who[hid][output] = rand_weight
+				@who[hid][output] = create_random_weight
 			}
 		}
 	end
