@@ -50,7 +50,7 @@ class BackProp
 	end
 	def run
 		err=0.0
-		i=sample=iterations=sum=0
+		sample=iterations=sum=0
 		file = File.open("stats.txt", "w")
 		assign_random_weights
 		while true
@@ -72,12 +72,11 @@ class BackProp
 			feed_forward
 	
 			err = 0.0
-			OUTPUT_NEURONS.times {|output|
-				err += (@samples[sample].output_neurons[output] - @actual[output]) ** 2
+			OUTPUT_NEURONS.times {|i|
+				err += (@samples[sample].output_neurons[i] - @actual[i]) ** 2
 			}
 			err = 0.5 * err
 			file.write("#{err}\n")
-			#puts "MSE = " + err.to_s
 		
 			iterations += 1
 			break if iterations > MAX_ITERATIONS
@@ -85,7 +84,34 @@ class BackProp
 
 			back_propagate
 		end
+		MAX_SAMPLES.times {|i|
+			@inputs[0] = @samples[i].health
+			@inputs[1] = @samples[i].knife
+			@inputs[2] = @samples[i].gun
+			@inputs[3] = @samples[i].enemy
+			
+			@target[0] = @samples[i].output_neurons[0]
+			@target[1] = @samples[i].output_neurons[1]
+			@target[2] = @samples[i].output_neurons[2]
+			@target[3] = @samples[i].output_neurons[3]
+		
+			feed_forward
+			if action(actual) != actual(target) 
+				
+			end	
+		}
 		file.close			
+	end
+	def action(vector)
+		selection = 0
+		max=vector[0]
+		1.upto(OUTPUT_NEURONS-1).times {|index|
+			if vector[index] > max
+				max = vector[index]
+				selection = index
+			end
+		}
+		return selection
 	end
 	def back_propagate
 		OUTPUT_NEURONS.times {|output|
