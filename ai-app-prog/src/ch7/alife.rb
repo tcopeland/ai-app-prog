@@ -100,9 +100,9 @@ class ArtificialLife
 	WEST_RIGHT = [Location.new(-2,0), Location.new(-2,-1), Location.new(9,9)]
 	WEST_PROX = [Location.new(1,0), Location.new(1,-1), Location.new(0,-1), Location.new(-1,-1), Location.new(-1,0), Location.new(9,9)]
 
-	STATS="stats.dat"
-	AGENTS="agents.dat"
-	RUNTIME="runtime.dat"
+	STATS_FILENAME="stats.dat"
+	AGENTS_FILENAME="agents.dat"
+	RUNTIME_FILENAME="runtime.dat"
 
 	def initialize(args)
 		if args.include?("--help") or args.include?("-h") 
@@ -162,6 +162,7 @@ class ArtificialLife
 				end
 			}
 		else
+			raise "Reading agent data from a file isn't implemented yet"
 		end
 		
 	end
