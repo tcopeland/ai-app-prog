@@ -177,13 +177,13 @@ class Simulation
 	end
 
 	def emit_data_file(ant)
-		f = File.new("cities_data.txt", "w")
+		f = File.new("cities.txt", "w")
 		(0..(MAX_CITIES-1)).each {|x|
 			f.write "#{@cities[x].x} #{@cities[x].y}\n"
 		}
 		f.close
 
-		f = File.new("solution.dat", "w")
+		f = File.new("solution.txt", "w")
 		(0..(MAX_CITIES-1)).each {|x|
 			f.write "#{@cities[ant.path[x]].x} #{@cities[ant.path[x]].y}\n"
 		}
@@ -215,7 +215,7 @@ class Simulation
 				if current_time != MAX_TIME
 					restart_ants
 				end
-				puts "Time is #{current_time} #{@best.tour_length}"
+				#puts "Time is #{current_time} #{@best.tour_length}"
 			end
 		end	
 		puts "Best tour = #{@best.tour_length}\n\n"
@@ -224,7 +224,6 @@ class Simulation
 end
 
 if __FILE__ == $0
-	puts Simulation::MAX_CITIES
 	s = Simulation.new
 	s.main
 end

@@ -2,9 +2,10 @@
 
 set terminal png color
 set title 'Cities'
-set key 70,30
+set nokey
 set xrange [0:100]
 set yrange [0:100]
 set output '../../www/ch4/cities.png'
-plot "cities_data.txt" u 1:2 t "City" w points 
+plot "cities.txt" u 1:2 t "City" w points, \
+			"solution.txt" u 1:2 t "Path" w lines
 
