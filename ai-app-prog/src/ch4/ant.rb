@@ -121,6 +121,22 @@ class Simulation
 	end
 
 	def simulate_ants
+		moving = 0
+		(0..(MAX_ANTS-1)).each {|k|
+			if @ants[k].path_index < MAX_CITIES
+				@ants[k].next_city=select_next_city(k)
+				@ants[k].tabu[@ants[k].next_city] = 1a
+				@ants[k].path_index += 1
+				@ants[k].path[@ants[k].path_index] = @ants[k].next_city
+				@ants[k].tour_length += distance[@ants[k].current_city][@ants[k].next_city]
+				if @ants[k].path_index == MAX_CITIES
+					@ants[k].tour_length += distance[@ants[k].path[MAX_CITIES-1]][@ants[k].path[0]]
+				end
+				@ants[k].current_city = @ants[k].next_city
+				moving += 1
+			end
+		}
+		return moving
 	end
 	
 	def abs(x)
