@@ -301,7 +301,8 @@ class Predator < MovingObject
 	end
 	def move
 		super
-			
+		# determine angle between current heading and prey
+		# plug that into mbrship functions		
 		@heading.translate(1)
 	end
 end
