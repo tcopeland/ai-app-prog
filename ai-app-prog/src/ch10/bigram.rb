@@ -6,17 +6,17 @@ class Bigram
 	FIRST_WORD=0
 	MIDDLE_WORD=1
 	LAST_WORD=2
-	START_SYMBOL=0
-	END_SYMBOL=1
+	START_SYMBOL="<START>"
+	END_SYMBOL="<END>"
 	
 	def initialize(debug)
 		@debug = debug
 		@word_vector = []
 		@occurrences = Hash.new(0)
-		@@last_index = START_SYMBOL
+		@@last_index = 0
 		
-		@word_vector << "<START>"
-		@word_vector << "<END>"
+		@word_vector << START_SYMBOL
+		@word_vector << END_SYMBOL
 
 		@bigram_array = Array.new(MAX_WORDS)
 		@bigram_array.each_index {|x| @bigram_array[x] = Array.new(MAX_WORDS, 0)}
@@ -24,8 +24,8 @@ class Bigram
 
 	def build_sentence
 		max = 0
-		word = next_word(@word_vector[START_SYMBOL])
-		while word != "<END>"
+		word = next_word(START_SYMBOL)
+		while word != END_SYMBOL
 			print " #{word}"
 			word = next_word(word)
 			max += rand(12) + 1	
@@ -88,7 +88,7 @@ class Bigram
 				b[1] <=> a[1]
 			}
 			a.each {|x|
-				puts "#{x[0]} occurred #{x[1]} times"
+				puts "\"#{x[0]}\" occurred #{x[1]} times"
 			}
 		end
 	end
@@ -102,11 +102,11 @@ class Bigram
 			@word_vector << word
 		end
 		if order == FIRST_WORD
-			@bigram_array[START_SYMBOL][@word_vector.index(word)] += 1
+			@bigram_array[0][@word_vector.index(word)] += 1
 			@occurrences[START_SYMBOL] += 1
 		elsif order == LAST_WORD
-			@bigram_array[END_SYMBOL][@word_vector.index(word)] += 1
-			@bigram_array[@word_vector.index(word)][END_SYMBOL] += 1
+			@bigram_array[1][@word_vector.index(word)] += 1
+			@bigram_array[@word_vector.index(word)][1] += 1
 			@occurrences[END_SYMBOL] += 1
 		else
 			@bigram_array[@@last_index][@word_vector.index(word)] += 1
