@@ -230,22 +230,22 @@ class SpikeProfile
 		@high = high
 	end
 	def compute(value)
-		tlow = @low
-		thigh = @high
-    value += (-tlow)
-    if tlow<0 and thigh<0
-      thigh = -(thigh-tlow)
-    elsif tlow<0 and thigh>0
-      thigh += -tlow
-    elsif tlow>0 and thigh>0
-      thigh -= tlow
+		temp_low = @low
+		temp_high = @high
+    value += (-temp_low)
+    if temp_low<0 and temp_high<0
+      temp_high = -(temp_high-temp_low)
+    elsif temp_low<0 and temp_high>0
+      temp_high += -temp_low
+    elsif temp_low>0 and temp_high>0
+      temp_high -= temp_low
     end
-    peak = thigh/2.0
-    tlow = 0.0
+    peak = temp_high/2.0
+    temp_low = 0.0
     if value<peak
       return value/peak
     elsif value>peak
-      return (thigh-value)/peak
+      return (temp_high-value)/peak
     end
     return 1.0
 	end
