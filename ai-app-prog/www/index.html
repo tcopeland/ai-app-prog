@@ -140,7 +140,7 @@ x += 1
 </pre>
 This bit me something fierce on the Ant Algorithm code.  Of course, what really bit me was that I didn't write any unit tests.  Gack.<p>
 <li>C has the <code>static</code> keyword which can be used inside functions to indicate that a variable is only initialized once.  This translates to a class-level variable in Ruby.  At least, that's the best comparison I can think of at the moment, comments are welcome.<p>
-<li>Some fairly verbose C idioms can go away when converting to Ruby... for example, instead of manually traversing an array to find the largest element, just do a <code>largest = array.sort[0]</code>.  If the array isn't very large, that'll do the trick.
+<li>Some fairly verbose C idioms can go away when converting to Ruby... for example, instead of manually traversing an array to find the largest element, just use <code>Array.max</code>.  Thanks to Charles Comstock for suggesting this in lieu of my original suggestion of the O(n) <code>Array.sort[0]</code>.
 </ul>
 </body>
 </html>

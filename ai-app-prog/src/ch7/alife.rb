@@ -69,7 +69,7 @@ class Agent
 			}
 		}
 		
-		largest = @actions.sort[0]
+		largest = @actions.max
 		winner = @actions.index(largest)
 		if winner == ArtificialLife::ACTION_TURN_LEFT or winner == ArtificialLife::ACTION_TURN_RIGHT
 			turn(winner)
