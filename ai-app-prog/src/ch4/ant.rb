@@ -49,7 +49,7 @@ class Ants
 		@ants = []
 		city_index = 0
 		(0..Simulation::MAX_ANTS-1).each {|x|
-			@ants << Ant.new(city_index % (Simulation::MAX_CITIES-1))
+			@ants << Ant.new(city_index % Simulation::MAX_CITIES)
 			city_index += 1
 		}	
 	end
@@ -59,7 +59,7 @@ class Ants
 			if  best_so_far == nil or @ants[x].tour_length < best_so_far.tour_length
 				best_so_far = @ants[x]
 			end
-      @ants[x] = Ant.new(city_index % (Simulation::MAX_CITIES-1))
+      @ants[x] = Ant.new(city_index % Simulation::MAX_CITIES)
       city_index += 1
 		}
 		return best_so_far
@@ -84,7 +84,7 @@ class Ants
 	end
 	def select_next_city(ant, pheromone, distance)
 		denom = 0.0
-		@ants.each_index {|target_city|
+		0.upto(Simulation::MAX_CITIES-1) {|target_city|
 			if ant.tabu[target_city] == 0
 				denom += ant_product(ant, target_city, pheromone, distance)
 			end
