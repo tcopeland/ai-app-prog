@@ -13,6 +13,8 @@ class BackProp
 	OUTPUT_NEURONS = 4
 	RAND_MAX = 2147483647.0
 	MAX_SAMPLES = 18
+	LEARN_RATE = 0.2
+	MAX_ITERATIONS = 10000
 	def initialize
 		@wih = []
 		@who = []
@@ -20,6 +22,8 @@ class BackProp
 		@target = []
 		@hidden = []
 		@actual = []
+		@erro = []
+		@errh = []
 		@samples = [
   		Element.new(2.0, 0.0, 0.0, 0.0, [0.0, 0.0, 1.0, 0.0]),
 		  Element.new(2.0, 0.0, 0.0, 1.0, [0.0, 0.0, 1.0, 0.0]),
@@ -76,9 +80,39 @@ class BackProp
 			#puts "MSE = " + err.to_s
 		
 			iterations += 1
-			break if iterations > 100000
+			break if iterations > MAX_ITERATIONS
+			puts iterations.to_s + " of " + MAX_ITERATIONS.to_s + " iterations" if iterations % 100 == 0
+
+			back_propagate
 		end
 		file.close			
+	end
+	def back_propagate
+		OUTPUT_NEURONS.times {|output|
+			@erro[output] = (@target[output] - @actual[output])	 * sigmoid_derivative(@actual[output])
+		}
+		HIDDEN_NEURONS.times {|hid|
+			@errh[hid] = 0.0
+			OUTPUT_NEURONS.times {|output|
+				@errh[hid] += @erro[output] * @who[hid][output]
+			}
+			@errh[hid] *= sigmoid_derivative(@hidden[hid])
+		}
+		OUTPUT_NEURONS.times {|output|
+			HIDDEN_NEURONS.times {|hid|
+				@who[hid][output] += (LEARN_RATE * @erro[output] * @hidden[hid])
+			}
+			@who[HIDDEN_NEURONS][output] += (LEARN_RATE * @erro[output])
+		}
+		HIDDEN_NEURONS.times {|hid|
+			INPUT_NEURONS.times {|input|
+				@wih[input][hid] += (LEARN_RATE * @errh[hid] * @inputs[input])		
+			}
+			@wih[INPUT_NEURONS][hid] += (LEARN_RATE * @errh[hid])
+		}
+	end
+	def sigmoid_derivative(val)
+		val * (1.0 - val)
 	end
 	def sigmoid(val)
 		(1.0 / (1.0 + Math.exp(-val.to_f)))
