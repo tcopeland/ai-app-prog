@@ -35,7 +35,7 @@ end
 
 class Genetic
 	MAX_PROGRAM=6
-	MAX_GENERATIONS=10000
+	MAX_GENERATIONS=100
 	MAX_CHROMS=3000
 	MUTATION_PROB = 0.02
 	CROSSOVER_PROB = 0.8
@@ -73,7 +73,7 @@ class Genetic
 				printf("\tMinimum fitness = %f\n", @min_fitness)
 				printf("\tCrossovers = %d\n", @current_crossovers)
 				printf("\tMutation = %d\n", @current_mutations)
-				printf("\tpercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
+				printf("\tPercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
 			end
 			if generation > (MAX_GENERATIONS * 0.25) && (@avg_fitness / @max_fitness) > 0.98
 				puts "Converged"
@@ -83,26 +83,26 @@ class Genetic
 				puts "Found solution"
 				break
 			end
-			puts "Generation " + (generation-1).to_s
-			printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
-			printf("\tAverage fitness = %f\n", @avg_fitness)
-			printf("\tMinimum fitness = %f\n", @min_fitness)
-			printf("\tCrossovers = %d\n", @current_crossovers)
-			printf("\tMutation = %d\n", @current_mutations)
-			printf("\tPercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
-			MAX_CHROMS.times {|i|
-				if @populations[@current_population][i].fitness == @max_fitness
-					printf("Program %3d : ", i)
-					@populations[@current_population][i].prog_size.times {|x|
-						printf("%0.2d ", @populations[@current_population][i].program[index])
-					}
-					printf("\n")
-					printf("Fitness %f\n", @populations[@current_population][i].fitness)
-					printf("ProgSize %f\n", @populations[@current_population][i].prog_size)
-					break
-				end
-			}
 		end
+		puts "Generation " + (generation-1).to_s
+		printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
+		printf("\tAverage fitness = %f\n", @avg_fitness)
+		printf("\tMinimum fitness = %f\n", @min_fitness)
+		printf("\tCrossovers = %d\n", @current_crossovers)
+		printf("\tMutation = %d\n", @current_mutations)
+		printf("\tPercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
+		MAX_CHROMS.times {|i|
+			if @populations[@current_population][i].fitness == @max_fitness
+				printf("Program %3d : ", i)
+				@populations[@current_population][i].prog_size.times {|x|
+					printf("%0.2d ", @populations[@current_population][i].program[i])
+				}
+				printf("\n")
+				printf("Fitness %f\n", @populations[@current_population][i].fitness)
+				printf("ProgSize %f\n", @populations[@current_population][i].prog_size)
+				break
+			end
+		}
 	end
 	def perform_selection
 		0.step(MAX_CHROMS-1, 2) {|chrom|
@@ -145,16 +145,14 @@ class Genetic
 		ret = -1
 		begin
 			loop do
-			ret_fitness = @populations[@current_population][@@class_chrom].fitness.to_f / @max_fitness.to_f
+				ret_fitness = @populations[@current_population][@@class_chrom].fitness.to_f / @max_fitness.to_f
 				@@class_chrom = 0 if @@class_chrom == MAX_CHROMS - 1
-				
-				#puts "ret_fitness = #{ret_fitness}, @populations[@current_population][@@class_chrom].fitness = #{@populations[@current_population][@@class_chrom].fitness}, @min_fitness = #{@min_fitness}, @@class_chrom=#{@@class_chrom}"
-	
-				if @populations[@current_population][@@class_chrom].fitness > @min_fitness && rand < ret_fitness
+				#puts "@@class_chrom == #{@@class_chrom}, @populations[@current_population][@@class_chrom].fitness = #{@populations[@current_population][@@class_chrom].fitness}, @min_fitness = #{@min_fitness}, ret_fitness = #{ret_fitness}"
+				if @populations[@current_population][@@class_chrom].fitness >= @min_fitness && rand < 0.5
 					ret = @@class_chrom
 					@@class_chrom += 1
 					ret_fitness = @populations[@current_population][@@class_chrom].fitness
-					raise "STOP"
+					raise "STOP"	
 				end
 				@@class_chrom += 1	
 			end
