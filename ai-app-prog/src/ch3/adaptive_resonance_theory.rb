@@ -1,5 +1,43 @@
 #!/usr/local/bin/ruby
 
+class Vector
+  def initialize(size_or_array)
+    if size_or_array.kind_of?(Array)
+      @a = size_or_array
+    else
+      @a = Array.new(size_or_array,0)
+    end
+  end
+  def value(x)
+    @a[x]
+  end
+  def set(x)
+    @a[x] = 1
+  end
+  def set?(x)
+    @a[x] == 1
+  end
+  def magnitude
+    @a.collect{|x| x > 0 ? 1 : nil }.compact.size
+  end
+  def clear(x)
+    @a[x] = 0
+  end
+  def add(x)
+    @a.each_index{|i| @a[i] += x.value(i) }
+  end
+  def bitwise_and(w)
+    res = Vector.new(@a.size)
+    0.upto(@a.size-1) {|i|
+      res.set(i) if set?(i) && w.set?(i)
+    }
+    res
+  end
+  def to_s
+    @a.inspect
+  end
+end
+
 class Adaptive
 	DATABASE = [
         [ 0,   0,   0,   0,   0,   1,   0,   0,   1,   0,   0],
