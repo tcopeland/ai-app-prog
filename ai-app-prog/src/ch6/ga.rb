@@ -1,7 +1,8 @@
 #!/usr/local/bin/ruby
 
 class Population
-	attr_reader :fitness, :prog_size, :program
+	attr_reader :prog_size, :program
+	attr_accessor :fitness
 	def initialize
 		reset_fitness
 		@prog_size = Genetic::MAX_PROGRAM-1
@@ -77,7 +78,7 @@ class StackMachine
 		args.reverse.each {|x| @stack.push(x) }
 	end
 	def solve
-		0.upto(@pop.prog_size - 1) {|x|
+		@pop.prog_size.times {|x|
 			case @pop.program[x]
 				when Instructions::DUP
 					@stack.assert_elements(1)
@@ -117,7 +118,6 @@ class Genetic
 		@current_crossovers=0
 		@current_mutations=0
 		@populations = []
-		@@weird_x_value = 0
 		@@class_chrom = 0
 	end
 	def run
@@ -168,13 +168,14 @@ class Genetic
 			end
 		}
 	end
+
 	def perform_selection
-		0.step(MAX_CHROMS-1, 2) {|x|
-			perform_reproduction(select_parent, select_parent, x, x+1)
+		0.step(MAX_CHROMS-1, 2) {|c|
+			perform_reproduction(select_parent, select_parent, c, c+1)
 		}
 	end
+
 	def perform_reproduction(para, parb, childa, childb)
-		next_pop = @current_population == 0 ? 1 : 0
 		cross_point = 0
 		if rand > XPROB
 			if @populations[@current_population][para].prog_size - 2 > @populations[@current_population][parb].prog_size
@@ -186,6 +187,7 @@ class Genetic
 		else		
 			cross_point = MAX_PROGRAM
 		end
+		next_pop = @current_population == 0 ? 1 : 0
 		@populations[next_pop] = [] if @populations[next_pop] == nil
 		@populations[next_pop][childa] = Population.new if @populations[next_pop][childa] == nil
 		@populations[next_pop][childb] = Population.new if @populations[next_pop][childb] == nil
@@ -196,8 +198,9 @@ class Genetic
 		cross_point.upto(MAX_PROGRAM-1) {|i|
 			@populations[next_pop][childa].program[i] = mutate(@populations[@current_population][parb].program[i])
 			@populations[next_pop][childb].program[i] = mutate(@populations[@current_population][para].program[i])
-		}
+		}		
 	end
+
 	def mutate(gene)
 		if rand > MPROB
 			gene = rand(Instructions::MAX_INSTRUCTIONS)
@@ -210,7 +213,12 @@ class Genetic
 		@@class_chrom = 0
 		ret_fitness = 0.0	
 		fit_marker = rand * @total_fitness * 0.25
-		loop do	
+		c = 0
+		loop do		
+			c += 1
+			if c % 1000 == 0
+				puts "ret_fitness = #{ret_fitness}"
+			end
 			ret_fitness += @populations[@current_population][@@class_chrom].fitness
 			@@class_chrom += 1	
 			break if ret_fitness >= fit_marker
@@ -248,11 +256,11 @@ class Genetic
 				@min_fitness = @populations[@current_population][chrom].fitness
 			end
 			@total_fitness += @populations[@current_population][chrom].fitness
+			puts "@max_fitness = #{@max_fitness}; @min_fitness = #{@min_fitness}; @total_fitness = #{@total_fitness}"
 		}
 		@avg_fitness = @total_fitness.to_f / MAX_CHROMS.to_f
-		printf("%d %6.4f %6.4f %6.4f\n", @@weird_x_value, @min_fitness, @avg_fitness, @max_fitness)
-		@@weird_x_value += 1
 	end
+
 	def init_population	
 		MAX_CHROMS.times {|x| 
 			@populations[@current_population] = [] if @populations[@current_population] == nil
