@@ -116,26 +116,11 @@ class ArtificialLife
 		@no_reproduction = args.include?("--no-reproduction")
 		@step = args.include?("--step")
 		@verbose = args.include?("-v")
-	end
-		
-	def loop
-		0.upto(MAX_STEPS-1) {
-			if @seed_population
-				emit_landscape
-			end
-			if @step
-				getc
-			end
-			
-		}
-	end
-
-	def init
 		if !@seed_population
-			@fp = File.open(STATS, "w")
+			@fp = File.open(STATS_FILENAME, "w")
 		end
 		if @emit_runtime_trend
-			@rfp = File.open(RUNTIME, "w")
+			@rfp = File.open(RUNTIME_FILENAME, "w")
 		end
 
 		puts "Creating landscape" unless !@verbose
@@ -176,6 +161,47 @@ class ArtificialLife
 			raise "Reading agent data from a file isn't implemented yet"
 		end
 	end
+		
+	def loop
+		0.upto(MAX_STEPS-1) {|i|
+			if @seed_population
+				emit_landscape
+			end
+			if @step
+				getc
+			end
+			simulate
+			if !@seed_population
+				if i % 100 == 0
+					emit_trend_to_file
+				end
+			else
+				if @agents.empty? 
+					break
+				end
+			end
+			if @emit_runtime_trend
+				emit_runtime_trend_to_file
+			end
+		}
+		if !@seed_population
+			emit_agents_to_file
+		end
+		if @emit_runtime_trend
+			# TODO close runtime trend file
+		end
+	end
+	
+	def emit_trend_to_file
+		# TODO
+	end
+
+	def emit_agents_to_file
+		# TODO
+	end
+
+	def simulate
+	end
 
 	def getWeight
      rand(9)-1
@@ -188,5 +214,5 @@ end
 
 if __FILE__ == $0
 	life = ArtificialLife.new(ARGV)
-	life.init
+	life.loop
 end
