@@ -107,7 +107,7 @@ class Ants
 end
 
 class Simulation
-	MAX_CITIES = 15
+	MAX_CITIES = 20
 	MAX_DISTANCE = 100
 	MAX_TOUR = MAX_CITIES * MAX_DISTANCE
 	MAX_ANTS = 20
