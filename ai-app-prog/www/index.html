@@ -202,10 +202,11 @@ end
 in Ruby.  In other words. "non zero" in C needs to be translated to "not nil and not zero" in Ruby.<p>
 <li>A <code>do..while</code> forever loop in C can be done like this in Ruby:
 <pre>
-begin
+loop do
 	# do stuff
-end until !true
-</pre><p>
+end
+</pre>
+Thanks to Brian Schroeder for suggesting this idiom vs my previous idea of <code>while [loop body] end until !true</code><p>
 <li>Translate pre- and post-increment statements correctly.  C code like this:
 <pre>
 int x = 0;
