@@ -9,6 +9,7 @@ class City
 end
 
 class Ant
+	attr_accessor :tour_length
 	def initialize(city)
 		@current_city = city
 		@next_city = -1
@@ -43,8 +44,8 @@ class Simulation
 		@ants = []
 		@distance = []
 		@pheromone = []
-		@best = MAX_TOUR
-		@best_index = 0
+		@best = Ant.new
+		@best.tour_length = 500000
 	
 		(0..(MAX_CITIES-1)).each {|x|
 			@cities[x] =City.new(rand(MAX_DISTANCE), rand(MAX_DISTANCE))
@@ -73,6 +74,19 @@ class Simulation
 			city_index += 1
 			@ants[x] = Ant.new(city_index)
 		}	
+	end
+	
+	def restart_ants
+		(0..(MAX_ANTS-1)).each {|x| 
+			if @ants[x].tour_length < @best.tour_length
+				@best = @ants[x]
+			end
+			if city_index == MAX_CITIES
+        city_index = 0
+      end
+      city_index += 1
+      @ants[x] = Ant.new(city_index)
+		}
 	end
 
 	def abs(x)
