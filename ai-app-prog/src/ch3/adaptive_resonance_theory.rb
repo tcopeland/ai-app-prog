@@ -147,12 +147,12 @@ class Adaptive
 					val = @sum_vector[@membership[customer]][item]
 				end
 			}
-			puts "For customer #{customer}"
+			printf("For customer #{customer}, ")
 			if best >= 0
-				puts "The best recommendation is #{best} (#{ITEM_NAMES[best]})"
+				puts "the best recommendation is #{best} (#{ITEM_NAMES[best]})"
 				puts "Owned by #{@sum_vector[@membership[customer]][best]} out of #{@members[@membership[customer]]} members of this cluster"
 			else
-				puts "No recommendation can be made"
+				puts "no recommendation can be made"
 			end
 			printf("Already owns: ")
 			0.upto(ITEM_NAMES.size-1) {|item|
@@ -178,6 +178,6 @@ end
 if __FILE__ == $0
 	a = Adaptive.new	
 	a.perform_art1
-	#a.display_customer_database
+	a.display_customer_database
 	a.make_recommendations
 end
