@@ -105,56 +105,23 @@ class BackProp
 		}
 		printf("Network is %g%% correct\n", (sum.to_f/MAX_SAMPLES.to_f)*100)
 
-		@inputs[0] = 2.0
-		@inputs[1] = 1.0
-		@inputs[2] = 1.0
-		@inputs[3] = 1.0
-		feed_forward
-		puts "2111 action " + STRINGS[action(@actual)]
-
-		@inputs[0] = 1.0
-		@inputs[1] = 1.0
-		@inputs[2] = 1.0
-		@inputs[3] = 2.0
-		feed_forward
-		puts "1112 action " + STRINGS[action(@actual)]
-
-		@inputs[0] = 0.0
-		@inputs[1] = 0.0
-		@inputs[2] = 0.0
-		@inputs[3] = 0.0
-		feed_forward
-		puts "0000 action " + STRINGS[action(@actual)]
-
-		@inputs[0] = 0.0
-		@inputs[1] = 1.0
-		@inputs[2] = 1.0
-		@inputs[3] = 1.0
-		feed_forward
-		puts "0111 action " + STRINGS[action(@actual)]
-
-		@inputs[0] = 2.0
-		@inputs[1] = 0.0
-		@inputs[2] = 1.0
-		@inputs[3] = 3.0
-		feed_forward
-		puts "2013 action " + STRINGS[action(@actual)]
-
-		@inputs[0] = 2.0
-		@inputs[1] = 1.0
-		@inputs[2] = 0.0
-		@inputs[3] = 3.0
-		feed_forward
-		puts "2103 action " + STRINGS[action(@actual)]
-
-		@inputs[0] = 0.0
-		@inputs[1] = 1.0
-		@inputs[2] = 0.0
-		@inputs[3] = 3.0
-		feed_forward
-		puts "0103 action " + STRINGS[action(@actual)]
+		test_inputs(2.0, 1.0, 1.0, 1.0, "2111")
+		test_inputs(1.0, 1.0, 1.0, 2.0, "1112")
+		test_inputs(0.0, 0.0, 0.0, 0.0, "0000")
+		test_inputs(0.0, 1.0, 1.0, 1.0, "0111")
+		test_inputs(2.0, 0.0, 1.0, 3.0, "2013")
+		test_inputs(2.0, 1.0, 0.0, 3.0, "2103")
+		test_inputs(0.0, 1.0, 0.0, 3.0, "0103")
 
 		file.close			
+	end
+	def test_inputs(a, b, c, d, display)
+		@inputs[0] = a
+		@inputs[1] = b
+		@inputs[2] = c
+		@inputs[3] = d
+		feed_forward
+		puts display + " action " + STRINGS[action(@actual)]
 	end
 	def action(vector)
 		selection = 0
