@@ -81,7 +81,21 @@ class ArtificialLife
 
 end
 
+def usage
+	puts "./alife [--seed-population] [--emit-runtime-trend] [--no-grow] [--carnivore-to-plant] [--no-reproduction] [--step]"
+end
 
 if __FILE__ == $0
+	seed_population = ARGV.include?("--seed-population")
+	emit_runtime_trend = ARGV.include?("--emit-runtime-trend")
+	no_grow = ARGV.include?("--no-grow")
+	carnivore_to_plant = ARGV.include?("--carnivore-to-plant")
+	no_reproduction = ARGV.include?("--no-reproduction")
+	step = ARGV.include?("--step")
+	if ARGV.include?("--help") or ARGV.include?("-h") 
+		usage
+		exit(1)
+	end
+	life = ArtificialLife.new
 	puts "Hi!"
 end
