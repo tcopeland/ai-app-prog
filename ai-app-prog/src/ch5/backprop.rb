@@ -81,7 +81,7 @@ class BackProp
 		
 			iterations += 1
 			break if iterations > MAX_ITERATIONS
-			puts iterations.to_s + " of " + MAX_ITERATIONS.to_s + " iterations" if iterations % 100 == 0
+			#puts iterations.to_s + " of " + MAX_ITERATIONS.to_s + " iterations" if iterations % 100 == 0
 
 			back_propagate
 		end
@@ -103,6 +103,57 @@ class BackProp
 				sum += 1
 			end	
 		}
+		printf("Network is %g%% correct\n", (sum.to_f/MAX_SAMPLES.to_f)*100)
+
+		@inputs[0] = 2.0
+		@inputs[1] = 1.0
+		@inputs[2] = 1.0
+		@inputs[3] = 1.0
+		feed_forward
+		puts "2111 action " + STRINGS[action(@actual)]
+
+		@inputs[0] = 1.0
+		@inputs[1] = 1.0
+		@inputs[2] = 1.0
+		@inputs[3] = 2.0
+		feed_forward
+		puts "1112 action " + STRINGS[action(@actual)]
+
+		@inputs[0] = 0.0
+		@inputs[1] = 0.0
+		@inputs[2] = 0.0
+		@inputs[3] = 0.0
+		feed_forward
+		puts "0000 action " + STRINGS[action(@actual)]
+
+		@inputs[0] = 0.0
+		@inputs[1] = 1.0
+		@inputs[2] = 1.0
+		@inputs[3] = 1.0
+		feed_forward
+		puts "0111 action " + STRINGS[action(@actual)]
+
+		@inputs[0] = 2.0
+		@inputs[1] = 0.0
+		@inputs[2] = 1.0
+		@inputs[3] = 3.0
+		feed_forward
+		puts "2013 action " + STRINGS[action(@actual)]
+
+		@inputs[0] = 2.0
+		@inputs[1] = 1.0
+		@inputs[2] = 0.0
+		@inputs[3] = 3.0
+		feed_forward
+		puts "2103 action " + STRINGS[action(@actual)]
+
+		@inputs[0] = 0.0
+		@inputs[1] = 1.0
+		@inputs[2] = 0.0
+		@inputs[3] = 3.0
+		feed_forward
+		puts "0103 action " + STRINGS[action(@actual)]
+
 		file.close			
 	end
 	def action(vector)
