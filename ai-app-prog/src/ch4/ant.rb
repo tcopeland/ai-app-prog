@@ -197,7 +197,7 @@ class Simulation
 	def emit_data_file(ant)
 		@cities.write("cities.txt")
 		File.open("solution.txt", "w") {|f|
-			(0..(MAX_CITIES-1)).each {|x|
+			@pheromone.each_index {|x|
 				f.write "#{@cities.get(ant.path[x]).x} #{@cities.get(ant.path[x]).y}\n"
 			}
 			f.write "#{@cities.get(ant.path[0]).x} #{@cities.get(ant.path[0]).y}\n"
