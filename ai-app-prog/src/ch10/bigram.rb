@@ -15,11 +15,11 @@ class Bigram
 		@sum_vector = Array.new(MAX_WORDS)
 		@@last_index = START_SYMBOL
 		
-		@word_vector[0] = "<START>"
-		@word_vector[1] = "<END>"
+		@word_vector << "<START>"
+		@word_vector << "<END>"
 
-		@bigram_array = Array.new(MAX_WORDS, 0)
-		@word = Array.new(MAX_WORDS+1)
+		@bigram_array = Array.new(MAX_WORDS)
+		@word = Array.new(MAX_WORD_LEN+1)
 		index = 0
 		first = false
 		file = File.open(filename, "r")
@@ -59,8 +59,18 @@ class Bigram
 	end
 
 	def load_word(word, order)
-		word_index = 0
-		
+		if @current_word == MAX_WORDS
+			puts "Too many words, increase MAX_WORDS!\n"
+			exit(1)
+		end
+		if !@word_vector.includes?(word)
+			@word_vector << word
+		end
+		if order == FIRST_WORD
+			@bigram_array
+		elsif
+		else
+		end
 	end
 end
 
