@@ -47,8 +47,7 @@ class Genetic
 	def run
 		generation = 0
 		init_population
-		file = File.open("stats.txt", "w")
-		perform_fitness_check(file)
+		perform_fitness_check
 		while generation < MAX_GENERATIONS
 			@current_crossovers = @current_mutations = 0
 			perform_selection
@@ -90,7 +89,6 @@ class Genetic
 				end
 			}
 		end
-		file.close
 	end
 	def perform_selection
 		0.step(MAX_CHROMS-1, 2) {|chrom|
@@ -151,7 +149,7 @@ class Genetic
 		end
 		return ret	
 	end
-	def perform_fitness_check(file)
+	def perform_fitness_check
 		@max_fitness = 0
 		@min_fitness = 1000
 		@total_fitness = 0
@@ -173,7 +171,7 @@ class Genetic
 			@total_fitness += @populations[@current_population][chrom].fitness
 		}
 		@avg_fitness = @total_fitness.to_f / MAX_CHROMS.to_f
-		printf(file, "%d %6.4f %6.4f %6.4f\n", x, @min_fitness, @avg_fitness, @max_fitness)
+		printf("%d %6.4f %6.4f %6.4f\n", x, @min_fitness, @avg_fitness, @max_fitness)
 		x += 1
 	end
 	def interpret_stm(program, prog_length, args)
@@ -206,6 +204,7 @@ class Genetic
 						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(2)
 						spush(@stack[@stack.size-2].dup)
 				end
+				pc += 1
 			rescue Exception => x
 				error = x.message.to_i
 			end
