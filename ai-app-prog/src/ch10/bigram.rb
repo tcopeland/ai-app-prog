@@ -11,29 +11,23 @@ class Bigram
 	
 	def initialize(debug)
 		@debug = debug
-		@word_vector = []
 		@occurrences = Hash.new(0)
 		@@last_index = 0
-		
-		@word_vector << START_SYMBOL
-		@word_vector << END_SYMBOL
-
+		@word_vector = [START_SYMBOL, END_SYMBOL]
 		@bigram_array = Array.new(MAX_WORDS)
 		@bigram_array.each_index {|x| @bigram_array[x] = Array.new(MAX_WORDS, 0)}
 	end
 
 	def build_sentence
 		max = 0
+		sentence = ""
 		word = next_word(START_SYMBOL)
-		while word != END_SYMBOL
-			print " #{word}"
+		while word != END_SYMBOL and max < 100
+			sentence << " #{word}"
 			word = next_word(word)
 			max += rand(12) + 1	
-			if max > 100
-				break
-			end
 		end
-		puts ".\n"	
+		return sentence << ".\n"	
 	end
 
 	def next_word(word)
@@ -84,12 +78,7 @@ class Bigram
 		}
 		if @debug
 			puts "#{@word_vector.size} unique words in the corpus"
-			a = @occurrences.sort {|a,b| 
-				b[1] <=> a[1]
-			}
-			a.each {|x|
-				puts "\"#{x[0]}\" occurred #{x[1]} times"
-			}
+			@occurrences.sort {|a,b| b[1] <=> a[1] }.each {|x| puts "\"#{x[0]}\" occurred #{x[1]} times" unless x[1] < 4 }
 		end
 	end
 
@@ -121,10 +110,7 @@ if __FILE__ == $0
 		puts "./bigram -f <filename> [-v]"
 		exit
 	end
-	puts "Creating new Bigram object" unless !ARGV.include?("-v")
 	b = Bigram.new(ARGV.include?("-v"))
-	puts "Parsing corpus" unless !ARGV.include?("-v")
 	b.parse_corpus(ARGV[ARGV.index("-f")+1])
-	puts "Building the sentence" unless !ARGV.include?("-v")
-	b.build_sentence
+	5.times { puts b.build_sentence}
 end
