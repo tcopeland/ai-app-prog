@@ -31,12 +31,13 @@ class Member
 
 	def emit_solution
 		board = create_new_board
-		0.upto(MAX_LENGTH-1) {|x| 
+		0.upto(Emsa::MAX_LENGTH-1) {|x| 
 			board[x][@solution[x]] = 'Q' 
 		}
-		0.upto(MAX_LENGTH-1) {|x|
-			0.upto(MAX_LENGTH-1) {|y|
-				p board[x][y]
+		0.upto(Emsa::MAX_LENGTH-1) {|x|
+			0.upto(Emsa::MAX_LENGTH-1) {|y|
+				putc board[x][y]
+				putc ' '
 			}	
 			puts "\n"
 		}	
@@ -80,7 +81,7 @@ class Member
 end
 
 class Emsa
-	MAX_LENGTH=30
+	MAX_LENGTH=8
 	INITIAL_TEMPERATURE=30.0
 	FINAL_TEMPERATURE=0.5
 	ALPHA=0.99
@@ -129,12 +130,12 @@ class Emsa
 						current.copy_into(working)
 					end
 				end
-			end		
 			
-			f.write("#{timer} #{temperature} #{best.energy} #{accepted}\n")
-			timer += 1
-			puts "Best energy: #{best.energy}"
-			temperature *= ALPHA	
+				file.write("#{timer} #{temperature} #{best.energy} #{accepted}\n")
+				timer += 1
+				puts "Best energy: #{best.energy}"
+				temperature *= ALPHA	
+			end		
 		}
 		
 		if solution > 0
