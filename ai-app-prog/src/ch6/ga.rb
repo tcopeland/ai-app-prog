@@ -138,12 +138,12 @@ class Genetic
 			generation += 1
 			puts "Generation " + (generation-1).to_s
 			printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
-			printf("\tAverage fitness = %f\n", @avg_fitness)
+			printf("\tAverage fitness = %f\n", @average_fitness)
 			printf("\tMinimum fitness = %f\n", @min_fitness)
 			printf("\tCrossovers = %d\n", @current_crossovers)
 			printf("\tMutation = %d\n", @current_mutations)
-			printf("\tPercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
-			if generation > (MAX_GENERATIONS * 0.25) && (@avg_fitness / @max_fitness) > 0.98
+			printf("\tPercentage = %f\n", @average_fitness.to_f/@max_fitness.to_f)
+			if generation > (MAX_GENERATIONS * 0.25) && (@average_fitness / @max_fitness) > 0.98
 				puts "Converged"
 				break
 			end
@@ -154,11 +154,11 @@ class Genetic
 		end
 		puts "Generation " + (generation-1).to_s
 		printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
-		printf("\tAverage fitness = %f\n", @avg_fitness)
+		printf("\tAverage fitness = %f\n", @average_fitness)
 		printf("\tMinimum fitness = %f\n", @min_fitness)
 		printf("\tCrossovers = %d\n", @current_crossovers)
 		printf("\tMutation = %d\n", @current_mutations)
-		printf("\tPercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
+		printf("\tPercentage = %f\n", @average_fitness.to_f/@max_fitness.to_f)
 		MAX_CHROMS.times {|i|
 			if @populations[@current_population][i].fitness == @max_fitness
 				printf("Program %3d : ", i)
@@ -182,11 +182,7 @@ class Genetic
 	def perform_reproduction(para, parb, childa, childb)
 		cross_point = 0
 		if rand > XPROB
-			if @populations[@current_population][para].prog_size - 2 > @populations[@current_population][parb].prog_size
-				cross_point = rand(@populations[@current_population][para].prog_size - 2) + 1
-			else	
-				cross_point = rand(@populations[@current_population][parb].prog_size - 2) + 1
-			end
+			cross_point = rand(@populations[@current_population][parb].prog_size - 2) + 1
 			@current_crossovers += 1
 		else		
 			cross_point = MAX_PROGRAM
@@ -228,7 +224,7 @@ class Genetic
 
 	def perform_fitness_check
 		@max_fitness = 0.0
-		@avg_fitness = 0.0
+		@average_fitness = 0.0
 		@min_fitness = 1000.0
 		@total_fitness = 0.0
 		MAX_CHROMS.times {|chrom|
@@ -253,7 +249,7 @@ class Genetic
 			end
 			@total_fitness += @populations[@current_population][chrom].fitness
 		}
-		@avg_fitness = @total_fitness.to_f / MAX_CHROMS.to_f
+		@average_fitness = @total_fitness.to_f / MAX_CHROMS.to_f
 	end
 
 	def init_population	
