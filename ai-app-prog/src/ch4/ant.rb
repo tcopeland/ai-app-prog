@@ -33,11 +33,8 @@ class Cities
 			@cities << City.new(rand(Simulation::MAX_DISTANCE), rand(Simulation::MAX_DISTANCE))
 		}
 	end
-	def dist_x(x, y)
-		(@cities[x].x - @cities[y].x).abs
-	end
-	def dist_y(x, y)
-		(@cities[x].y - @cities[y].y).abs
+	def dist(x,y)
+		return Math.sqrt((@cities[x].x - @cities[y].x).abs**2 + (@cities[x].y - @cities[y].y).abs**2)
 	end
 	def write(filename)
 		File.open(filename, "w") {|f|
@@ -136,6 +133,7 @@ class Simulation
 	def initialize
 		@cities = Cities.new
 		@ants = Ants.new
+	
 		@distance = []
 		@pheromone = []
 		@best = Ant.new(0)
@@ -153,7 +151,7 @@ class Simulation
 		(0..MAX_CITIES-1).each {|x|
 			(0..MAX_CITIES-1).each {|y|
 				if x != y and @distance[x][y] == 0.0	
-					@distance[x][y] = Math.sqrt((@cities.dist_x(x,y))**2 + (@cities.dist_y(x,y))**2)
+					@distance[x][y] = @cities.dist(x,y)
 					@distance[y][x] = @distance[x][y]
 				end
 			}
