@@ -176,7 +176,6 @@ class Genetic
 				}
 				printf("\n")
 				printf("Fitness %d\n", @populations[@current_population][i].fitness.to_i)
-				printf("ProgSize %d\n", @populations[@current_population][i].prog_size.to_i)
 				break
 			end
 		}
