@@ -73,8 +73,8 @@ class Simulation
 			if city_index == (MAX_CITIES-1)
 				city_index = 0
 			end
-			city_index += 1
 			@ants[x] = Ant.new(city_index)
+			city_index += 1
 		}	
 	end
 	
@@ -87,8 +87,8 @@ class Simulation
 			if city_index == (MAX_CITIES-1)
         city_index = 0
       end
-      city_index += 1
       @ants[x] = Ant.new(city_index)
+      city_index += 1
 		}
 	end
 	
