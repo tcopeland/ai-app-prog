@@ -66,7 +66,17 @@ class BackProp
 			@target[3] = @samples[sample].output_neurons[3]
 
 			feed_forward
-			
+	
+			err = 0.0
+			OUTPUT_NEURONS.times {|output|
+				err += (@samples[sample].output_neurons[output] - @actual[output]) ** 2
+			}
+			err = 0.5 * err
+			file.write("#{err}\n")
+			#puts "MSE = " + err.to_s
+		
+			iterations += 1
+			break if iterations > 100000
 		end
 		file.close			
 	end
