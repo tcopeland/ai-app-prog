@@ -124,7 +124,6 @@ class Genetic
 		@current_crossovers=0
 		@current_mutations=0
 		@populations = []
-		@@class_chrom = 0
 	end
 	def run
 		generation = 0
@@ -215,16 +214,16 @@ class Genetic
 	end
 
 	def select_parent
-		@@class_chrom = 0
+		chrom = 0
 		ret_fitness = 0.0	
 		fit_marker = rand * @total_fitness * 0.25
 		loop do		
-			ret_fitness += @populations[@current_population][@@class_chrom].fitness
-			@@class_chrom += 1	
+			ret_fitness += @populations[@current_population][chrom].fitness
+			chrom += 1	
 			break if ret_fitness >= fit_marker
-			@@class_chrom = 0 if @@class_chrom == MAX_CHROMS
+			chrom = 0 if chrom == MAX_CHROMS
 		end
-		return @@class_chrom - 1
+		return chrom - 1
 	end
 
 	def perform_fitness_check
