@@ -95,10 +95,9 @@ class Ants
 		}
 		city=0
 		begin
-			p=0.0
 			if ant.tabu[city % Simulation::MAX_CITIES] == 0
 				p = ant_product(ant, city % Simulation::MAX_CITIES, pheromone, distance)/denom
-				if rand() < p
+				if rand() < ant_product(ant, city % Simulation::MAX_CITIES, pheromone, distance)/denom
 					break
 				end
 			end
