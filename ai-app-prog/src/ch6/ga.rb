@@ -77,6 +77,12 @@ class StackMachine
 		@stack = Stack.new
 		args.reverse.each {|x| @stack.push(x) }
 	end
+	def one_solution
+		@stack.size == 1
+	end
+	def first
+		@stack.first
+	end
 	def solve
 		@pop.prog_size.times {|x|
 			case @pop.program[x]
@@ -234,12 +240,9 @@ class Genetic
 				begin 
 					stm = StackMachine.new(@populations[@current_population][chrom], args)
 					stm.solve
-					# no stack crashes, so some points
 					@populations[@current_population][chrom].fitness += Instructions::TIER1
-					# only one answer, more points
-					@populations[@current_population][chrom].fitness += Instructions::TIER2 if stm.stack.size == 1
-					# w00t!
-					@populations[@current_population][chrom].fitness += Instructions::TIER3 if stm.stack.first == answer
+					@populations[@current_population][chrom].fitness += Instructions::TIER2 if stm.one_solution
+					@populations[@current_population][chrom].fitness += Instructions::TIER3 if stm.first == answer
 				rescue Exception => x
 					# no points if there was an error
 				end
