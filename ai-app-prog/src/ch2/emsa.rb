@@ -1,7 +1,7 @@
 #!/usr/local/bin/ruby
 
 class Member
-	NUMBER_OF_QUEENS=8
+	NUMBER_OF_QUEENS=6
 	DX = [-1, 1, -1, 1]
 	DY = [-1, 1, 1, -1]
 	attr_accessor :energy, :solution
@@ -73,10 +73,7 @@ class Member
 
 	def create_new_board
 		board = Array.new(NUMBER_OF_QUEENS, '.')
-		board.each_index {|x| 
-			board[x] = Array.new(NUMBER_OF_QUEENS, '.') 
-		}
-		return board
+		board.each_index {|x| board[x] = Array.new(NUMBER_OF_QUEENS, '.') }
 	end
 
 end
@@ -87,13 +84,14 @@ class Emsa
 	ALPHA=0.99
 	STEPS_PER_CHANGE=100
 
-	def initialize(print_stats_to_file)
-		timer=solution=0
+	def go
+		timer=0
+		@solution_found = false
 		temperature=INITIAL_TEMPERATURE
 	
 		current=Member.new
 		working=Member.new
-		best=Member.new(100.0)
+		@best=Member.new(100.0)
 
 		current.compute_energy
 		current.copy_into(working)
@@ -123,36 +121,33 @@ class Emsa
 			if use_new
 				use_new = false
 				working.copy_into(current)
-				if current.energy < best.energy
-					current.copy_into(best)
-					solution = 1
+				if current.energy < @best.energy
+					current.copy_into(@best)
+					@solution_found = true
 				else
 					current.copy_into(working)
 				end
 			end
-			stats << "#{timer} #{temperature} #{best.energy} #{accepted}\n"
+			stats << "#{timer} #{temperature} #{@best.energy} #{accepted}\n"
 			timer += 1
-			puts "Best energy: #{best.energy}" unless output_interval % 20 != 0
+			puts "Best energy: #{@best.energy}" unless output_interval % 20 != 0
 			temperature *= ALPHA	
 			output_interval += 1
 		end		
-		
-		if solution > 0
-			best.emit_solution
-		end
-		
-		if print_stats_to_file
-			File.open("stats.txt", "w") {|file|
-				file.write(stats)
-			}
-		end
+	end
+	
+	def print_stats_to_file
+		File.open("stats.txt", "w") {|file| file.write(stats) }
+	end
+
+	def print_board
+		@best.emit_solution unless !@solution_found
 	end
 end
 
 if __FILE__ == $0
-	stats_file = false
-	if ARGV.size > 0
-		stats_file = ARGV.include?("-statsfile")
-	end
-	Emsa.new(stats_file)
+	e = Emsa.new
+	e.go
+	e.print_board
+	e.print_stats_to_file unless !ARGV.include?("-statsfile")
 end
