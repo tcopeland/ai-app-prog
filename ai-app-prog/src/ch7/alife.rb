@@ -20,6 +20,10 @@ end
 
 class OffsetPair
 	attr_accessor :x_offset, :y_offset
+	def initialize(x,y)
+		@x_offset = x
+		@y_offset = y
+	end
 end
 
 class ArtificialLife
@@ -53,6 +57,27 @@ class ArtificialLife
 	WEST=3
 	MAX_DIRECTION=4
 
+	# these may turn into instance variables
+	MAX_FOOD_ENERGY=15
+	MAX_ENERGY=60
+	REPRODUCE_ENERGY=0.9
+	MAX_AGENTS=36
+	MAX_PLANTS=35
+	MAX_GRID=30
+	MAX_STEPS=1000000
+
+	NORTH_FRONT = [OffsetPair.new(-2,-2), OffsetPair.new(-2,-1), OffsetPair.new(-2,0), OffsetPair.new(-2,1), OffsetPair.new(-2,2), OffsetPair.new(9,9)]
+	NORTH_LEFT = [OffsetPair.new(0,-2), OffsetPair.new(-1,-2), OffsetPair.new(9,9)]
+	NORTH_RIGHT = [OffsetPair.new(0,2), OffsetPair.new(-1,2), OffsetPair.new(9,9)]
+	NORTH_PROX = [OffsetPair.new(0,-1), OffsetPair.new(-1,-1), OffsetPair.new(-1,0), OffsetPair.new(-1,1), OffsetPair.new(0,1), OffsetPair.new(9,9)]
+	WEST_FRONT = [OffsetPair.new(2,-2), OffsetPair.new(1,-2), OffsetPair.new(0,-2), OffsetPair.new(-1,-2), OffsetPair.new(-2,-2), OffsetPair.new(9,9)]
+	WEST_LEFT = [OffsetPair.new(2,0), OffsetPair.new(2,-1), OffsetPair.new(9,9)]
+	WEST_RIGHT = [OffsetPair.new(-2,0), OffsetPair.new(-2,-1), OffsetPair.new(9,9)]
+	WEST_PROX = [OffsetPair.new(1,0), OffsetPair.new(1,-1), OffsetPair.new(0,-1), OffsetPair.new(-1,-1), OffsetPair.new(-1,0), OffsetPair.new(9,9)]
+
+	def getWeight
+     rand(9)-1
+	end
 
 end
 
