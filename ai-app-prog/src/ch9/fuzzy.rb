@@ -294,9 +294,10 @@ class MovingObject
 end
 
 class Predator < MovingObject
-end
-
-class Prey < MovingObject
+	def initialize(pos, heading, prey)
+		super(pos, heading)
+		@prey = prey
+	end
 end
 
 class Heading
@@ -328,8 +329,8 @@ if __FILE__ == $0
 			end
 		}
 	else
-		prey = Prey.new(Position.new(10.0,10.0), Heading.new(60))
-		predator = Predator.new(Position.new(80.0,120.0), Heading.new(90))
+		prey = MovingObject.new(Position.new(10.0,10.0), Heading.new(60))
+		predator = Predator.new(Position.new(80.0,120.0), Heading.new(90), prey)
 		100.times {
 			prey.move
 			predator.move
