@@ -207,25 +207,37 @@ class Genetic
 		end
 		gene
 	end
+
+#int selectParent( void )
+#{
+#  static int chrom = 0;
+#  int ret = -1;
+#  float retFitness = 0.0;
+#  float fitMarker = ((getSRand() * totFitness) * 0.25);
+#  do {
+#    retFitness += populations[curPop][chrom].fitness;
+#    if (retFitness >= fitMarker) {
+#      ret = chrom;
+#    }
+#    if (++chrom == MAX_CHROMS) chrom = 0;
+#  } while (ret == -1);
+#  return ret;
+
 	def select_parent
 		@@class_chrom = 0
-		ret = -1
-		begin
-			loop do
-				ret_fitness = @populations[@current_population][@@class_chrom].fitness.to_f / @max_fitness.to_f
-				@@class_chrom = 0 if @@class_chrom == MAX_CHROMS - 1
-				#if @populations[@current_population][@@class_chrom].fitness >= @min_fitness && rand < ret_fitness
-				if @populations[@current_population][@@class_chrom].fitness >= @min_fitness && rand < 0.5
-					ret = @@class_chrom
-					@@class_chrom += 1
-					# TODO retFitness bug ?
-					raise "STOP"	
-				end
+		ret_fitness = 0.0	
+		fit_marker = rand * @total_fitness * 0.25
+		counter = 0
+		loop do
+			counter += 1
+			ret_fitness += @populations[@current_population][@@class_chrom].fitness
+			if ret_fitness >= fit_marker
 				@@class_chrom += 1	
+				return @@class_chrom - 1
 			end
-		rescue Exception => e
+			@@class_chrom = 0 if (@@class_chrom + 1) == MAX_CHROMS
+			@@class_chrom += 1	
 		end
-		return ret	
 	end
 	def perform_fitness_check
 		@max_fitness = 0.0
