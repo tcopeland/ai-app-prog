@@ -308,15 +308,10 @@ class Predator < MovingObject
 		if desired_heading < 0
 			desired_heading = 360 - ((360-desired_heading)%360)
 		end
-		#puts "current heading = #{@heading}"
-		#puts "desired heading = #{desired_heading}"
-	
 		diff = desired_heading - @heading.angle
 		if desired_heading < @heading.angle && diff > 0
 			diff = -diff
 		end
-		#puts "diff is #{diff}"
-		# plug that into mbrship functions		
 		pmf = PredatorMembershipFunctions.new
 		fuz = FuzzyOperations.new	
 		change = 0
@@ -335,7 +330,6 @@ class Predator < MovingObject
 		elsif fuz.normalize(pmf.xright.compute(diff)) > 0
 			change=15
 		end
-		#puts "change = #{change}"
 		@heading.translate(change)
 	end
 end
