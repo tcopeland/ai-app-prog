@@ -10,15 +10,16 @@ class Bigram
 	END_SYMBOL=1
 	
 	def initialize(debug)
-		@word_vector = Array.new(MAX_WORDS)
-		@occurrences = Hash.new
+		@debug = debug
+		@word_vector = []
+		@occurrences = Hash.new(0)
 		@@last_index = START_SYMBOL
 		
 		@word_vector << "<START>"
 		@word_vector << "<END>"
 
 		@bigram_array = Array.new(MAX_WORDS)
-		@bigram_array.each {|slot| slot = Array.new(MAX_WORDS)}
+		@bigram_array.each_index {|x| @bigram_array[x] = Array.new(MAX_WORDS, 0)}
 	end
 
 	def build_sentence
@@ -49,6 +50,7 @@ class Bigram
 			if file.eof
 				if word.size > 0
 					load_word(word, LAST_WORD)
+					word = ""
 				end
 			elsif byte == 10 or byte == 13 or byte.chr == ' '
 				if !word.empty?
@@ -58,28 +60,30 @@ class Bigram
 					else
 						load_word(word, MIDDLE_WORD)
 					end	
+					word = ""
 				end
 			elsif byte.chr == '.' or byte.chr == '?'
 				load_word(word, MIDDLE_WORD)
 				load_word(word, LAST_WORD)
 				first = true
+				word = ""
 			else
 				if byte != 10 and byte.chr != ','
 					word << byte.chr
 				end
 			end
 		}
-		if debug
+		if @debug
 			puts "#{@word_vector.size} unique words in the corpus"
 		end
 	end
 
 	def load_word(word, order)
-		if @word_vector.size == MAX_WORDS
+		if @word_vector.size >= MAX_WORDS
 			puts "Too many words, increase MAX_WORDS!\n"
 			exit(1)
 		end
-		if !@word_vector.includes?(word)
+		if !@word_vector.include?(word)
 			@word_vector << word
 		end
 		if order == FIRST_WORD
@@ -104,5 +108,5 @@ if __FILE__ == $0
 	end
 	b = Bigram.new(ARGV.include?("-v"))
 	b.parse_corpus(ARGV[ARGV.index("-f")+1])
-	b.build_sentence
+	#b.build_sentence
 end
