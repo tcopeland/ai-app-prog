@@ -118,11 +118,11 @@ class Genetic
 		else		
 			cross_point = MAX_PROGRAM
 		end
-		CROSSPOINT.times {|i|
+		cross_point.times {|i|
 			@populations[next_pop][childa].program[i] = mutate(@populations[next_pop][childa].program[i])
 			@populations[next_pop][childb].program[i] = mutate(@populations[next_pop][childb].program[i])
 		}
-		CROSSPOINT.upto(MAX_PROGRAM-1) {|i|
+		cross_point.upto(MAX_PROGRAM-1) {|i|
 			@populations[next_pop][childa].program[i] = mutate(@populations[@current_population][parb].program[i])
 			@populations[next_pop][childb].program[i] = mutate(@populations[@current_population][para].program[i])
 		}
