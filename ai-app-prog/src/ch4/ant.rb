@@ -158,6 +158,20 @@ class Simulation
 				end
 			}
 		}
+		
+		current_time = 0
+		while current_time < MAX_TIME
+			current_time += 1
+			if @ants.simulate(@distance, @pheromone) == 0
+				update_trails
+				if current_time != MAX_TIME
+					@best = @ants.restart(@best)
+				end
+				#puts "Time is #{current_time} #{@best.tour_length}"
+			end
+		end	
+		puts "Best tour = #{@best.tour_length}\n\n"
+		emit_data_file()
 	end
 	
 	def update_trails
@@ -202,25 +216,8 @@ class Simulation
 			f.write "#{@cities.get(@best.path[0]).x} #{@cities.get(@best.path[0]).y}\n"
 		}
 	end
-	
-	def main
-		current_time = 0
-		while current_time < MAX_TIME
-			current_time += 1
-			if @ants.simulate(@distance, @pheromone) == 0
-				update_trails
-				if current_time != MAX_TIME
-					@best = @ants.restart(@best)
-				end
-				#puts "Time is #{current_time} #{@best.tour_length}"
-			end
-		end	
-		puts "Best tour = #{@best.tour_length}\n\n"
-		emit_data_file()
-	end
 end
 
 if __FILE__ == $0
-	s = Simulation.new
-	s.main
+	Simulation.new
 end
