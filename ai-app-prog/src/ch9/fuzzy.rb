@@ -120,6 +120,32 @@ class Battery
 	end
 end
 
+class LowEndExcluder
+	def result(value, profile)
+		if value < profile.low
+      return 1.0
+    end
+    return 0.0
+	end
+end
+
+class MiddleExcluder
+	def result(value, profile)
+		if value < profile.low or value > profile.high
+      return 0.0
+    end
+	end
+end
+
+class HighEndExcluder
+	def result(value, profile)
+		if value < profile.low
+      return 0.0
+    end
+		return 1.0
+	end
+end
+
 class PlateauProfile
 	attr_accessor :low, :low_plateau, :high_plateau, :high
 	def initialize(low, low_plateau, high_plateau, high)
