@@ -33,6 +33,7 @@ class Adaptive
 	end
 	def perform_art1
 		and_result = Array.new(MAX_ITEMS)
+		count = 50
 		exit = false
 		mag_pe = mag_p = mag_e = 0
 		while !exit
@@ -58,13 +59,37 @@ class Adaptive
 									end
 									@members[pvec] += 1
 									update_prototype_vectors(old) if old >=0 && old < TOTAL_PROTOTYPE_VECTORS
+									update_prototype_vectors(pvec)
+									exit = false
+									break
 								end
 							end
 						end
 					end
 				}
+				if @membership[index] == -1
+					@membership[index] = create_new_prototype_vector(DATABASE[index])
+					done = false
+				end
 			}
+			count -= 1
+			break if count == 0
 		end
+	end
+	def create_new_prototype_vector(example)
+		cluster = 0 
+		0.upto(TOTAL_PROTOTYPE_VECTORS-1) {|x|
+			if @members[x] == 0
+				cluster = x
+				break
+			end
+		}
+		@num_prototype_vectors += 1
+		0.upto(MAX_ITEMS-1) {|i|
+			@prototype_vector[cluster][i] = example[i]
+		}	
+		@members[cluster] = 1
+		cluster
 	end
 	def update_prototype_vectors(cluster)
 		first = true
