@@ -13,19 +13,20 @@ class Population
 end
 
 class Instructions
-	DUP=0
-	SWAP=0x01
-	MUL=0x02
-	ADD=0x03
-	OVER=0x04
-	NOP=0x05
-	MAX_INSTRUCTIONS=NOP+1
-	NONE=0
-	COUNT=10
-	TIER1=1
-	TIER2=(TIER1+1)*COUNT
-	TIER3=(TIER1+TIER2+2)*COUNT
-	STACK_DEPTH=25
+	DUP = 0
+	SWAP = 0x01
+	MUL = 0x02
+	ADD = 0x03
+	OVER = 0x04
+	NOP = 0x05
+	MAX_INSTRUCTIONS = NOP+1
+	NONE = 0
+	COUNT = 10
+	TIER1 = 1
+	TIER2 = (TIER1+1)*COUNT
+	TIER3 = (TIER1+TIER2+2)*COUNT
+	MAX_FITNESS = ((TIER3*COUNT) + (TIER2*COUNT) + (TIER1*COUNT)).to_f
+	STACK_DEPTH = 25
 end
 
 class Genetic
@@ -52,6 +53,42 @@ class Genetic
 			@current_crossovers = @current_mutations = 0
 			perform_selection
 			generation += 1
+			if generation % 100 == 0 
+				puts "Generation " + (generation-1).to_s
+				printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
+				printf("\tAverage fitness = %f\n", @avg_fitness)
+				printf("\tMinimum fitness = %f\n", @min_fitness)
+				printf("\tCrossovers = %d\n", @current_crossovers)
+				printf("\tMutation = %d\n", @current_mutations)
+				printf("\tpercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
+			end
+			if generation > (MAX_GENERATIONS * 0.25) && (@avg_fitness / @max_fitness) > 0.98
+				puts "Converged"
+				break
+			end
+			if @max_fitness == MAX_FIT
+				puts "Found solution"
+				break
+			end
+			puts "Generation " + (generation-1).to_s
+			printf("\tMaximum fitness = %f (%g)\n", @max_fitness, Instructions::MAX_FITNESS)
+			printf("\tAverage fitness = %f\n", @avg_fitness)
+			printf("\tMinimum fitness = %f\n", @min_fitness)
+			printf("\tCrossovers = %d\n", @current_crossovers)
+			printf("\tMutation = %d\n", @current_mutations)
+			printf("\tpercentage = %f\n", @avg_fitness.to_f/@max_fitness.to_f)
+			MAX_CHROMS.times {|i|
+				if @populations[@current_population][i].fitness == @max_fitness
+					printf("Program %3d : ", i)
+					@populations[@current_population][i].prog_size.times {|x|
+						printf("%0.2d ", @populations[@current_population][i].program[index])
+					}
+					printf("\n")
+					printf("Fitness %f\n", @populations[@current_population][i].fitness)
+					printf("ProgSize %f\n", @populations[@current_population][i].prog_size)
+					break
+				end
+			}
 		end
 		file.close
 	end
@@ -77,7 +114,7 @@ class Genetic
 		else		
 			cross_point = MAX_PROGRAM
 		end
-		(CROSSPOINT-1).times {|i|
+		CROSSPOINT.times {|i|
 			@populations[next_pop][childa].program[i] = mutate(@populations[next_pop][childa].program[i])
 			@populations[next_pop][childb].program[i] = mutate(@populations[next_pop][childb].program[i])
 		}
@@ -118,9 +155,9 @@ class Genetic
 		@max_fitness = 0
 		@min_fitness = 1000
 		@total_fitness = 0
-		(MAX_CHROMS-1).times {|chrom|
+		MAX_CHROMS.times {|chrom|
 			@populations[@current_population][chrom].reset_fitness
-			(Instructions::COUNT-1).times {|i|	
+			Instructions::COUNT.times {|i|	
 				args = [rand(32), rand(32), rand(32)]
 				answer = args[0]**3 + args[1]**2 + args[2]
 				result = interpret_stm(@populations[@current_population][chrom].program, @populations[@current_population][chrom].prog_size, args)
@@ -193,12 +230,12 @@ class Genetic
 		@stack.last
 	end
 	def init_population	
-		(MAX_CHROMS-1).times {|x| init_member(x) }
+		MAX_CHROMS.times {|x| init_member(x) }
 	end
 	def init_member(index)
 		@populations[@current_population] = [] if @populations[@current_population] == nil
 		@populations[@current_population][index] = Population.new
-		(MAX_PROGRAM-1).times {|x| 
+		MAX_PROGRAM.times {|x| 
 			@populations[@current_population][index].program[x] = rand(Instructions::MAX_INSTRUCTIONS)
 		}
 	end
