@@ -1,18 +1,19 @@
 #!/usr/local/bin/ruby
 
 class Member
+	NUMBER_OF_QUEENS=8
 	DX = [-1, 1, -1, 1]
 	DY = [-1, 1, 1, -1]
 	attr_accessor :energy, :solution
 	def initialize(energy=0.0)
 		@energy=energy
-		@solution=Array.new(Emsa::MAX_LENGTH)
-		0.upto(Emsa::MAX_LENGTH-1) {|x| @solution[x] = x}
-		0.upto(Emsa::MAX_LENGTH-1) {|x| tweak}
+		@solution=Array.new(NUMBER_OF_QUEENS)
+		0.upto(NUMBER_OF_QUEENS-1) {|x| @solution[x] = x}
+		0.upto(NUMBER_OF_QUEENS-1) {|x| tweak}
 	end
 
 	def copy_into(dest)
-		0.upto(Emsa::MAX_LENGTH-1) {|x|
+		0.upto(NUMBER_OF_QUEENS-1) {|x|
 			dest.solution[x] = @solution[x]
 		}
 		dest.energy = @energy
@@ -20,9 +21,9 @@ class Member
 
 	def tweak
 		y=0
-		x = rand(Emsa::MAX_LENGTH)
+		x = rand(NUMBER_OF_QUEENS)
 		begin
-			y = rand(Emsa::MAX_LENGTH)
+			y = rand(NUMBER_OF_QUEENS)
 		end until x != y
 		temp = @solution[x]
 		@solution[x] = @solution[y]
@@ -31,11 +32,11 @@ class Member
 
 	def emit_solution
 		board = create_new_board
-		0.upto(Emsa::MAX_LENGTH-1) {|x| 
+		0.upto(NUMBER_OF_QUEENS-1) {|x| 
 			board[x][@solution[x]] = 'Q' 
 		}
-		0.upto(Emsa::MAX_LENGTH-1) {|x|
-			0.upto(Emsa::MAX_LENGTH-1) {|y|
+		0.upto(NUMBER_OF_QUEENS-1) {|x|
+			0.upto(NUMBER_OF_QUEENS-1) {|y|
 				putc board[x][y]
 				putc ' '
 			}	
@@ -45,11 +46,11 @@ class Member
 	end
 	def compute_energy
 		board = create_new_board
-		0.upto(Emsa::MAX_LENGTH-1) {|x|
+		0.upto(NUMBER_OF_QUEENS-1) {|x|
 			board[x][@solution[x]] = 'Q';
 		}
 		conflicts = 0
-		0.upto(Emsa::MAX_LENGTH-1) {|i|
+		0.upto(NUMBER_OF_QUEENS-1) {|i|
 			x = i
 			y = solution[i]
 			0.upto(3) {|j|
@@ -58,7 +59,7 @@ class Member
 				while true	
 					tempx += DX[j]
 					tempy += DY[j]
-					if tempx<0 || tempx >= Emsa::MAX_LENGTH || tempy<0 || tempy>=Emsa::MAX_LENGTH 
+					if tempx<0 || tempx >= NUMBER_OF_QUEENS || tempy<0 || tempy>=NUMBER_OF_QUEENS 
 						break
 					end
 					if board[tempx][tempy] == 'Q'
@@ -71,9 +72,9 @@ class Member
 	end
 
 	def create_new_board
-		board = Array.new(Emsa::MAX_LENGTH, '.')
+		board = Array.new(NUMBER_OF_QUEENS, '.')
 		board.each_index {|x| 
-			board[x] = Array.new(Emsa::MAX_LENGTH, '.') 
+			board[x] = Array.new(NUMBER_OF_QUEENS, '.') 
 		}
 		return board
 	end
@@ -81,7 +82,6 @@ class Member
 end
 
 class Emsa
-	MAX_LENGTH=8
 	INITIAL_TEMPERATURE=30.0
 	FINAL_TEMPERATURE=0.5
 	ALPHA=0.99
