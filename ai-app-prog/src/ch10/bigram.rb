@@ -1,5 +1,6 @@
 #!/usr/local/bin/ruby
 
+# TODO sum_vector needs to be a map of words->occurrence count
 class Bigram
 	MAX_WORD_LEN=40
 	MAX_WORDS=1000
@@ -9,7 +10,7 @@ class Bigram
 	START_SYMBOL=0
 	END_SYMBOL=1
 	
-	def initialize(debug, filename)
+	def initialize(debug)
 		@current_word = 2
 		@word_vector = Array.new(MAX_WORDS)
 		@sum_vector = Array.new(MAX_WORDS)
@@ -20,6 +21,26 @@ class Bigram
 
 		@bigram_array = Array.new(MAX_WORDS)
 		@bigram_array.each {|slot| slot = Array.new(MAX_WORDS)}
+	end
+
+	def build_sentence
+		max = 0
+		puts "\n"
+		word = next_word(START_SYMBOL)
+		while word != END_SYMBOL and max < 100
+			puts "#{@word_vector[word]} "
+			word = next_word(word)
+			max += rand(12)
+		end
+		puts "\n"	
+	end
+
+	def next_word(word)
+		nextword = @word_vector.index(word) + 1
+		max = @sum_vector[@word_vector.index(word)]
+	end
+
+	def parse_corpus(filename)
 		word = ""
 		first = false
 		file = File.open(filename, "r")
@@ -73,9 +94,11 @@ class Bigram
 end
 
 if __FILE__ == $0
-		if ARGV.length < 2 or !ARGV.include?("-f")
-				puts "./bigram -f <filename> [-v]"
-				exit
-		end
-	Bigram.new(ARGV.include?("-v"),ARGV[ARGV.index("-f")+1])
+	if ARGV.length < 2 or !ARGV.include?("-f")
+		puts "./bigram -f <filename> [-v]"
+		exit
+	end
+	b = Bigram.new(ARGV.include?("-v"))
+	b.parse_corpus(ARGV[ARGV.index("-f")+1])
+	b.build_sentence
 end
