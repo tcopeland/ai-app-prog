@@ -95,8 +95,8 @@ class Battery
 	attr_accessor :mode
 	def initialize
 		@mode = FastCharge.new
-		@tm = TemperatureMembership.new
-		@bm = BatteryMembership.new
+		@tm = TemperatureMembershipFunctions.new
+		@bm = BatteryMembershipFunctions.new
 		@ops = FuzzyOperations.new
 		@count = 0
 	end
@@ -160,7 +160,7 @@ class PlateauProfile
 	end
 end
 
-class TemperatureMembership	
+class TemperatureMembershipFunctions	
 	def initialize
 		@cold = PlateauProfile.new(15.0, 15.0, 15.0, 25.0)
 		@warm = PlateauProfile.new(15.0, 25.0, 35.0, 45.0)
@@ -192,7 +192,7 @@ class TemperatureMembership
 	end
 end
 
-class BatteryMembership
+class BatteryMembershipFunctions
 	def initialize
 		@low = PlateauProfile.new(5.0, 5.0, 5.0, 10.0)
 		@med = PlateauProfile.new(5.0, 10.0, 20.0, 25.0)
