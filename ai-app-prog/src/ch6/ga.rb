@@ -103,7 +103,7 @@ end
 
 class Genetic
 	MAX_PROGRAM=6
-	MAX_GENERATIONS=10
+	MAX_GENERATIONS=1000
 	MAX_CHROMS=3000
 	MUTATION_PROB = 0.02
 	CROSSOVER_PROB = 0.8
@@ -162,7 +162,7 @@ class Genetic
 			if @populations[@current_population][i].fitness == @max_fitness
 				printf("Program %3d : ", i)
 				@populations[@current_population][i].prog_size.times {|x|
-					printf("%0.2d ", @populations[@current_population][i].program[i])
+					printf("%0.2d ", @populations[@current_population][i].program[x])
 				}
 				printf("\n")
 				printf("Fitness %f\n", @populations[@current_population][i].fitness)
