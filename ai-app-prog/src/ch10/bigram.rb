@@ -24,22 +24,28 @@ class Bigram
 
 	def build_sentence
 		max = 0
-		puts "\n"
-		word = next_word(START_SYMBOL)
-		while word != END_SYMBOL and max < 100
-			puts "#{@word_vector[word]} "
+		word = next_word(@word_vector[START_SYMBOL])
+		while word != "<END>" and max < 100
+			print " #{word}"
 			word = next_word(word)
-			max += rand(12)
+			max += rand(12) + 1
 		end
-		puts "\n"	
+		puts ".\n"	
 	end
 
 	def next_word(word)
 		nextwordindex = @word_vector.index(word) + 1
 		lim = rand(@occurrences[word] + 1)
+		sum = 0
 		while nextwordindex != @word_vector.index(word)
-			# TODO
+			nextwordindex = nextwordindex % @word_vector.size
+			sum += @bigram_array[@word_vector.index(word)][nextwordindex]
+			if sum >= lim
+				return @word_vector[nextwordindex]
+			end
+			nextwordindex += 1		
 		end
+		return @word_vector[nextwordindex]
 	end
 
 	def parse_corpus(filename)
@@ -108,5 +114,5 @@ if __FILE__ == $0
 	end
 	b = Bigram.new(ARGV.include?("-v"))
 	b.parse_corpus(ARGV[ARGV.index("-f")+1])
-	#b.build_sentence
+	b.build_sentence
 end
