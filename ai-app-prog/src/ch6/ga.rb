@@ -30,23 +30,53 @@ end
 
 class Genetic
 	MAX_PROGRAM=6
+	MAX_GENERATIONS=10000
 	MAX_CHROMS=3000
 	def initialize
 		@current_population=0
+		@current_crossovers=0
+		@current_mutations=0
 		@populations = []
 		@stack = [] 
 	end
 	def run
+		generation = 0
 		init_population
 		file = File.open("stats.txt", "w")
-		perform_fitness_check(file)
-		
+		perform_fitness_check(file)a
+		while generation < MAX_GENERATIONS
+			@current_crossovers = @current_mutations = 0
+			perform_selection
+			generation += 1
+		end
 		file.close
 	end
+	def perform_selection
+		0.step(MAX_CHROMS-1, 2) {|chrom|
+			par1 = select_parent
+		}
+	end
+	def select_parent
+		chrom = 0
+		ret = -1
+		ret_fitness = 0.0
+		loop do
+			ret_fitness = @populations[@current_population][chrom].fitness / @max_fitness
+			chrom = 0 if chrom == MAX_CHROM
+			if @populations[@current_population][chrom].fitness > @min_fitness
+				if rand < ret_fitness
+					ret = chrom
+					chrom += 1
+					ret_fitness = @populations[@current_population][chrom].fitness
+					break
+			end
+			chrom += 1
+		end	
+	end
 	def perform_fitness_check(file)
-		max_fitness = 0
-		min_fitness = 1000
-		total_fitness = 0
+		@max_fitness = 0
+		@min_fitness = 1000
+		@total_fitness = 0
 		(MAX_CHROMS-1).times {|chrom|
 			@populations[@current_population][chrom].reset_fitness
 			(Instructions::COUNT-1).times {|i|	
@@ -57,16 +87,16 @@ class Genetic
 				@populations[@current_population][chrom].fitness += Instructions::TIER2 if @stack.size == 1
 				@populations[@current_population][chrom].fitness += Instructions::TIER3 if @stack.first == answer
 			}	
-			if @populations[@current_population][chrom].fitness > max_fitness	
-				max_fitness = @populations[@current_population][chrom].fitness
-			elsif @populations[@current_population][chrom].fitness < min_fitness
-				min_fitness = @populations[@current_population][chrom].fitness
+			if @populations[@current_population][chrom].fitness > @max_fitness	
+				@max_fitness = @populations[@current_population][chrom].fitness
+			elsif @populations[@current_population][chrom].fitness < @min_fitness
+				@min_fitness = @populations[@current_population][chrom].fitness
 			end
-			total_fitness += @populations[@current_population][chrom].fitness
+			@total_fitness += @populations[@current_population][chrom].fitness
 		}
-		avg_fitness = total_fitness.to_f / MAX_CHROMS.to_f
+		@avg_fitness = @total_fitness.to_f / MAX_CHROMS.to_f
+		printf(file, "%d %6.4f %6.4f %6.4f\n", x, @min_fitness, @avg_fitness, @max_fitness)
 		x += 1
-		printf(file, "%d %6.4f %6.4f %6.4f\n", x, min_fitness, avg_fitness, max_fitness)
 	end
 	def interpret_stm(program, prog_length, args)
 		pc = 0
