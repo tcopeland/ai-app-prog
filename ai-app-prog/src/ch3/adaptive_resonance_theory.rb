@@ -25,13 +25,9 @@ class Adaptive
 
 	def initialize
 		@prototype_vector	= Array.new(TOTAL_PROTOTYPE_VECTORS, 0)
-		@prototype_vector.each_index {|x|
-			@prototype_vector[x] = Array.new(ITEM_NAMES.size, 0)
-		}
+		@prototype_vector.each_index {|x| @prototype_vector[x] = Array.new(ITEM_NAMES.size, 0) }
 		@sum_vector	= Array.new(TOTAL_PROTOTYPE_VECTORS, 0)
-		@sum_vector.each_index {|x|
-			@sum_vector[x] = Array.new(ITEM_NAMES.size, 0)
-		}
+		@sum_vector.each_index {|x| @sum_vector[x] = Array.new(ITEM_NAMES.size, 0) }
 		@members = Array.new(TOTAL_PROTOTYPE_VECTORS, 0)
 		@membership = Array.new(MAX_CUSTOMERS, -1)
 		@num_prototype_vectors = 0
@@ -89,9 +85,7 @@ class Adaptive
 			end
 		}
 		@num_prototype_vectors += 1
-		0.upto(ITEM_NAMES.size-1) {|i|
-			@prototype_vector[cluster][i] = example[i]
-		}	
+		0.upto(ITEM_NAMES.size-1) {|i| @prototype_vector[cluster][i] = example[i] }	
 		@members[cluster] = 1
 		cluster
 	end
@@ -162,9 +156,7 @@ class Adaptive
 		}
 	end
 	def vector_magnitude(v)
-		res = 0
-		v.each {|x| res += x }
-		res
+		v.collect{|a| a > 0 ? 1 : nil}.compact.size
 	end
 	def vector_bitwise_and(v, w)
 		res = Array.new(v.size, 0)
