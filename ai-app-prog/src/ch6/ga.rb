@@ -33,6 +33,8 @@ class Genetic
 	def initialize
 		@current_population=0
 		@populations = []
+		@stack_pointer = 0
+		@stack = [] 
 	end
 	def run
 		init_population
@@ -48,10 +50,20 @@ class Genetic
 			(Instructions::COUNT-1).times {|i|	
 				args[0], args[1], args[2] = rand(32), rand(32), rand(32)
 				answer = args[0]**3 + args[1]**2 + args[2]
-				result = interpret_stm(@populations[@current_population][chrom].program, @populations[@current_population][chrom].prog_size, args, 3)
+				result = interpret_stm(@populations[@current_population][chrom].program, @populations[@current_population][chrom].prog_size, args)
 				@populations[@current_population][chrom].fitness += Instructions::TIER1 if result == Instructions::NONE
+				@populations[@current_population][chrom].fitness += Instructions::TIER2 if stack_pointer == 1
 			}	
 		}
+	end
+	def interpret_stm(program, prog_length, args)
+		pc = 0
+		error = Instructions::NONE
+		@stack_pointer = 0
+		args.size.downto(0) {|x| spush(args[x])	
+	end
+	def spush(x)
+		stack << x	
 	end
 	def init_population	
 		(MAX_CHROMS-1).times {|x| init_member(x) }
