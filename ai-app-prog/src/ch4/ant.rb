@@ -9,7 +9,7 @@ class City
 end
 
 class Ant
-	attr_accessor :tour_length
+	attr_accessor :tour_length, :path_index, :tabu, :current_city, :next_city, :path
 	def initialize(city)
 		@current_city = city
 		@next_city = -1
@@ -44,11 +44,13 @@ class Simulation
 		@ants = []
 		@distance = []
 		@pheromone = []
-		@best = Ant.new
+		@best = Ant.new(0)
 		@best.tour_length = 500000
 	
 		(0..(MAX_CITIES-1)).each {|x|
-			@cities[x] =City.new(rand(MAX_DISTANCE), rand(MAX_DISTANCE))
+			@cities[x] = City.new(rand(MAX_DISTANCE), rand(MAX_DISTANCE))
+			@distance[x] = []
+			@pheromone[x] = []
 			(0..(MAX_CITIES-1)).each {|y|
 				@distance[x][y] = 0.0
 				@pheromone[x][y] = INIT_PHEROMONE	
@@ -68,7 +70,7 @@ class Simulation
 
 		city_index = 0
 		(0..(MAX_ANTS-1)).each {|x|
-			if city_index == MAX_CITIES
+			if city_index == (MAX_CITIES-1)
 				city_index = 0
 			end
 			city_index += 1
@@ -77,11 +79,12 @@ class Simulation
 	end
 	
 	def restart_ants
+     city_index = 0
 		(0..(MAX_ANTS-1)).each {|x| 
 			if @ants[x].tour_length < @best.tour_length
 				@best = @ants[x]
 			end
-			if city_index == MAX_CITIES
+			if city_index == (MAX_CITIES-1)
         city_index = 0
       end
       city_index += 1
@@ -117,7 +120,8 @@ class Simulation
 					break
 				end
 			end
-		end until !true	
+		end until !true
+		return to
 	end
 
 	def simulate_ants
@@ -128,9 +132,9 @@ class Simulation
 				@ants[k].tabu[@ants[k].next_city] = 1
 				@ants[k].path_index += 1
 				@ants[k].path[@ants[k].path_index] = @ants[k].next_city
-				@ants[k].tour_length += distance[@ants[k].current_city][@ants[k].next_city]
+				@ants[k].tour_length += @distance[@ants[k].current_city][@ants[k].next_city]
 				if @ants[k].path_index == MAX_CITIES
-					@ants[k].tour_length += distance[@ants[k].path[MAX_CITIES-1]][@ants[k].path[0]]
+					@ants[k].tour_length += @distance[@ants[k].path[MAX_CITIES-1]][@ants[k].path[0]]
 				end
 				@ants[k].current_city = @ants[k].next_city
 				moving += 1
@@ -173,17 +177,17 @@ class Simulation
 	end
 
 	def emit_data_file(ant)
-		f = File.new("cities.dat", "w")
+		f = File.new("cities_data.txt", "w")
 		(0..(MAX_CITIES-1)).each {|x|
-			f.write "#{@cities[x].x} #{@cities[x].y}"
+			f.write "#{@cities[x].x} #{@cities[x].y}\n"
 		}
 		f.close
 
 		f = File.new("solution.dat", "w")
 		(0..(MAX_CITIES-1)).each {|x|
-			f.write "#{@cities[ant.path[city]].x} #{@cities[ant.path[city]].y}"
+			f.write "#{@cities[ant.path[x]].x} #{@cities[ant.path[x]].y}\n"
 		}
-		f.write "#{@cities[ant.path[0]].x} #{@cities[ant.path[0]].y}"
+		f.write "#{@cities[ant.path[0]].x} #{@cities[ant.path[0]].y}\n"
 		f.close
 	end
 	
@@ -205,16 +209,17 @@ class Simulation
 	def main
 		current_time = 0
 		while current_time < MAX_TIME
+			current_time += 1
 			if simulate_ants == 0
 				update_trails
 				if current_time != MAX_TIME
 					restart_ants
 				end
-				puts "Time is #{current_time} #{best}"
+				puts "Time is #{current_time} #{@best.tour_length}"
 			end
 		end	
-		puts "Best tour = #{best}\n\n"
-		emit_data_file(best)
+		puts "Best tour = #{@best.tour_length}\n\n"
+		emit_data_file(@best)
 	end
 end
 
