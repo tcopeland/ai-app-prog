@@ -11,9 +11,9 @@ class Bigram
 	WHITESPACE = ['\n','\r',' ']
 	
 	def initialize(debug)
+		@@last_index = 0
 		@debug = debug
 		@occurrences = Hash.new(0)
-		@@last_index = 0
 		@word_vector = [START_SYMBOL, END_SYMBOL]
 		@bigram_array = Array.new(MAX_WORDS)
 		@bigram_array.each_index {|x| @bigram_array[x] = Array.new(MAX_WORDS, 0)}
@@ -24,7 +24,7 @@ class Bigram
 		sentence = ""
 		word = next_word(START_SYMBOL)
 		while word != END_SYMBOL and max < 100
-			sentence << " #{word}"
+			sentence << " " << word
 			word = next_word(word)
 			max += rand(12) + 1	
 		end
@@ -37,7 +37,7 @@ class Bigram
 		sum = 0
 		while nextwordindex != @word_vector.index(word)
 			nextwordindex = nextwordindex % @word_vector.size
-			sum += @bigram_array[@word_vector.index(word)][nextwordindex]
+			sum += @bigram_array[@word_vector.index(word)][nextwordindex]	
 			if sum >= lim
 				return @word_vector[nextwordindex]
 			end
