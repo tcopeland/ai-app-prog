@@ -3,8 +3,24 @@
 class DataFile
 	def initialize(filename)
 		@bigram_array = Array.new(Bigram::MAX_WORDS, 0)
-		File.open(filename, "r").each_byte {|byte|
-			puts byte.chr
+		@word = Array.new(Bigram::MAX_WORDS+1)
+		index = 0
+		file = File.open(filename, "r")
+		file.each_byte {|byte|
+			if file.eof
+				if index > 0
+					word[index]=0
+					index += 1
+					load_word(word, Bigram::LAST_WORD)
+					index = 0
+				end
+			elsif byte == 10 or byte == 13 or byte.chr == ' '
+			elsif byte.chr == '.' or byte.chr == '?'
+			else
+				if byte != 10 and byte.chr != ','
+					word[index] = byte.chr
+				end
+			end
 		}
 	end
 end
