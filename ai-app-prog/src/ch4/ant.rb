@@ -194,13 +194,13 @@ class Simulation
 		}
 	end
 
-	def emit_data_file(ant)
+	def emit_data_file()
 		@cities.write("cities.txt")
 		File.open("solution.txt", "w") {|f|
 			@pheromone.each_index {|x|
-				f.write "#{@cities.get(ant.path[x]).x} #{@cities.get(ant.path[x]).y}\n"
+				f.write "#{@cities.get(@best.path[x]).x} #{@cities.get(@best.path[x]).y}\n"
 			}
-			f.write "#{@cities.get(ant.path[0]).x} #{@cities.get(ant.path[0]).y}\n"
+			f.write "#{@cities.get(@best.path[0]).x} #{@cities.get(@best.path[0]).y}\n"
 		}
 	end
 	
@@ -217,7 +217,7 @@ class Simulation
 			end
 		end	
 		puts "Best tour = #{@best.tour_length}\n\n"
-		emit_data_file(@best)
+		emit_data_file()
 	end
 end
 
