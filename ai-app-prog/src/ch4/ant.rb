@@ -97,7 +97,7 @@ class Ants
 		begin
 			p=0.0
 			city += 1
-			if city >= Simulation::MAX_CITIES
+			if city > Simulation::MAX_CITIES-1
 				city = 0
 			end
 			if @ants[ant].tabu[city] == 0
