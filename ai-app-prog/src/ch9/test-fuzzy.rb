@@ -56,12 +56,14 @@ class BatteryMembershipTest < Test::Unit::TestCase
 	end
 end
 
-class MembershipProfilesTest < Test::Unit::TestCase
-	def test_spike
-		mp = MembershipProfiles.new
-		assert(mp.spike_profile(3, 2, 5).to_s[0..3] == "0.66", "Spike profile failed for value close to low")
-		assert(mp.spike_profile(4, -5, 5).to_s[0..2] == "0.2", "Spike profile failed for value close to high with negative low")
-		assert(mp.spike_profile(-5, -4, -1).to_s[0..3] == "1.33", "Spike profile failed for lots of negative values")
+class SpikeProfileTest < Test::Unit::TestCase
+	def test_simple
+		p = SpikeProfile.new(2,5)
+		assert(p.compute(3).to_s[0..3] == "0.66", "Spike profile failed for value close to low")
+		p = SpikeProfile.new(-5,5)
+		assert(p.compute(4).to_s[0..2] == "0.2", "Spike profile failed for value close to high with negative low")
+		p = SpikeProfile.new(-4,-1)
+		assert(p.compute(-5).to_s[0..3] == "1.33", "Spike profile failed for lots of negative values")
 	end
 end
 

@@ -162,7 +162,6 @@ end
 
 class TemperatureMembership	
 	def initialize
-		@profiles = MembershipProfiles.new
 		@cold = PlateauProfile.new(15.0, 15.0, 15.0, 25.0)
 		@warm = PlateauProfile.new(15.0, 25.0, 35.0, 45.0)
 		@hot = PlateauProfile.new(35.0, 45.0, 45.0, 45.0)
@@ -195,7 +194,6 @@ end
 
 class BatteryMembership
 	def initialize
-		@profiles = MembershipProfiles.new
 		@low = PlateauProfile.new(5.0, 5.0, 5.0, 10.0)
 		@med = PlateauProfile.new(5.0, 10.0, 20.0, 25.0)
 		@high = PlateauProfile.new(25.0, 30.0, 30.0, 30.0)
@@ -226,24 +224,30 @@ class BatteryMembership
 	end
 end
 
-class MembershipProfiles
-	def spike_profile(value, low, high)
-		value += (-low)
-		if low<0 and high<0
-			high = -(high-low)
-		elsif low<0 and high>0
-			high += -low
-		elsif low>0 and high>0
-			high -= low
-		end
-		peak = high/2.0
-		low = 0.0
-		if value<peak
-			return value/peak
-		elsif value>peak
-			return (high-value)/peak
-		end
-		return 1.0
+class SpikeProfile
+	def initialize(low, high)
+		@low = low	
+		@high = high
+	end
+	def compute(value)
+		tlow = @low
+		thigh = @high
+    value += (-tlow)
+    if tlow<0 and thigh<0
+      thigh = -(thigh-tlow)
+    elsif tlow<0 and thigh>0
+      thigh += -tlow
+    elsif tlow>0 and thigh>0
+      thigh -= tlow
+    end
+    peak = thigh/2.0
+    tlow = 0.0
+    if value<peak
+      return value/peak
+    elsif value>peak
+      return (thigh-value)/peak
+    end
+    return 1.0
 	end
 end
 
