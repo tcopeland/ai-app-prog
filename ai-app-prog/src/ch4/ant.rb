@@ -51,6 +51,75 @@ class Cities
 	end
 end
 
+class Ants
+	def initialize
+		@ants = []
+		city_index = 0
+		(0..Simulation::MAX_ANTS-1).each {|x|
+			@ants << Ant.new(city_index % (Simulation::MAX_CITIES-1))
+			city_index += 1
+		}	
+	end
+	def restart(best)
+    city_index = 0
+		@ants.each_index {|x| 
+			if @ants[x].tour_length < best.tour_length
+				best = @ants[x]
+			end
+      @ants[x] = Ant.new(city_index % (Simulation::MAX_CITIES-1))
+      city_index += 1
+		}
+		return best
+	end
+	def simulate(distance, pheromone)
+		moving = 0
+		@ants.each_index {|k|
+			if @ants[k].path_index < Simulation::MAX_CITIES
+				@ants[k].next_city=select_next_city(k, pheromone, distance)
+				@ants[k].tabu[@ants[k].next_city] = 1
+				@ants[k].path_index += 1
+				@ants[k].path[@ants[k].path_index] = @ants[k].next_city
+				@ants[k].tour_length += distance[@ants[k].current_city][@ants[k].next_city]
+				if @ants[k].path_index == Simulation::MAX_CITIES
+					@ants[k].tour_length += distance[@ants[k].path[Simulation::MAX_CITIES-1]][@ants[k].path[0]]
+				end
+				@ants[k].current_city = @ants[k].next_city
+				moving += 1
+			end
+		}
+		return moving
+	end
+	def select_next_city(ant, pheromone, distance)
+		denom = 0.0
+		@ants.each_index {|x|
+			if @ants[ant].tabu[x] == 0
+				denom += ant_product(@ants[ant].current_city, x, pheromone, distance)
+			end
+		}
+		city=0
+		begin
+			p=0.0
+			city += 1
+			if city >= Simulation::MAX_CITIES
+				city = 0
+			end
+			if @ants[ant].tabu[city] == 0
+				p = ant_product(@ants[ant].current_city, city, pheromone, distance)/denom
+				if rand() < p
+					break
+				end
+			end
+		end until !true
+		return city
+	end
+	def ant_product(x,y, pheromone, distance)
+		(pheromone[x][y]**Simulation::ALPHA) * ((1.0/distance[x][y])**Simulation::BETA)
+	end
+	def get(index)
+		@ants[index]
+	end
+end
+
 class Simulation
 	MAX_CITIES = 15
 	MAX_DISTANCE = 100
@@ -66,7 +135,7 @@ class Simulation
 
 	def initialize
 		@cities = Cities.new
-		@ants = []
+		@ants = Ants.new
 		@distance = []
 		@pheromone = []
 		@best = Ant.new(0)
@@ -89,70 +158,6 @@ class Simulation
 				end
 			}
 		}
-
-		city_index = 0
-		(0..MAX_ANTS-1).each {|x|
-			@ants[x] = Ant.new(city_index % (MAX_CITIES-1))
-			city_index += 1
-		}	
-	end
-	
-	def restart_ants
-    city_index = 0
-		(0..MAX_ANTS-1).each {|x| 
-			if @ants[x].tour_length < @best.tour_length
-				@best = @ants[x]
-			end
-      @ants[x] = Ant.new(city_index % (MAX_CITIES-1))
-      city_index += 1
-		}
-	end
-	
-	def ant_product(x,y)
-		(@pheromone[x][y]**ALPHA) * ((1.0/@distance[x][y])**BETA)
-	end
-
-	def select_next_city(ant)
-		denom = 0.0
-		@ants.each_index {|x|
-			if @ants[ant].tabu[x] == 0
-				denom += ant_product(@ants[ant].current_city, x)
-			end
-		}
-		city=0
-		begin
-			p=0.0
-			city += 1
-			if city >= MAX_CITIES
-				city = 0
-			end
-			if @ants[ant].tabu[city] == 0
-				p = ant_product(@ants[ant].current_city, city)/denom
-				if rand() < p
-					break
-				end
-			end
-		end until !true
-		return city
-	end
-
-	def simulate_ants
-		moving = 0
-		@ants.each_index {|k|
-			if @ants[k].path_index < MAX_CITIES
-				@ants[k].next_city=select_next_city(k)
-				@ants[k].tabu[@ants[k].next_city] = 1
-				@ants[k].path_index += 1
-				@ants[k].path[@ants[k].path_index] = @ants[k].next_city
-				@ants[k].tour_length += @distance[@ants[k].current_city][@ants[k].next_city]
-				if @ants[k].path_index == MAX_CITIES
-					@ants[k].tour_length += @distance[@ants[k].path[MAX_CITIES-1]][@ants[k].path[0]]
-				end
-				@ants[k].current_city = @ants[k].next_city
-				moving += 1
-			end
-		}
-		return moving
 	end
 	
 	def update_trails
@@ -170,13 +175,13 @@ class Simulation
 		@pheromone.each_index {|ant|
 			@pheromone.each_index {|i|
 				if i < MAX_CITIES-1
-					from = @ants[ant].path[i]
-					to = @ants[ant].path[i+1]	
+					from = @ants.get(ant).path[i]
+					to = @ants.get(ant).path[i+1]	
 				else
-					from = @ants[ant].path[i]
-					to = @ants[ant].path[0]
+					from = @ants.get(ant).path[i]
+					to = @ants.get(ant).path[0]
 				end
-				@pheromone[from][to] += (QVAL/@ants[ant].tour_length)
+				@pheromone[from][to] += (QVAL/@ants.get(ant).tour_length)
 				@pheromone[to][from] = @pheromone[from][to]
 			}
 		}
@@ -202,10 +207,10 @@ class Simulation
 		current_time = 0
 		while current_time < MAX_TIME
 			current_time += 1
-			if simulate_ants == 0
+			if @ants.simulate(@distance, @pheromone) == 0
 				update_trails
 				if current_time != MAX_TIME
-					restart_ants
+					@best = @ants.restart(@best)
 				end
 				#puts "Time is #{current_time} #{@best.tour_length}"
 			end
