@@ -25,6 +25,7 @@ class Instructions
 	TIER1=1
 	TIER2=(TIER1+1)*COUNT
 	TIER3=(TIER1+TIER2+2)*COUNT
+	STACK_DEPTH=25
 end
 
 class Genetic
@@ -33,7 +34,6 @@ class Genetic
 	def initialize
 		@current_population=0
 		@populations = []
-		@stack_pointer = 0
 		@stack = [] 
 	end
 	def run
@@ -52,18 +52,62 @@ class Genetic
 				answer = args[0]**3 + args[1]**2 + args[2]
 				result = interpret_stm(@populations[@current_population][chrom].program, @populations[@current_population][chrom].prog_size, args)
 				@populations[@current_population][chrom].fitness += Instructions::TIER1 if result == Instructions::NONE
-				@populations[@current_population][chrom].fitness += Instructions::TIER2 if stack_pointer == 1
+				@populations[@current_population][chrom].fitness += Instructions::TIER2 if @stack.size == 1
 			}	
 		}
 	end
 	def interpret_stm(program, prog_length, args)
 		pc = 0
 		error = Instructions::NONE
-		@stack_pointer = 0
 		args.size.downto(0) {|x| spush(args[x])	
+		while error == Instructions::NONE && pc < prog_length
+			begin 
+				case program[pc]
+					when Instructions::DUP
+						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(1)
+						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_not_full
+						spush(speek)
+					when Instructions::SWAP
+						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(2)
+						a = @stack.last.dup
+						@stack[@stack.size-1] = @stack[@stack.size-2]
+						@stack[@stack.size-2] = a
+					when Instructions::MUL
+						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(2)
+						a = spop
+						b = spop
+						spush(a * b)
+					when Instructions::ADD
+						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(2)
+						a = spop
+						b = spop
+						spush(a + b)
+					when Instructions::OVER
+						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(2)
+						spush(@stack[@stack.size-2].dup)	
+				end
+			rescue Exception => x
+				error = x.message.to_i
+			end
+		end
+		return error
+	end
+	def assert_stack_elements(x)
+		@stack.size < x
+	end
+	def assert_stack_not_full
+		!@stack.size == STACK_DEPTH
+	end
+	def spop	
+		x = speek.dup
+		@stack.delete_at(@stack.size - 1)
+		return x
 	end
 	def spush(x)
-		stack << x	
+		@stack << x	
+	end
+	def speek
+		@stack.last
 	end
 	def init_population	
 		(MAX_CHROMS-1).times {|x| init_member(x) }
