@@ -116,10 +116,7 @@ class BackProp
 		file.close			
 	end
 	def test_inputs(a, b, c, d)
-		@inputs[0] = a
-		@inputs[1] = b
-		@inputs[2] = c
-		@inputs[3] = d
+		@inputs[0],@inputs[1],@inputs[2],@inputs[3] = a,b,c,d
 		feed_forward
 		puts a.to_i.to_s + b.to_i.to_s + c.to_i.to_s + d.to_i.to_s + " action " + STRINGS[action(@actual)]
 	end
