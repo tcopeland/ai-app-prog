@@ -34,13 +34,11 @@ class Cities
 		}
 	end
 	def dist(x,y)
-		return Math.sqrt((@cities[x].x - @cities[y].x).abs**2 + (@cities[x].y - @cities[y].y).abs**2)
+		@cities[x].distance_to(@cities[y])
 	end
 	def write(filename)
 		File.open(filename, "w") {|f|
-			@cities.each {|city|
-				f.write "#{city.x} #{city.y}\n"
-			}
+			@cities.each {|city| f.write "#{city.x} #{city.y}\n" }
 		}
 	end
 	def get(index)
@@ -172,18 +170,16 @@ class Simulation
 		}
 
 		@pheromone.each_index {|x|
-			@pheromone.each_index {|y|
-				@pheromone[x][y] *= RHO
-			}
+			@pheromone.each_index {|y| @pheromone[x][y] *= RHO }
 		}
 	end
 
 	def write_solution()
 		File.open("solution.txt", "w") {|f|
 			(0..MAX_CITIES-1).each {|x|
-				f.write "#{@cities.get(@best_so_far.path[x]).x} #{@cities.get(@best_so_far.path[x]).y}\n"
+				f.write(@cities.get(@best_so_far.path[x]).x.to_s + " " + @cities.get(@best_so_far.path[x]).y.to_s + "\n")
 			}
-			f.write "#{@cities.get(@best_so_far.path[0]).x} #{@cities.get(@best_so_far.path[0]).y}\n"
+			f.write(@cities.get(@best_so_far.path[0]).x.to_s + " " + @cities.get(@best_so_far.path[0]).y.to_s + "\n")
 		}
 	end
 end
