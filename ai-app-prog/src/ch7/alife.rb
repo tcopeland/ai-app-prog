@@ -58,20 +58,48 @@ class Agent
 			percept(@location, @inputs[ArtificialLife::HERB_RIGHT], ArtificialLife::WEST_RIGHT, -1)
 			percept(@location, @inputs[ArtificialLife::HERB_PROXIMITY], ArtificialLife::WEST_PROX, -1)
 		end
+		
 		0.upto(ArtificialLife::MAX_OUTPUTS-1) {|out|
 			@actions[out] = @biaso[out]
 			0.upto(ArtificialLife::MAX_INPUTS-1) {|infoo|
 				@actions[out] += (@inputs[infoo] * @weight_oi[(out*Artificial_Life::MAX_INPUTS)+infoo])
 			}
 		}
+		
 		largest = @actions.sort[0]
 		winner = @actions.index(largest)
+		if winner == ArtificialLife::ACTION_TURN_LEFT or winner == ArtificialLife::ACTION_TURN_RIGHT
+			turn(winner)
+		elsif winner == ArtificialLife::ACTION_MOVE
+			move
+		elsif winner == ArtificialLife::ACTION_EAT
+			eat
+		end
+
+		if herbivore
+			@energy -= 2
+		else
+			@energy -= 1
+		end
+		@age += 1 unless @energy <=0 
+	end
+	def die
+	end
+	def turn(winner)
+		
+	end
+	def move
+	end
+	def eat
 	end
 	def herbivore
 		@type == TYPE_HERBIVORE
 	end
 	def carnivore
 		@type == TYPE_CARNIVORE
+	end
+	def dead	
+		@age<=0
 	end
 end
 
@@ -255,6 +283,9 @@ class ArtificialLife
 	def simulate
 		@agents.herbivores {|agent|
 			agent.simulate
+			if agent.dead
+				# TODO kill agent
+			end
 		}
 	end
 
