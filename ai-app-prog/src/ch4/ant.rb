@@ -103,25 +103,21 @@ class Simulation
 				denom += ant_product(@ants[ant].current_city, x)
 			end
 		}
-		if denom == 0.0
-			puts "Denom should not be 0.0!"
-			exit
-		end
-		to=0
+		city=0
 		begin
 			p=0.0
-			to += 1
-			if to >= MAX_CITIES
-				to = 0
+			city += 1
+			if city >= MAX_CITIES
+				city = 0
 			end
-			if @ants[ant].tabu[to] == 0
-				p = ant_product(@ants[ant].current_city, to)/denom
+			if @ants[ant].tabu[city] == 0
+				p = ant_product(@ants[ant].current_city, city)/denom
 				if rand() < p
 					break
 				end
 			end
 		end until !true
-		return to
+		return city
 	end
 
 	def simulate_ants
@@ -177,25 +173,16 @@ class Simulation
 	end
 
 	def emit_data_file(ant)
-		f = File.new("cities.txt", "w")
-		(0..(MAX_CITIES-1)).each {|x|
-			f.write "#{@cities[x].x} #{@cities[x].y}\n"
-		}
-		f.close
-
-		f = File.new("solution.txt", "w")
-		(0..(MAX_CITIES-1)).each {|x|
-			f.write "#{@cities[ant.path[x]].x} #{@cities[ant.path[x]].y}\n"
-		}
-		f.write "#{@cities[ant.path[0]].x} #{@cities[ant.path[0]].y}\n"
-		f.close
-	end
-	
-	def emit_table
-		(0..(MAX_CITIES-1)).each {|x|
-			(0..(MAX_CITIES-1)).each {|y|
-				puts @pheromone[x][y]
+		File.open("cities.txt", "w") {|f|
+			(0..(MAX_CITIES-1)).each {|x|
+				f.write "#{@cities[x].x} #{@cities[x].y}\n"
 			}
+		}
+		File.open("solution.txt", "w") {|f|
+			(0..(MAX_CITIES-1)).each {|x|
+				f.write "#{@cities[ant.path[x]].x} #{@cities[ant.path[x]].y}\n"
+			}
+			f.write "#{@cities[ant.path[0]].x} #{@cities[ant.path[0]].y}\n"
 		}
 	end
 	
