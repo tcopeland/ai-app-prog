@@ -2,10 +2,17 @@
 
 class Location
 	attr_accessor :x, :y
+	def initialize(x,y)
+		@x_offset = x
+		@y_offset = y
+	end
 end
 
 class Plant
 	attr_accessor :location
+	def initialize(loc)
+		@location = loc
+	end
 end
 
 class Agent
@@ -75,17 +82,58 @@ class ArtificialLife
 	WEST_RIGHT = [OffsetPair.new(-2,0), OffsetPair.new(-2,-1), OffsetPair.new(9,9)]
 	WEST_PROX = [OffsetPair.new(1,0), OffsetPair.new(1,-1), OffsetPair.new(0,-1), OffsetPair.new(-1,-1), OffsetPair.new(-1,0), OffsetPair.new(9,9)]
 
+	STATS="stats.dat"
+	AGENTS="agents.dat"
+	RUNTIME="runtime.dat"
+
 	def initialize(args)
-		seed_population = args.include?("--seed-population")
-		emit_runtime_trend = args.include?("--emit-runtime-trend")
-		no_grow = args.include?("--no-grow")
-		carnivore_to_plant = args.include?("--carnivore-to-plant")
-		no_reproduction = args.include?("--no-reproduction")
-		step = args.include?("--step")
 		if args.include?("--help") or args.include?("-h") 
 			usage
 			exit(1)
 		end
+
+		@seed_population = args.include?("--seed-population")
+		@emit_runtime_trend = args.include?("--emit-runtime-trend")
+		@no_grow = args.include?("--no-grow")
+		@carnivore_to_plant = args.include?("--carnivore-to-plant")
+		@no_reproduction = args.include?("--no-reproduction")
+		@step = args.include?("--step")
+		@verbose = args.include?("-v")
+	end
+
+	def live
+		if !@seed_population
+			@fp = File.open(STATS, "w")
+		end
+		if @emit_runtime_trend
+			@rfp = File.open(RUNTIME, "w")
+		end
+		init()
+	end
+
+	def init
+		puts "Creating landscape" unless !@verbose
+		@landscape = Array.new(3)
+		@landscape.each_index {|x| 
+			@landscape[x] = Array.new(MAX_GRID, 0)
+			@landscape[x].each_index{|y| 
+				@landscape[x][y] = Array.new(MAX_GRID, 0) 
+			}
+		}
+		@best_agent = []
+		@plants = []	
+		puts "Creating plants" unless !@verbose
+		0.upto(MAX_PLANTS-1) {|x|
+			while true
+				x = rand(MAX_GRID)	
+				y = rand(MAX_GRID)
+				if @landscape[PLANT_PLANE][y][x] == 0
+					@plants << Plant.new(Location.new(x,y))
+					@landscape[PLANT_PLANE][y][x] += 1
+					break
+				end
+			end
+		}
 	end
 
 	def getWeight
@@ -99,4 +147,5 @@ end
 
 if __FILE__ == $0
 	life = ArtificialLife.new(ARGV)
+	life.live
 end
