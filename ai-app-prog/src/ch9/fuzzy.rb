@@ -95,21 +95,21 @@ class Battery
 	attr_accessor :mode
 	def initialize
 		@mode = FastCharge.new
-		@tm = TemperatureMembershipFunctions.new
-		@bm = BatteryMembershipFunctions.new
-		@ops = FuzzyOperations.new
+		@temperature_mf = TemperatureMembershipFunctions.new
+		@battery_mf = BatteryMembershipFunctions.new
+		@fuzzy = FuzzyOperations.new
 		@count = 0
 	end
 	def charge_control(simulation, timer)
 		@count += 1
 		if (@count % 10) == 0
-			if normalize(@bm.high(simulation.voltage)) >0
+			if normalize(@battery_mf.high(simulation.voltage)) >0
 				@mode = TrickleCharge.new
 				timer.reset
-			elsif normalize(@tm.hot(simulation.temperature.current)) > 0
+			elsif normalize(@temperature_mf.hot(simulation.temperature.current)) > 0
 				@mode = TrickleCharge.new
 				timer.reset
-			elsif normalize(@ops.and(@ops.not(@bm.high(simulation.voltage)), @ops.not(@tm.hot(simulation.temperature.current)))) > 0
+			elsif normalize(@fuzzy.and(@fuzzy.not(@battery_mf.high(simulation.voltage)), @fuzzy.not(@temperature_mf.hot(simulation.temperature.current)))) > 0
 				@mode = FastCharge.new
 				timer.reset
 			end
