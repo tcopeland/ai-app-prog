@@ -59,9 +59,9 @@ class Genetic
 	def interpret_stm(program, prog_length, args)
 		pc = 0
 		error = Instructions::NONE
-		args.size.downto(0) {|x| spush(args[x])	
+		args.size.downto(0) {|x| spush(args[x])	}
 		while error == Instructions::NONE && pc < prog_length
-			begin 
+			begin
 				case program[pc]
 					when Instructions::DUP
 						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(1)
@@ -84,7 +84,7 @@ class Genetic
 						spush(a + b)
 					when Instructions::OVER
 						raise Exception.exception(STACK_VIOLATION.to_s) if assert_stack_elements(2)
-						spush(@stack[@stack.size-2].dup)	
+						spush(@stack[@stack.size-2].dup)
 				end
 			rescue Exception => x
 				error = x.message.to_i
