@@ -106,10 +106,10 @@ class Battery
 			if normalize(@bm.high(simulation.voltage)) >0
 				@mode = TrickleCharge.new
 				timer.reset
-			elsif normalize(@tm.temp_hot(simulation.temperature.current)) > 0
+			elsif normalize(@tm.hot(simulation.temperature.current)) > 0
 				@mode = TrickleCharge.new
 				timer.reset
-			elsif normalize(@ops.and(@ops.not(@bm.high(simulation.voltage)), @ops.not(@tm.temp_hot(simulation.temperature.current)))) > 0
+			elsif normalize(@ops.and(@ops.not(@bm.high(simulation.voltage)), @ops.not(@tm.hot(simulation.temperature.current)))) > 0
 				@mode = FastCharge.new
 				timer.reset
 			end
@@ -166,7 +166,7 @@ class TemperatureMembership
 		@warm = PlateauProfile.new(15.0, 25.0, 35.0, 45.0)
 		@hot = PlateauProfile.new(35.0, 45.0, 45.0, 45.0)
 	end
-	def temp_cold(temp)
+	def cold(temp)
 		if temp < @cold.low 
 			return 1.0	
 		end
@@ -175,13 +175,13 @@ class TemperatureMembership
 		end
 		return @cold.compute(temp)
 	end
-	def temp_warm(temp)
+	def warm(temp)
 		if temp < @warm.low or temp > @warm.high
 			return 0.0	
 		end
 		return @warm.compute(temp)
 	end
-	def temp_hot(temp)
+	def hot(temp)
 		if temp < @hot.low 
 			return 0.0	
 		end

@@ -38,19 +38,19 @@ class ConstrainedValueTest < Test::Unit::TestCase
 	end
 end
 
-class BatteryMembershipTest < Test::Unit::TestCase
+class BatteryMembershipFunctionsTest < Test::Unit::TestCase
 	def test_low
-		b = BatteryMembership.new	
+		b = BatteryMembershipFunctions.new	
 		assert(b.low(ConstrainedValue.new(1.0, 0.0, 35.0)) == 1.0, "Voltage below low end should have resulted in 1.0")
 		assert(b.low(ConstrainedValue.new(11.0, 0.0, 35.0)) == 0.0, "Voltage above high end should have resulted in 0.0")
 	end
 	def test_medium
-		b = BatteryMembership.new	
+		b = BatteryMembershipFunctions.new	
 		assert(b.medium(ConstrainedValue.new(2.0, 0.0, 35.0)) == 0.0, "Voltage below low end should have resulted in 0.0")
 		assert(b.medium(ConstrainedValue.new(30.0, 0.0, 35.0)) == 0.0, "Voltage above high end should have resulted in 0.0")
 	end
 	def test_high
-		b = BatteryMembership.new	
+		b = BatteryMembershipFunctions.new	
 		assert(b.high(ConstrainedValue.new(20.0, 0.0, 35.0)) == 0.0, "Voltage below low end should have resulted in 0.0")
 		assert(b.high(ConstrainedValue.new(35.0, 0.0, 35.0)) == 1.0, "Voltage above high end should have resulted in 1.0")
 	end
