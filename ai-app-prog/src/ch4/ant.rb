@@ -171,7 +171,8 @@ class Simulation
 			end
 		end	
 		puts "Best tour = #{@best.tour_length}\n\n"
-		emit_data_file()
+		@cities.write("cities.txt")
+		write_solution()
 	end
 	
 	def update_trails
@@ -207,10 +208,9 @@ class Simulation
 		}
 	end
 
-	def emit_data_file()
-		@cities.write("cities.txt")
+	def write_solution()
 		File.open("solution.txt", "w") {|f|
-			@pheromone.each_index {|x|
+			(0..MAX_CITIES-1).each {|x|
 				f.write "#{@cities.get(@best.path[x]).x} #{@cities.get(@best.path[x]).y}\n"
 			}
 			f.write "#{@cities.get(@best.path[0]).x} #{@cities.get(@best.path[0]).y}\n"
