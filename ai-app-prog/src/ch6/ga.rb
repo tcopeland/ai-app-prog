@@ -14,11 +14,11 @@ end
 
 class Instructions
 	DUP=0
-	SWAP=1
-	MUL=2
-	ADD=3
-	OVER=4
-	NOP=5
+	SWAP=0x01
+	MUL=0x02
+	ADD=0x03
+	OVER=0x04
+	NOP=0x05
 	MAX_INSTRUCTIONS=NOP+1
 end
 
@@ -38,9 +38,15 @@ class Genetic
 		file.close
 	end
 	def perform_fitness_check(file)
+		args = []
 		(MAX_CHROMS-1).times {|chrom|
 			@populations[@current_population][chrom].reset_fitness
-			
+			(COUNT-1).times {|i|	
+				# TODO - is this what's intended?
+				args[0] = ((rand*10).to_i & 0x1f) + 1
+				args[1] = ((rand*10).to_i & 0x1f) + 1
+				args[2] = ((rand*10).to_i & 0x1f) + 1
+			}	
 		}
 	end
 	def init_population	
