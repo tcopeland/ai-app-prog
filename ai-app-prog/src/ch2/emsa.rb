@@ -7,26 +7,35 @@ class Member
 	def initialize
 		@energy=0.0
 		@solution=Array.new(Emsa::MAX_LENGTH)
-		0..upto(Emsa::MAX_LENGTH-1) {|x| @solution[x] = x}
-		0..upto(Emsa::MAX_LENGTH-1) {|x| tweak}
+		0.upto(Emsa::MAX_LENGTH-1) {|x| @solution[x] = x}
+		0.upto(Emsa::MAX_LENGTH-1) {|x| tweak}
 	end
+
 	def copy_to(dest)
+		0..upto(MAX_LENGTH-1) {|x|
+			dest.solution[x] = @solution[x]
+		}
+		dest.energy = @energy
 	end
+
 	def tweak
 		y=0
 		x = rand(Emsa::MAX_LENGTH)
 		begin
 			y = rand(Emsa::MAX_LENGTH)
-		until x != y
+		end until x != y
 		temp = @solution[x]
 		@solution[x] = @solution[y]
 		@solution[y] = temp
 	end
+
 	def emit_solution
 		board = create_new_board
-		0..upto(MAX_LENGTH-1) {|x| board[x][@solution[x]]] = 'Q' }
-		0..upto(MAX_LENGTH-1) {|x|
-			0..upto(MAX_LENGTH-1) {|y|
+		0.upto(MAX_LENGTH-1) {|x| 
+			board[x][@solution[x]] = 'Q' 
+		}
+		0.upto(MAX_LENGTH-1) {|x|
+			0.upto(MAX_LENGTH-1) {|y|
 				p board[x][y]
 			}	
 			puts "\n"
@@ -35,14 +44,14 @@ class Member
 	end
 	def compute_energy
 		board = create_new_board
-		0..upto(MAX_LENGTH-1) {|x|
+		0.upto(MAX_LENGTH-1) {|x|
 			board[i][@solution[i]] = 'Q';
 		}
 		conflicts = 0
-		0..upto(MAX_LENGTH-1) {|i|
+		0.upto(MAX_LENGTH-1) {|i|
 			x = i
 			y = solution[i]
-			0..upto(3) {|j|
+			0.upto(3) {|j|
 				tempx = x
 				tempy = y
 				while true	
@@ -61,10 +70,13 @@ class Member
 	end
 
 	def create_new_board
-		board = Array.new(MAX_LENGTH, '.')
-		board.each_index {|x| board[x] = Array.new(MAX_LENGTH, '.') }
+		board = Array.new(Emsa::MAX_LENGTH, '.')
+		board.each_index {|x| 
+			board[x] = Array.new(Emsa::MAX_LENGTH, '.') 
+		}
 		return board
 	end
+
 end
 
 class Emsa
@@ -74,16 +86,16 @@ class Emsa
 	ALPHA=0.99
 	STEPS_PER_CHANGE=100
 
-
 	def initialize
-		timer=step=solution=use_new=accepted=0
+		timer=solution=use_new=accepted=0
 		temperature=INITIAL_TEMPERATURE
+	
 		current=Member.new
 		working=Member.new
 		best=Member.new
 
 		File.open("stats.txt", "w") {|file|
-			compute_energy(current)
+			current.compute_energy
 			best.energy = 100.0	
 			
 			current.copy_to(working)
@@ -91,10 +103,10 @@ class Emsa
 			while temperature > FINAL_TEMPERATURE
 				puts "Temperature: #{temperature}"
 				accepted = 0
-				0..upto(STEPS_PER_CHANGE-1) {|step|
+				0.upto(STEPS_PER_CHANGE-1) {
 					use_new = 0	
 					working.tweak
-					compute_energy(working)
+					working.compute_energy
 	
 					if working.energy <= current.energy
 						use_new = 1
@@ -121,6 +133,7 @@ class Emsa
 			end		
 			
 			f.write("#{timer} #{temperature} #{best.energy} #{accepted}\n")
+			timer += 1
 			puts "Best energy: #{best.energy}"
 			temperature *= ALPHA	
 		}
@@ -134,5 +147,5 @@ end
 
 
 if __FILE__ == $0
-	puts "hi"
+	Emsa.new
 end
