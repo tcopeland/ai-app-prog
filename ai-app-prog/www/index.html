@@ -98,16 +98,16 @@ Q . . . . . . . . . . . . . . .
 <a name="notes"></a>
 <h3><a href="#top">Porting notes</a></h3>
 <ul>
-<li>The code in this book doesn't use setjmp() or doubly-indirect pointers or other hairy C stuff - it's mostly just loops and functions.  This makes porting it a lot easier.
+<li>The code in this book doesn't use setjmp() or doubly-indirect pointers or other hairy C stuff - it's mostly just loops and functions.  This makes porting it a lot easier.<p>
 <li>I'm porting in several steps:
 <ol>
 <li>Do an initial "raw" port by just translating C to Ruby
 <li>Pick a blob of associated data items, refactor them into a Ruby class
-<li>Add tests, back to step 2
+<li>Add tests, back to step 2<p>
 </ol>
-<li>Ruby is _so_ much less wordy than C - not having to type all the parentheses and semicolons and such is really nice.
-<li>If someone wanted to do this and preserve speed, it'd probably be best to just write Ruby extensions that wrap the AI stuff (thx to Rich Kilmer for this comment)
-<li>Writing more tests will alleviate some problems I'm having - i.e., forgetting the "@" on a instance variable.  It's kind of an odd situation, though... I don't really understand how some of the algorithms work, so writing tests for them is hard since I have to step thru the entire function with sample values.  I feel like the tests I'm writing are too high-level or something.
+<li>Ruby is _so_ much less wordy than C - not having to type all the parentheses and semicolons and such is really nice.<p>
+<li>If someone wanted to do this and preserve speed, it'd probably be best to just write Ruby extensions that wrap the AI stuff (thx to Rich Kilmer for this comment)<p>
+<li>Writing more tests will alleviate some problems I'm having - i.e., forgetting the "@" on a instance variable.  It's kind of an odd situation, though... I don't really understand how some of the algorithms work, so writing tests for them is hard since I have to step thru the entire function with sample values.  I feel like the tests I'm writing are too high-level or something.<p>
 <li>Watch for C code like this:
 <pre>
 if (foo) {
@@ -120,13 +120,13 @@ if foo != 0
 	# do something
 end
 </pre>
-in Ruby.  In other words. "non zero" in C needs to be translated to "not nil and not zero" in Ruby.
+in Ruby.  In other words. "non zero" in C needs to be translated to "not nil and not zero" in Ruby.<p>
 <li>A <code>do..while</code> forever loop in C can be done like this in Ruby:
 <pre>
 begin
 	# do stuff
 end until !true
-</pre>
+</pre><p>
 <li>Translate pre- and post-increment statements correctly.  C code like this:
 <pre>
 int x = 0;
@@ -138,10 +138,10 @@ x = 0
 puts "Value = #{x}\n"
 x += 1
 </pre>
-This bit me something fierce on the Ant Algorithm code.  Of course, what really bit me was that I didn't write any unit tests.  Gack.
-<li>C has the <code>static</code> keyword which can be used inside functions to indicate that a variable is only initialized once.  This translates to a class-level variable in Ruby.  At least, that's the best comparison I can think of at the moment, comments are welcome.
+This bit me something fierce on the Ant Algorithm code.  Of course, what really bit me was that I didn't write any unit tests.  Gack.<p>
+<li>C has the <code>static</code> keyword which can be used inside functions to indicate that a variable is only initialized once.  This translates to a class-level variable in Ruby.  At least, that's the best comparison I can think of at the moment, comments are welcome.<p>
+<li>Some fairly verbose C idioms can go away when converting to Ruby... for example, instead of manually traversing an array to find the largest element, just do a <code>largest = array.sort[0]</code>.  If the array isn't very large, that'll do the trick.
 </ul>
-
 </body>
 </html>
 
