@@ -25,23 +25,19 @@ class Instructions
 	TIER2 = (TIER1+1)*COUNT
 	TIER3 = (TIER1+TIER2+2)*COUNT
 	MAX_FITNESS = ((TIER3*COUNT) + (TIER2*COUNT) + (TIER1*COUNT)).to_f
-	
-	NONE = 0
-	STACK_VIOLATION = 1
-	MATH_VIOLATION = 2
-
-	STACK_DEPTH = 25
 end
 
 class Stack
+	STACK_DEPTH = 25
+	STACK_VIOLATION = 1
 	def initialize
 		@s = []
 	end
 	def assert_elements(x)
-		@s.size < x
+		raise Exception.exception(STACK_VIOLATION.to_s) if @s.size < x
 	end
 	def assert_not_full
-		!@s.size == Instructions::STACK_DEPTH
+		raise Exception.exception(STACK_VIOLATION.to_s) if @s.size == STACK_DEPTH
 	end
 	def size
 		@s.size
@@ -236,24 +232,24 @@ class Genetic
 		0.upto(pop.prog_size - 1) {|x|
 			case pop.program[x]
 				when Instructions::DUP
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_elements(1)
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_not_full
+					@stack.assert_elements(1)
+					@stack.assert_not_full
 					@stack.push(@stack.peek)
 				when Instructions::SWAP
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_elements(2)
+					@stack.assert_elements(2)
 					@stack.swap
 				when Instructions::MUL
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_elements(2)
+					@stack.assert_elements(2)
 					a = @stack.pop
 					b = @stack.pop
 					@stack.push(a * b)
 				when Instructions::ADD
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_elements(2)
+					@stack.assert_elements(2)
 					a = @stack.pop
 					b = @stack.pop
 					@stack.push(a + b)
 				when Instructions::OVER
-					raise Exception.exception(Instructions::STACK_VIOLATION.to_s) if @stack.assert_elements(2)
+					@stack.assert_elements(2)
 					@stack.over
 			end
 		}
