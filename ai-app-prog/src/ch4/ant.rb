@@ -64,17 +64,17 @@ class Ants
 		}
 		return best_so_far
 	end
-	def simulate(distance, pheromone)
+	def simulate(distances, pheromone)
 		moving = 0
 		@ants.each_index {|k|
 			if @ants[k].path_index < Simulation::MAX_CITIES
-				@ants[k].next_city=select_next_city(@ants[k], pheromone, distance)
+				@ants[k].next_city=select_next_city(@ants[k], pheromone, distances)
 				@ants[k].tabu[@ants[k].next_city] = 1
 				@ants[k].path_index += 1
 				@ants[k].path[@ants[k].path_index] = @ants[k].next_city
-				@ants[k].tour_length += distance[@ants[k].current_city][@ants[k].next_city]
+				@ants[k].tour_length += distances.get(@ants[k].current_city, @ants[k].next_city)
 				if @ants[k].path_index == Simulation::MAX_CITIES
-					@ants[k].tour_length += distance[@ants[k].path[Simulation::MAX_CITIES-1]][@ants[k].path[0]]
+					@ants[k].tour_length += distances.get(@ants[k].path[Simulation::MAX_CITIES-1], @ants[k].path[0])
 				end
 				@ants[k].current_city = @ants[k].next_city
 				moving += 1
@@ -82,27 +82,46 @@ class Ants
 		}
 		return moving
 	end
-	def select_next_city(ant, pheromone, distance)
+	def select_next_city(ant, pheromone, distances)
 		denom = 0.0
 		0.upto(Simulation::MAX_CITIES-1) {|target_city|
 			if ant.tabu[target_city] == 0
-				denom += ant_product(ant, target_city, pheromone, distance)
+				denom += ant_product(ant, target_city, pheromone, distances)
 			end
 		}
 		city=0
 		begin
-			if ant.tabu[city % Simulation::MAX_CITIES] == 0 && rand() < ant_product(ant, city % Simulation::MAX_CITIES, pheromone, distance)/denom
+			if ant.tabu[city % Simulation::MAX_CITIES] == 0 && rand() < ant_product(ant, city % Simulation::MAX_CITIES, pheromone, distances)/denom
 				break
 			end
 			city += 1
 		end until !true
 		return city % Simulation::MAX_CITIES
 	end
-	def ant_product(ant, target_city, pheromone, distance)
-		(pheromone[ant.current_city][target_city]**Simulation::ALPHA) * ((1.0/distance[ant.current_city][target_city])**Simulation::BETA)
+	def ant_product(ant, target_city, pheromone, distances)
+		(pheromone[ant.current_city][target_city]**Simulation::ALPHA) * ((1.0/distances.get(ant.current_city, target_city))**Simulation::BETA)
 	end
 	def get(index)
 		@ants[index]
+	end
+end
+
+class Distances
+	def initialize(cities)
+		@distance = []
+		0.upto(Simulation::MAX_CITIES-1) {|x|
+			@distance[x] = Array.new(Simulation::MAX_CITIES, 0.0)
+		}
+		0.upto(Simulation::MAX_CITIES-1) {|x|
+			0.upto(Simulation::MAX_CITIES-1) {|y|
+				if x != y and @distance[x][y] == 0.0	
+					@distance[x][y] = @distance[y][x] = cities.dist(x,y)
+				end
+			}
+		}
+	end
+	def get(x,y)
+		return @distance[x][y]
 	end
 end
 
@@ -122,28 +141,19 @@ class Simulation
 	def initialize
 		@cities = Cities.new
 		@ants = Ants.new
-	
-		@distance = []
+		@distances = Distances.new(@cities)
+
 		@pheromone = []
 		@best_so_far = nil
 	
 		0.upto(MAX_CITIES-1) {|x|
-			@distance[x] = Array.new(MAX_CITIES, 0.0)
 			@pheromone[x] = Array.new(MAX_CITIES, INIT_PHEROMONE)
 		}
 
-		0.upto(MAX_CITIES-1) {|x|
-			0.upto(MAX_CITIES-1) {|y|
-				if x != y and @distance[x][y] == 0.0	
-					@distance[x][y] = @distance[y][x] = @cities.dist(x,y)
-				end
-			}
-		}
-		
 		current_time = 0
 		while current_time < MAX_TIME
 			current_time += 1
-			if @ants.simulate(@distance, @pheromone) == 0
+			if @ants.simulate(@distances, @pheromone) == 0
 				update_trails
 				if current_time != MAX_TIME
 					@best_so_far = @ants.restart(@best_so_far)
