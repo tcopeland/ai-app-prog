@@ -109,7 +109,6 @@ class ArtificialLife
 			usage
 			exit(1)
 		end
-
 		@seed_population = args.include?("--seed-population")
 		@emit_runtime_trend = args.include?("--emit-runtime-trend")
 		@no_grow = args.include?("--no-grow")
@@ -118,8 +117,20 @@ class ArtificialLife
 		@step = args.include?("--step")
 		@verbose = args.include?("-v")
 	end
+		
+	def loop
+		0.upto(MAX_STEPS-1) {
+			if @seed_population
+				emit_landscape
+			end
+			if @step
+				getc
+			end
+			
+		}
+	end
 
-	def live
+	def init
 		if !@seed_population
 			@fp = File.open(STATS, "w")
 		end
@@ -164,7 +175,6 @@ class ArtificialLife
 		else
 			raise "Reading agent data from a file isn't implemented yet"
 		end
-		
 	end
 
 	def getWeight
@@ -178,5 +188,5 @@ end
 
 if __FILE__ == $0
 	life = ArtificialLife.new(ARGV)
-	life.live
+	life.init
 end
