@@ -126,10 +126,10 @@ class Distances
 end
 
 class Simulation
-	MAX_CITIES = 10
+	MAX_CITIES = 30
 	MAX_DISTANCE = 100
 	MAX_TOUR = MAX_CITIES * MAX_DISTANCE
-	MAX_ANTS = 15
+	MAX_ANTS = 30
 	ALPHA = 1.0
 	BETA = 5.0	
 	RHO = 0.5
