@@ -274,7 +274,7 @@ if __FILE__ == $0
 		b.charge_control(s, t)
 		t.bump
 		if count % 25 == 0
-			puts "#{count},#{s.voltage.current},#{s.temperature.current}"
+			puts "#{count} #{s.voltage.current} #{s.temperature.current}"
 		end
 	}	
 end
