@@ -1,10 +1,10 @@
 #!/usr/local/bin/ruby
 
 class Rule
-	attr_reader :name, :antecedents
+	attr_reader :name, :antecedents, :consequents
 	def initialize(name)
 		@name = name
-		@antecedents = []
+		@antecedents, @consequents = [], []
 	end
 end
 
@@ -99,7 +99,6 @@ class RulesetParser
 	
 		ctx.bump	
 		while (ctx.ptr <= toks.size - 2) && toks[ctx.ptr].open?
-			ctx.bump # skip delim 
 			ctx.push(RuleParser.new)
 			ctx.peek.handle(ctx, toks)
 			ctx.pop
@@ -111,13 +110,34 @@ end
 
 class RuleParser
 		def handle(ctx, toks)
-			# has-hair ?
-			ctx.rules.last.antecedents << Fact.new(toks[ctx.ptr].txt, toks[ctx.ptr + 1].txt)
+			while toks[ctx.ptr].delim?
+				ctx.bump # skip delim 
+				ctx.push(FactParser.new(ctx.rules.last.antecedents))
+				ctx.peek.handle(ctx, toks)
+				ctx.pop
+				ctx.bump # skip delim 
+			end
+			# move past the "=>"
 			ctx.bump
+			while toks[ctx.ptr].delim?
+				ctx.bump # skip delim 
+				ctx.push(FactParser.new(ctx.rules.last.consequents))
+				ctx.peek.handle(ctx, toks)
+				ctx.pop
+				ctx.bump # skip delim 
+			end
 		end
 end
 
 class FactParser
+	def initialize(arr)
+		@arr = arr
+	end
+	def handle(ctx, toks)
+		@arr << Fact.new(toks[ctx.ptr].txt, toks[ctx.ptr + 1].txt)
+		ctx.bump
+		ctx.bump
+	end
 end	
 
 class Ctx
