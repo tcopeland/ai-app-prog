@@ -75,27 +75,28 @@ class ArtificialLife
 	WEST_RIGHT = [OffsetPair.new(-2,0), OffsetPair.new(-2,-1), OffsetPair.new(9,9)]
 	WEST_PROX = [OffsetPair.new(1,0), OffsetPair.new(1,-1), OffsetPair.new(0,-1), OffsetPair.new(-1,-1), OffsetPair.new(-1,0), OffsetPair.new(9,9)]
 
+	def initialize(args)
+		seed_population = args.include?("--seed-population")
+		emit_runtime_trend = args.include?("--emit-runtime-trend")
+		no_grow = args.include?("--no-grow")
+		carnivore_to_plant = args.include?("--carnivore-to-plant")
+		no_reproduction = args.include?("--no-reproduction")
+		step = args.include?("--step")
+		if args.include?("--help") or args.include?("-h") 
+			usage
+			exit(1)
+		end
+	end
+
 	def getWeight
      rand(9)-1
 	end
 
-end
-
-def usage
-	puts "./alife [--seed-population] [--emit-runtime-trend] [--no-grow] [--carnivore-to-plant] [--no-reproduction] [--step]"
+	def usage
+		puts "./alife [--seed-population] [--emit-runtime-trend] [--no-grow] [--carnivore-to-plant] [--no-reproduction] [--step]"
+	end
 end
 
 if __FILE__ == $0
-	seed_population = ARGV.include?("--seed-population")
-	emit_runtime_trend = ARGV.include?("--emit-runtime-trend")
-	no_grow = ARGV.include?("--no-grow")
-	carnivore_to_plant = ARGV.include?("--carnivore-to-plant")
-	no_reproduction = ARGV.include?("--no-reproduction")
-	step = ARGV.include?("--step")
-	if ARGV.include?("--help") or ARGV.include?("-h") 
-		usage
-		exit(1)
-	end
-	life = ArtificialLife.new
-	puts "Hi!"
+	life = ArtificialLife.new(ARGV)
 end
