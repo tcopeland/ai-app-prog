@@ -101,7 +101,7 @@ class Simulation
 	end
 	
 	def restart_ants
-     city_index = 0
+    city_index = 0
 		(0..(MAX_ANTS-1)).each {|x| 
 			if @ants[x].tour_length < @best.tour_length
 				@best = @ants[x]
@@ -120,7 +120,7 @@ class Simulation
 
 	def select_next_city(ant)
 		denom = 0.0
-		(0..(MAX_CITIES-1)).each {|x|
+		@ants.each_index {|x|
 			if @ants[ant].tabu[x] == 0
 				denom += ant_product(@ants[ant].current_city, x)
 			end
