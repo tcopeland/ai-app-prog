@@ -85,11 +85,10 @@ class Adaptive
 					if !@members[pvec].nil?
 						mag_pe = vector_magnitude(vector_bitwise_and(DATABASE[index], @prototype_vector[pvec]))
 						mag_p = vector_magnitude(@prototype_vector[pvec])
-						mag_e = vector_magnitude(DATABASE[index])
 						result = mag_pe.to_f / (BETA + mag_p)
-						test = mag_e.to_f / (BETA + ITEM_NAMES.size.to_f)
+						test = DATABASE[index].magnitude.to_f / (BETA + ITEM_NAMES.size.to_f)
 						if result > test	
-							if (mag_pe.to_f / mag_e.to_f) < VIGILANCE
+							if (mag_pe.to_f / DATABASE[index].magnitude.to_f) < VIGILANCE
 								old = 0
 								if @membership[index] != pvec
 									old = @membership[index]
@@ -197,9 +196,6 @@ class Adaptive
 		}
 	end
 	def vector_magnitude(v)
-		if v.kind_of?(Vector)
-			return v.magnitude
-		end
 		v.collect{|a| a > 0 ? 1 : nil}.compact.size
 	end
 	def vector_bitwise_and(v, w)
