@@ -181,10 +181,18 @@ class Simulation
 
 		f = File.new("solution.dat", "w")
 		(0..(MAX_CITIES-1)).each {|x|
-			f.write "#{@cities[@ants[ant].path[city]].x} #{@cities[@ants[ant].path[city]].y}"
+			f.write "#{@cities[ant.path[city]].x} #{@cities[ant.path[city]].y}"
 		}
-		f.write "#{@cities[@ants[ant].path[0]].x} #{@cities[@ants[ant].path[0]].y}"
+		f.write "#{@cities[ant.path[0]].x} #{@cities[ant.path[0]].y}"
 		f.close
+	end
+	
+	def emit_table
+		(0..(MAX_CITIES-1)).each {|x|
+			(0..(MAX_CITIES-1)).each {|y|
+				puts @pheromone[x][y]
+			}
+		}
 	end
 	
 	def abs(x)
@@ -193,8 +201,26 @@ class Simulation
 		end
 		return x
 	end
+
+	def main
+		current_time = 0
+		while current_time < MAX_TIME
+			if simulate_ants == 0
+				update_trails
+				if current_time != MAX_TIME
+					restart_ants
+				end
+				puts "Time is #{current_time} #{best}"
+		end	
+		puts "Best tour = #{best}\n\n"
+		emit_data_file(best)
+	end
 end
+
+
 
 if __FILE__ == $0
 	puts Common::MAX_CITIES
+	s = Simulator.new
+	s.main
 end
