@@ -24,6 +24,17 @@
 <h3>General musings</h3>
 <ul>
 <li>The code in this book (so far) doesn't use setjmp() or doubly-indirect pointers or other hairy C stuff - it's mostly just loops and functions.  This makes porting it a lot easier.
+<li>Watch for C code like this:
+<pre>
+if (foo) {
+}
+</pre>
+It needs to be translated to
+<pre>
+if (foo != 0) {
+}
+</pre>
+in Ruby.  In other words. "non zero" in C needs to be translated to "not nil and not zero" in Ruby.
 <li>If someone wanted to do this and preserve speed, it'd probably be best to just write Ruby extensions that wrap the AI stuff (thx to Rich Kilmer for this comment)
 <li>So far I've pretty much just ported it straight over - only adding a few objects as necessary.  There's some stuff that could turn into some nice objects, i.e., the voltage membership functions in the fuzzy logic examples.
 <li>Ruby is _so_ much less wordy than C - not having to type all the parentheses and semicolons and such is really nice.

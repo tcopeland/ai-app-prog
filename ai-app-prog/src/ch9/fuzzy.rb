@@ -97,10 +97,10 @@ class Battery
 	attr_accessor :mode
 	def initialize
 		@mode = FastCharge.new
-		@count = 0
 		@tm = TemperatureMembership.new
 		@bm = BatteryMembership.new
 		@ops = FuzzyOperations.new
+		@count = 0
 	end
 	def charge_control(simulation, timer)
 		@count += 1
