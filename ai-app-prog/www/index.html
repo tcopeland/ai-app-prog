@@ -3,6 +3,7 @@
 <title>AI Application Programming Ruby port</title>
 </head>
 <body>
+<a href="top"><p></a>
 <p>In an effort to learn more about AI programming techniques, I'm trying to port M. Tim Jones' <a href="http://www.charlesriver.com/titles/aiapp.html">AI Application Programming</a> examples from C to Ruby.  I'm planning to port these in no particular order.
 
 <p>The relevant chapters are:
@@ -59,19 +60,19 @@ end until !true
 
 <hr>
 <a name="ant"></a>
-<h3>Chapter 4 - Ant Algorithms</h3>
+<h3><a href="#top">Chapter 4 - Ant Algorithms</a></h3>
 <p>Updated 10/17/03: Code is translated, beginning to refactor.
 <ul>
 <li>TRANSLATION BUG: One city is skipped
 <li>TRANSLATION BUG: Path sometimes appears to have a cycle - not sure if it just looks that way or what
-<li>Here's the city graph:
+<li>Here's the graph of the cities and the path between them:
 <p><img src="ch4/cities.png"/>
 </ul>
 
 <hr>
 
 <a name="fuzzy"></a>
-<h3>Chapter 9 - Fuzzy Logic</h3>
+<h3><a href="#top">Chapter 9 - Fuzzy Logic</a></h3>
 <p>Updated 10/16/03: Battery charger and predator prey examples complete, code is <a href="http://rubyforge.org/cgi-bin/viewcvs/cgi/viewcvs.cgi/ai-app-prog/src/ch9/?cvsroot=ai-app-prog">here</a>.  
 <ul>
 <li>The predator/prey example was fun because I had to relearn some trigonometry.  Also, I had to tweak the membership functions a bit - the first time through I made the center spike profile too wide and so the predator kept waiting too long to turn towards the prey.
