@@ -122,87 +122,109 @@ class Battery
 	end
 end
 
+class PlateauProfile
+	attr_accessor :low, :low_plateau, :high_plateau, :high
+	def initialize(low, low_plateau, high_plateau, high)
+		@low = low	
+		@low_plateau = low_plateau
+		@high_plateau = high_plateau
+		@high = high
+	end
+	def compute(value)
+		tmplp = @low_plateau
+		tmphp = @high_plateau
+		tmph = @high
+		value += -@low
+		if @low < 0.0
+			tmplp += -@low
+			tmphp += -@low
+			tmph += -@low
+		else
+			tmplp -= @low
+			tmphp -= @low
+			tmph -= @low
+		end
+		tmpl = 0
+		upslope = (1.0/(tmplp - tmpl))
+		downslope = (1.0/(tmph - tmphp))
+		if value< tmpl
+			return 0.0
+		elsif value> tmph
+			return 0.0
+		elsif value>= tmplp and value<=tmphp
+			return 1.0
+		elsif value< tmplp 
+			return (value-tmpl) * upslope
+		elseif value> tmphp
+			return (tmph-value)*downslope
+		end
+		return 0.0
+	end
+end
+
 class TemperatureMembership	
 	def initialize
 		@profiles = MembershipProfiles.new
+		@cold = PlateauProfile.new(15.0, 15.0, 15.0, 25.0)
+		@warm = PlateauProfile.new(15.0, 25.0, 35.0, 45.0)
+		@hot = PlateauProfile.new(35.0, 45.0, 45.0, 45.0)
 	end
 	def temp_cold(temp)
-		low = 15.0
-		low_plateau = 15.0
-		high_plateau = 15.0
-		high = 25.0
-		if temp < low 
+		if temp < @cold.low 
 			return 1.0	
 		end
-		if temp > high
+		if temp > @cold.high
 			return 0.0
 		end
-		return @profiles.plateau_profile(temp, low, low_plateau, high_plateau, high)
+		return @cold.compute(temp)
 	end
 	def temp_warm(temp)
-		low = 15.0
-		low_plateau = 25.0
-		high_plateau = 35.0
-		high = 45.0
-		if temp < low or temp > high
+		if temp < @warm.low or temp > @warm.high
 			return 0.0	
 		end
-		return @profiles.plateau_profile(temp, low, low_plateau, high_plateau, high)
+		return @warm.compute(temp)
 	end
 	def temp_hot(temp)
-		low = 35.0
-		low_plateau = 45.0
-		high_plateau = 45.0
-		high = 45.0
-		if temp < low 
+		if temp < @hot.low 
 			return 0.0	
 		end
-		if temp > high
+		if temp > @hot.high
 			return 1.0
 		end
-		return @profiles.plateau_profile(temp, low, low_plateau, high_plateau, high)
+		return @hot.compute(temp)
 	end
 end
 
 class BatteryMembership
 	def initialize
 		@profiles = MembershipProfiles.new
+		@low = PlateauProfile.new(5.0, 5.0, 5.0, 10.0)
+		@med = PlateauProfile.new(5.0, 10.0, 20.0, 25.0)
+		@high = PlateauProfile.new(25.0, 30.0, 30.0, 30.0)
 	end
 	def voltage_low(voltage)
-		low = 5.0
-		low_plateau = 5.0
-		high_plateau = 5.0
-		high = 10.0
-		if voltage.volts < low
+		if voltage.volts < @low.low
 			return 1.0
 		end
-		if voltage.volts > high 
+		if voltage.volts > @low.high 
 			return 0.0
 		end
-		return @profiles.plateau_profile(voltage.volts, low, low_plateau, high_plateau, high)
+		return @low.compute(voltage.volts)
 	end
 	def voltage_medium(voltage)
-		low = 5.0
-		low_plateau = 10.0
-		high_plateau = 20.0	
-		high = 25.0
-		if voltage.volts  < low or voltage.volts  > high
+		if voltage.volts < @med.low or voltage.volts > @med.high
 			return 0.0
 		end
-		return @profiles.plateau_profile(voltage.volts, low, low_plateau, high_plateau, high)
+		return @med.compute(voltage.volts)
 	end
 	def voltage_high(voltage)
-		low = 25.0
-		low_plateau = 30.0
-		high_plateau = 30.0
-		high = 30.0
-		if voltage.volts < low
+		if voltage.volts < @high.low
 			return 0.0
 		end
-		if voltage.volts > high 
+		if voltage.volts > @high.high 
 			return 1.0
 		end
-		return @profiles.plateau_profile(voltage.volts, low, low_plateau, high_plateau, high)
+		return @high.compute(voltage.volts)
 	end
 end
 
@@ -224,33 +246,6 @@ class MembershipProfiles
 			return (high-value)/peak
 		end
 		return 1.0
-	end
-	def plateau_profile(value, low, low_plateau, high_plateau, high)
-		value += -low
-		if low < 0.0
-			low_plateau += -low
-			high_plateau += -low
-			high += -low
-		else
-			low_plateau -= low
-			high_plateau -= low
-			high -= low
-		end
-		low = 0
-		upslope = (1.0/(low_plateau - low))
-		downslope = (1.0/(high - high_plateau))
-		if value< low
-			return 0.0
-		elsif value> high
-			return 0.0
-		elsif value>= low_plateau and value<=high_plateau
-			return 1.0
-		elsif value< low_plateau 
-			return (value-low) * upslope
-		elseif value> hi_plateau
-			return (high-value)*downslope
-		end
-		return 0.0
 	end
 end
 
