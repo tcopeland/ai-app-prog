@@ -3,20 +3,19 @@
 class Location
 	attr_accessor :x, :y
 	def initialize(x,y)
-		@x_offset = x
-		@y_offset = y
+		@x = x
+		@y = y
 	end
 end
 
 class Plant
-	attr_accessor :location
 	def initialize(loc)
 		@location = loc
 	end
 end
 
 class Agent
-	attr_accessor :type, :energy, :parent, :age, :generation, :location, :direction, :inputs, :weight_oi, :biaso, :actions
+	attr_reader :type, :energy, :parent, :age, :generation, :location, :direction, :inputs, :weight_oi, :biaso, :actions
 	def initialize(type)
 		@type = type
 		@inputs = Array.new(ArtificialLife::MAX_INPUTS)
@@ -27,15 +26,9 @@ class Agent
 		@energy = ArtificialLife::MAX_ENERGY/2
 		@age = 0
 		@generation = 1
-		
 	end
-end
-
-class OffsetPair
-	attr_accessor :x_offset, :y_offset
-	def initialize(x,y)
-		@x_offset = x
-		@y_offset = y
+	def set_location(loc)
+		@location = loc
 	end
 end
 
@@ -98,14 +91,14 @@ class ArtificialLife
 	MAX_GRID=30
 	MAX_STEPS=1000000
 
-	NORTH_FRONT = [OffsetPair.new(-2,-2), OffsetPair.new(-2,-1), OffsetPair.new(-2,0), OffsetPair.new(-2,1), OffsetPair.new(-2,2), OffsetPair.new(9,9)]
-	NORTH_LEFT = [OffsetPair.new(0,-2), OffsetPair.new(-1,-2), OffsetPair.new(9,9)]
-	NORTH_RIGHT = [OffsetPair.new(0,2), OffsetPair.new(-1,2), OffsetPair.new(9,9)]
-	NORTH_PROX = [OffsetPair.new(0,-1), OffsetPair.new(-1,-1), OffsetPair.new(-1,0), OffsetPair.new(-1,1), OffsetPair.new(0,1), OffsetPair.new(9,9)]
-	WEST_FRONT = [OffsetPair.new(2,-2), OffsetPair.new(1,-2), OffsetPair.new(0,-2), OffsetPair.new(-1,-2), OffsetPair.new(-2,-2), OffsetPair.new(9,9)]
-	WEST_LEFT = [OffsetPair.new(2,0), OffsetPair.new(2,-1), OffsetPair.new(9,9)]
-	WEST_RIGHT = [OffsetPair.new(-2,0), OffsetPair.new(-2,-1), OffsetPair.new(9,9)]
-	WEST_PROX = [OffsetPair.new(1,0), OffsetPair.new(1,-1), OffsetPair.new(0,-1), OffsetPair.new(-1,-1), OffsetPair.new(-1,0), OffsetPair.new(9,9)]
+	NORTH_FRONT = [Location.new(-2,-2), Location.new(-2,-1), Location.new(-2,0), Location.new(-2,1), Location.new(-2,2), Location.new(9,9)]
+	NORTH_LEFT = [Location.new(0,-2), Location.new(-1,-2), Location.new(9,9)]
+	NORTH_RIGHT = [Location.new(0,2), Location.new(-1,2), Location.new(9,9)]
+	NORTH_PROX = [Location.new(0,-1), Location.new(-1,-1), Location.new(-1,0), Location.new(-1,1), Location.new(0,1), Location.new(9,9)]
+	WEST_FRONT = [Location.new(2,-2), Location.new(1,-2), Location.new(0,-2), Location.new(-1,-2), Location.new(-2,-2), Location.new(9,9)]
+	WEST_LEFT = [Location.new(2,0), Location.new(2,-1), Location.new(9,9)]
+	WEST_RIGHT = [Location.new(-2,0), Location.new(-2,-1), Location.new(9,9)]
+	WEST_PROX = [Location.new(1,0), Location.new(1,-1), Location.new(0,-1), Location.new(-1,-1), Location.new(-1,0), Location.new(9,9)]
 
 	STATS="stats.dat"
 	AGENTS="agents.dat"
@@ -156,7 +149,17 @@ class ArtificialLife
 		puts "Creating agents" unless !@verbose
 		if !@seed_population
 			0.upto(MAX_AGENTS-1) {|x|
-				@agents << Agent.new((x < (MAX_AGENTS/2)) ? TYPE_HERBIVORE : TYPE_CARNIVORE)	
+				agent = Agent.new((x < (MAX_AGENTS/2)) ? TYPE_HERBIVORE : TYPE_CARNIVORE)	
+				@agents << agent
+				while true
+					x = rand(MAX_GRID)	
+					y = rand(MAX_GRID)
+					if @landscape.empty_at(agent.type, y, x)
+						@landscape.bump(agent.type, y, x)
+						agent.set_location(Location.new(y,x)
+						break
+					end
+				end
 			}
 		else
 		end
