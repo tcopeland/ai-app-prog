@@ -1,7 +1,16 @@
 #!/usr/local/bin/ruby
 
-TRICKLE_CHARGE = 0
-FAST_CHARGE = 1
+class TrickleCharge
+	def load	
+		return 1.0
+	end 
+end
+
+class FastCharge
+	def load	
+		return 10.0
+	end 
+end
 
 class Simulation
 	attr_accessor :temperature, :voltage
@@ -42,13 +51,9 @@ class Simulation
 			@current_load = rand(@load.size)
 		end
 		@voltage -= @load[@current_load]
-		if @battery.mode == FAST_CHARGE	
-			@voltage += charge * Math.sqrt(@timer)
-		else
-			@voltage += (charge * Math.sqrt(@timer))/10.0
-		end
+		@voltage += (charge * Math.sqrt(@timer))/@battery.mode.load
 		center_voltage
-		if @battery.mode == FAST_CHARGE
+		if @battery.mode.kind_of? FastCharge
 			if @voltage > 25
 				@temperature += (@load[@current_load] * (Math.sqrt(@timer)/25.0)) * 10.0
 			elsif @voltage > 15
@@ -75,7 +80,7 @@ end
 class Battery
 	attr_accessor :mode
 	def initialize
-		@mode = TRICKLE_CHARGE
+		@mode = FastCharge.new
 		@count = 0
 		@tm = TemperatureMembership.new
 		@bm = BatteryMembership.new
@@ -85,13 +90,13 @@ class Battery
 		@count += 1
 		if (@count % 10) == 0
 			if normalize(@bm.voltage_high(simulation.voltage)) >0
-				@mode = TRICKLE_CHARGE
+				@mode = TrickleCharge.new
 				simulation.reset_timer
 			elsif normalize(@tm.temp_hot(simulation.temperature)) > 0
-				@mode = TRICKLE_CHARGE
+				@mode = TrickleCharge.new
 				simulation.reset_timer
 			elsif normalize(@ops.and(@ops.not(@bm.voltage_high(simulation.voltage)), @ops.not(@tm.temp_hot(simulation.temperature)))) > 0
-				@mode = FAST_CHARGE
+				@mode = FastCharge.new
 				simulation.reset_timer
 			end
 		end
