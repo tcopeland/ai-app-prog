@@ -11,9 +11,6 @@ class Population
 	def reset_fitness
 		@fitness = 0.0
 	end
-	def to_s
-		"@fitness = #{@fitness}"
-	end
 end
 
 class Instructions
@@ -253,7 +250,8 @@ class Genetic
 			@populations[@current_population][chrom].reset_fitness
 			Instructions::COUNT.times {|i|	
 				args = [rand(32), rand(32), rand(32)]
-				answer = args[0]**3 + args[1]**2 + args[2]
+				#answer = args[0]**3 + args[1]**2 + args[2]
+				answer = args[0]*args[1] + args[1]*2 + args[2]
 				begin 
 					stm = StackMachine.new(@populations[@current_population][chrom], args)
 					stm.solve
