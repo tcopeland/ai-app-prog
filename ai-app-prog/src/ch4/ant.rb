@@ -92,10 +92,7 @@ class Simulation
 
 		city_index = 0
 		(0..MAX_ANTS-1).each {|x|
-			if city_index == (MAX_CITIES-1)
-				city_index = 0
-			end
-			@ants[x] = Ant.new(city_index)
+			@ants[x] = Ant.new(city_index % (MAX_CITIES-1))
 			city_index += 1
 		}	
 	end
