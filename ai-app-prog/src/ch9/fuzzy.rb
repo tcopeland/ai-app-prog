@@ -27,13 +27,13 @@ end
 
 class Simulation
 	attr_accessor :temperature, :voltage
+	LOAD = [0.02, 0.04, 0.06, 0.08, 0.1]
 
 	def initialize(battery)
 		@battery = battery
 		@voltage = 20.0
 		@temperature = 12.0
-		@load = [0.02, 0.04, 0.06, 0.08, 0.1]
-		@current_load = 0.02
+		@current_load = LOAD[0]
 		@t=0.0
 	end
 
@@ -52,24 +52,24 @@ class Simulation
 	
 	def simulate(timer)	
 		if rand < 0.02
-			@current_load = rand(@load.size)
+			@current_load = rand(LOAD.size)
 		end
-		@voltage -= @load[@current_load]
+		@voltage -= LOAD[@current_load]
 		@voltage += (charge * Math.sqrt(timer.elapsed))/@battery.mode.load
 		center_voltage
 		if @battery.mode.kind_of? FastCharge
 			if @voltage > 25
-				@temperature += (@load[@current_load] * (Math.sqrt(timer.elapsed)/25.0)) * 10.0
+				@temperature += (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/25.0)) * 10.0
 			elsif @voltage > 15
-				@temperature += (@load[@current_load] * (Math.sqrt(timer.elapsed)/20.0)) * 10.0
+				@temperature += (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/20.0)) * 10.0
 			else	
-				@temperature += (@load[@current_load] * (Math.sqrt(timer.elapsed)/15.0)) * 10.0
+				@temperature += (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/15.0)) * 10.0
 			end
 		else 
 			if @temperature > 20.0
-				@temperature -= (@load[@current_load] * (Math.sqrt(timer.elapsed)/20.0)) * 10.0
+				@temperature -= (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/20.0)) * 10.0
 			else
-				@temperature -= (@load[@current_load] * (Math.sqrt(timer.elapsed)/100.0)) * 10.0
+				@temperature -= (LOAD[@current_load] * (Math.sqrt(timer.elapsed)/100.0)) * 10.0
 			end
 		end
 		if @temperature < 0.0	
