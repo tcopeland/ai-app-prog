@@ -132,10 +132,8 @@ class Adaptive
 	def update_prototype_vectors(cluster)
 		first = true
 		raise "Cluster < 0!!" if cluster < 0
-		0.upto(ITEM_NAMES.size) {|item|
-			@prototype_vector[cluster][item] = 0
-			@sum_vector[cluster][item] = 0
-		}
+		@prototype_vector[cluster] = Array.new(ITEM_NAMES.size, 0)
+		@sum_vector[cluster] = Array.new(ITEM_NAMES.size, 0)
 		0.upto(MAX_CUSTOMERS-1) {|customer|
 			if @membership[customer] == cluster
 				if first
