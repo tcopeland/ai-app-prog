@@ -137,6 +137,9 @@ class Generation
 			@maximum_fitness = x
 		end
 	end
+	def pctg
+		@average_fitness.to_f/@maximum_fitness
+	end
 	def print_me
 		puts "Generation #{id}"
 		printf("\tMaximum fitness = %f (%g)\n", @maximum_fitness, Instructions::MAX_FITNESS)
@@ -144,7 +147,13 @@ class Generation
 		printf("\tMinimum fitness = %f\n", @minimum_fitness)
 		printf("\tCrossovers = %d\n", @crossovers)
 		printf("\tMutations = %d\n", @mutations)
-		printf("\tPercentage = %f\n", @average_fitness.to_f/@maximum_fitness)
+		printf("\tPercentage = %f\n", pctg)
+	end
+	def converged
+		(@id > (Genetic::MAX_GENERATIONS * 0.25)) && (pctg > 0.98)
+	end
+	def found_solution	
+		@maximum_fitness == Instructions::MAX_FITNESS
 	end
 end
 
@@ -170,16 +179,14 @@ class Genetic
 			@current_population = @current_population == 0 ? 1 : 0
 			calculate_fitness(g)
 			g.print_me
-			if g.id > (MAX_GENERATIONS * 0.25) && (g.average_fitness / g.maximum_fitness) > 0.98
+			if g.converged
 				puts "Converged"
 				break
-			end
-			if g.maximum_fitness == Instructions::MAX_FITNESS
+			elsif g.found_solution
 				puts "Found solution"
 				break
 			end
 		end
-		g.print_me
 		MAX_CHROMS.times {|i|
 			if @populations[@current_population][i].fitness == g.maximum_fitness
 				printf("Program %3d : ", i)
