@@ -84,20 +84,27 @@ Network is 100% correct
 <h3><a href="#top">Chapter 6 - Genetic Algorithms</a></h3>
 <p>Updated 04/23/04: Done, code is <a href="http://rubyforge.org/cgi-bin/viewcvs/cgi/viewcvs.cgi/ai-app-prog/src/ch6/?cvsroot=ai-app-prog">here</a>.
 <ul>
-<li>Example system solved </code>x*y + z^2</code>; here's the printout:
+<li>Solved an example system (</code>xy + (y*2) + z</code>) in around 10 seconds with with MAX_PROGRAM of 8:
 <pre>
 Generation 0
-        Maximum fitness = 380.000000 (380)
-        Average fitness = 14.110000
+        Maximum fitness = 200.000000 (380)
+        Average fitness = 14.066667
         Minimum fitness = 0.000000
-        Crossovers = 1202
-        Mutations = 367
-        Percentage = 0.037132
+        Crossovers = 1219
+        Mutations = 521
+        Percentage = 0.070333
+Generation 1
+        Maximum fitness = 380.000000 (380)
+        Average fitness = 16.601667
+        Minimum fitness = 0.000000
+        Crossovers = 1211
+        Mutations = 465
+        Percentage = 0.043689
 Found solution
-Program 126 : 02 04 03 03 05
+Program 2925 : 04 01 02 04 03 03 03
 Fitness 380
 </pre>
-<li>I tried a harder problem - <code>x^3 + y^2 + z</code>.  It wasn't solved after 1000 generations and 87 minutes of crunching, so I set MAX_PROGRAM to 50 and restarted.
+<li>Bounced some emails back and forth with Tim; seems like large values of MAX_PROGRAM tend to cause problems since they contain lots of NOPs and SWAPs.  8 instructions seems to be a good place to start.
 <li>Refactored out various classes - Generation, StackMachine, Stack, Population.  Still more to do, I'm sure.
 </ul>
 

@@ -155,7 +155,7 @@ class Generation
 end
 
 class Genetic
-	MAX_PROGRAM=6
+	MAX_PROGRAM=8
 	MAX_GENERATIONS=1000
 	MAX_CHROMS=3000
 	MUTATION_PROB = 0.02
@@ -250,8 +250,8 @@ class Genetic
 			@populations[@current_population][chrom].reset_fitness
 			Instructions::COUNT.times {|i|	
 				args = [rand(32), rand(32), rand(32)]
-				#answer = args[0]**3 + args[1]**2 + args[2]
-				answer = args[0]*args[1] + args[1]*2 + args[2]
+				#answer = args[0]*args[1] + args[1]*args[1] + args[2]
+				answer = (args[0]*args[1]) + (args[1]*2) + args[2]
 				begin 
 					stm = StackMachine.new(@populations[@current_population][chrom], args)
 					stm.solve
