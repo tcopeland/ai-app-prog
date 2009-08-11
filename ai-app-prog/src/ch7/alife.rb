@@ -65,7 +65,7 @@ class Agent
 		0.upto(ArtificialLife::MAX_OUTPUTS-1) {|out|
 			@actions[out] = @biaso[out]
 			0.upto(ArtificialLife::MAX_INPUTS-1) {|infoo|
-				@actions[out] += (@inputs[infoo] * @weight_oi[(out*Artificial_Life::MAX_INPUTS)+infoo])
+				@actions[out] += (@inputs[infoo] * @weight_oi[(out*ArtificialLife::MAX_INPUTS)+infoo])
 			}
 		}
 		
